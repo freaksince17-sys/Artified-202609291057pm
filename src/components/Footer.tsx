@@ -215,19 +215,6 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   type="button"
-                  onClick={() => {
-                    setActiveNavTab('track');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="hover:text-white transition-colors text-left flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Truck className="w-3.5 h-3.5 text-[#A69E96] shrink-0" />
-                  <span>Track Order Status Live</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
                   onClick={openOrderFAQsModal}
                   className="hover:text-white text-[#D4AF37] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
                 >
@@ -242,24 +229,6 @@ export const Footer: React.FC = () => {
                   className="hover:text-white transition-colors block text-left cursor-pointer"
                 >
                   📐 Size & Fit Guide (Necklaces & Rings)
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={openOrderFAQsModal}
-                  className="hover:text-white transition-colors block text-left cursor-pointer"
-                >
-                  🚚 Delivery Rates & 77 Districts Timelines
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={openOrderFAQsModal}
-                  className="hover:text-white transition-colors block text-left cursor-pointer"
-                >
-                  🔄 24-Hr Easy Exchange & Guarantee
                 </button>
               </li>
               {/* Patron Perks & Community Rewards */}

@@ -112,16 +112,16 @@ export const WishlistDrawer: React.FC = () => {
       />
 
       {/* Drawer */}
-      <div className="relative w-full max-w-md bg-[#FAF8F5] h-full shadow-2xl z-10 flex flex-col justify-between border-l border-[#E8DFD8]">
+      <div className="relative w-full max-w-md bg-[#FAF8F5] dark:bg-[#141312] text-[#1C1B1A] dark:text-[#F5F2EB] h-full shadow-2xl z-10 flex flex-col justify-between border-l border-[#E8DFD8] dark:border-[#2D2B28] transition-colors duration-200">
         
         {/* Header */}
-        <div className="px-6 py-4 bg-white border-b border-[#E8DFD8] flex items-center justify-between">
+        <div className="px-6 py-4 bg-white dark:bg-[#1A1918] border-b border-[#E8DFD8] dark:border-[#2D2B28] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
-            <h2 className="font-serif text-lg font-semibold tracking-wide text-[#1C1B1A]">
+            <h2 className="font-serif text-lg font-semibold tracking-wide text-[#1C1B1A] dark:text-[#F5F2EB]">
               Saved Wishlist
             </h2>
-            <span className="text-xs bg-[#FAF8F5] text-[#8C7A6B] px-2 py-0.5 rounded-full border border-[#E8DFD8]">
+            <span className="text-xs bg-[#FAF8F5] dark:bg-[#201F1D] text-[#8C7A6B] dark:text-[#A69E96] px-2 py-0.5 rounded-full border border-[#E8DFD8] dark:border-[#33302C]">
               {wishlistedProducts.length} pieces
             </span>
           </div>
@@ -133,8 +133,8 @@ export const WishlistDrawer: React.FC = () => {
                 onClick={() => setIsShareOpen(!isShareOpen)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
                   isShareOpen
-                    ? 'bg-[#1C1B1A] text-white border-[#1C1B1A]'
-                    : 'bg-[#FAF8F5] text-[#1C1B1A] border-[#E8DFD8] hover:border-[#C5A880]'
+                    ? 'bg-[#1C1B1A] dark:bg-[#FAF8F5] text-white dark:text-[#1C1B1A] border-[#1C1B1A] dark:border-[#FAF8F5]'
+                    : 'bg-[#FAF8F5] dark:bg-[#201F1D] text-[#1C1B1A] dark:text-[#F5F2EB] border-[#E8DFD8] dark:border-[#33302C] hover:border-[#C5A880]'
                 }`}
                 title="Share wishlist with friends or family"
               >
@@ -146,7 +146,7 @@ export const WishlistDrawer: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsWishlistOpen(false)}
-              className="p-1.5 rounded-full text-[#8C847E] hover:text-[#1C1B1A] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
+              className="p-1.5 rounded-full text-[#8C847E] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] hover:bg-[#FAF8F5] dark:hover:bg-[#252422] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -226,17 +226,17 @@ export const WishlistDrawer: React.FC = () => {
         <div className="overflow-y-auto p-4 sm:p-6 flex-1 space-y-4">
           {/* Multi-Device Cloud Wishlist Sync Status Banner */}
           {isUserLoggedIn && currentUser ? (
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-[#FAF8F5] to-emerald-50 border border-emerald-300/80 flex items-center justify-between text-xs text-emerald-950 shadow-2xs">
+            <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-[#FAF8F5] to-emerald-50 dark:from-emerald-950/40 dark:via-[#1A1918] dark:to-emerald-950/40 border border-emerald-300/80 dark:border-emerald-800/60 flex items-center justify-between text-xs text-emerald-950 dark:text-emerald-200 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-full bg-emerald-600/15 flex items-center justify-center text-emerald-700 shrink-0">
+                <div className="w-7 h-7 rounded-full bg-emerald-600/15 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
                   <Cloud className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-bold text-[11px] text-emerald-900 flex items-center gap-1">
+                  <p className="font-bold text-[11px] text-emerald-900 dark:text-emerald-300 flex items-center gap-1">
                     <span>☁️ Cloud Synced Across Devices</span>
-                    <Check className="w-3.5 h-3.5 text-emerald-600 inline" />
+                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 inline" />
                   </p>
-                  <p className="text-[10px] text-emerald-800/80 truncate">
+                  <p className="text-[10px] text-emerald-800/80 dark:text-emerald-400/80 truncate">
                     Saved to {currentUser.email || currentUser.displayName || 'Google Account'}
                   </p>
                 </div>
@@ -244,23 +244,23 @@ export const WishlistDrawer: React.FC = () => {
               <button
                 type="button"
                 onClick={logoutUser}
-                className="text-[10px] text-stone-500 hover:text-stone-800 underline ml-2 shrink-0 cursor-pointer"
+                className="text-[10px] text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 underline ml-2 shrink-0 cursor-pointer"
                 title="Sign out of this device"
               >
                 Sign Out
               </button>
             </div>
           ) : (
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FAF8F5] via-amber-50/50 to-[#FAF8F5] border border-[#D4AF37]/50 shadow-2xs space-y-2">
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FAF8F5] via-amber-50/50 to-[#FAF8F5] dark:from-[#181716] dark:via-amber-950/20 dark:to-[#181716] border border-[#D4AF37]/50 shadow-2xs space-y-2">
               <div className="flex items-start gap-2.5">
-                <div className="w-7 h-7 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#997B24] shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#997B24] dark:text-[#E6CA9E] shrink-0 mt-0.5">
                   <Cloud className="w-4 h-4" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-xs text-[#1C1B1A]">
+                  <p className="font-bold text-xs text-[#1C1B1A] dark:text-[#F5F2EB]">
                     Preserve your wishlist across devices
                   </p>
-                  <p className="text-[11px] text-[#736C65] leading-relaxed mt-0.5">
+                  <p className="text-[11px] text-[#736C65] dark:text-[#A69E96] leading-relaxed mt-0.5">
                     Sign in with Google to access your saved pieces seamlessly on your phone, laptop & tablet.
                   </p>
                 </div>
@@ -269,7 +269,7 @@ export const WishlistDrawer: React.FC = () => {
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={isLoggingIn}
-                className="w-full py-2 px-3 bg-white hover:bg-stone-50 text-[#1C1B1A] border border-[#D1D5DB] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer active:scale-[0.99] disabled:opacity-60"
+                className="w-full py-2 px-3 bg-white dark:bg-[#201F1D] hover:bg-stone-50 dark:hover:bg-[#282724] text-[#1C1B1A] dark:text-[#F5F2EB] border border-[#D1D5DB] dark:border-[#33302C] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer active:scale-[0.99] disabled:opacity-60"
               >
                 <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -284,19 +284,19 @@ export const WishlistDrawer: React.FC = () => {
 
           {wishlistedProducts.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 rounded-full bg-white border border-[#E8DFD8] flex items-center justify-center mx-auto mb-4 text-[#C5A880]">
+              <div className="w-16 h-16 rounded-full bg-white dark:bg-[#1A1918] border border-[#E8DFD8] dark:border-[#2D2B28] flex items-center justify-center mx-auto mb-4 text-[#C5A880]">
                 <Heart className="w-8 h-8" />
               </div>
-              <h3 className="font-serif text-lg text-[#1C1B1A] font-medium mb-1">
+              <h3 className="font-serif text-lg text-[#1C1B1A] dark:text-[#F5F2EB] font-medium mb-1">
                 Your wishlist is empty
               </h3>
-              <p className="text-xs text-[#736C65] max-w-xs mx-auto mb-6">
+              <p className="text-xs text-[#736C65] dark:text-[#A69E96] max-w-xs mx-auto mb-6">
                 Tap the heart on any pearl bag, choker, or macrame design to save your favorites here.
               </p>
               <button
                 type="button"
                 onClick={() => setIsWishlistOpen(false)}
-                className="px-6 py-2.5 bg-[#1C1B1A] text-white text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#34312F] transition-colors"
+                className="px-6 py-2.5 bg-[#1C1B1A] dark:bg-[#FAF8F5] text-white dark:text-[#1C1B1A] text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#34312F] dark:hover:bg-white transition-colors cursor-pointer"
               >
                 Browse Creations
               </button>
@@ -306,14 +306,14 @@ export const WishlistDrawer: React.FC = () => {
               {wishlistedProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="p-3.5 bg-white rounded-xl border border-[#E8DFD8] flex gap-3.5 shadow-2xs"
+                  className="p-3.5 bg-white dark:bg-[#181716] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] flex gap-3.5 shadow-2xs"
                 >
                   <div 
                     onClick={() => {
                       setIsWishlistOpen(false);
                       setQuickViewProduct(product);
                     }}
-                    className="w-20 h-24 rounded-lg overflow-hidden bg-[#FAF8F5] shrink-0 border border-[#F0EBE5] cursor-pointer"
+                    className="w-20 h-24 rounded-lg overflow-hidden bg-[#FAF8F5] dark:bg-[#201F1D] shrink-0 border border-[#F0EBE5] dark:border-[#33302C] cursor-pointer"
                   >
                     <img
                       src={getRealProductImage(product.title, product.images[0])}
@@ -333,33 +333,33 @@ export const WishlistDrawer: React.FC = () => {
                             setIsWishlistOpen(false);
                             setQuickViewProduct(product);
                           }}
-                          className="font-serif text-sm font-medium text-[#1C1B1A] leading-snug line-clamp-1 cursor-pointer hover:text-[#C5A880]"
+                          className="font-serif text-sm font-medium text-[#1C1B1A] dark:text-[#F5F2EB] leading-snug line-clamp-1 cursor-pointer hover:text-[#C5A880] dark:hover:text-[#E6CA9E]"
                         >
                           {product.title}
                         </h4>
                         <button
                           type="button"
                           onClick={() => toggleWishlist(product.id)}
-                          className="text-[#A69E96] hover:text-rose-500 p-0.5 transition-colors"
+                          className="text-[#A69E96] hover:text-rose-500 p-0.5 transition-colors cursor-pointer"
                           title="Remove from wishlist"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
 
-                      <p className="text-xs font-semibold text-[#1C1B1A] mt-0.5">
+                      <p className="text-xs font-semibold text-[#1C1B1A] dark:text-[#F5F2EB] mt-0.5">
                         Rs. {product.price.toLocaleString()}
                       </p>
-                      <p className="text-[10px] text-[#8C7A6B] capitalize">
+                      <p className="text-[10px] text-[#8C7A6B] dark:text-[#A69E96] capitalize">
                         {product.category.replace('-', ' ')}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#F0EBE5]">
+                    <div className="pt-2 border-t border-[#F0EBE5] dark:border-[#262422]">
                       <button
                         type="button"
                         onClick={() => handleMoveToCart(product)}
-                        className="w-full py-1.5 px-3 bg-[#1C1B1A] text-white rounded-lg text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-[#34312F] transition-colors"
+                        className="w-full py-1.5 px-3 bg-[#1C1B1A] dark:bg-[#FAF8F5] hover:bg-[#34312F] dark:hover:bg-white text-white dark:text-[#1C1B1A] rounded-lg text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <ShoppingBag className="w-3.5 h-3.5 text-[#C5A880]" />
                         <span>Move to Bag</span>
@@ -374,14 +374,14 @@ export const WishlistDrawer: React.FC = () => {
 
         {/* Footer */}
         {wishlistedProducts.length > 0 && (
-          <div className="p-4 bg-white border-t border-[#E8DFD8]">
+          <div className="p-4 bg-white dark:bg-[#1A1918] border-t border-[#E8DFD8] dark:border-[#2D2B28]">
             <button
               type="button"
               onClick={() => {
                 wishlistedProducts.forEach((p) => addToCart(p, 1));
                 setIsWishlistOpen(false);
               }}
-              className="w-full py-3 bg-[#1C1B1A] text-white rounded-xl text-xs font-semibold tracking-wider uppercase hover:bg-[#34312F] transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#1C1B1A] hover:bg-black dark:bg-[#FAF8F5] dark:hover:bg-white text-white dark:text-[#1C1B1A] rounded-xl text-xs font-semibold tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               <span>Move All to Bag</span>
               <ArrowRight className="w-4 h-4 text-[#C5A880]" />

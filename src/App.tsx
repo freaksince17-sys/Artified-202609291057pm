@@ -39,6 +39,7 @@ import { OrderFAQsModal } from './components/OrderFAQsModal';
 import { MeetArtisanModal } from './components/MeetArtisanModal';
 import { useCart } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -115,7 +116,7 @@ function AppContent() {
   } = useCart();
 
   return (
-    <div id="top" className="min-h-screen bg-[#FAF8F5] text-[#1C1B1A] flex flex-col font-sans selection:bg-[#E8DFD8] selection:text-[#1C1B1A]">
+    <div id="top" className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F0E0E] text-[#1C1B1A] dark:text-[#F5F2EB] flex flex-col font-sans selection:bg-[#E8DFD8] dark:selection:bg-[#33302C] selection:text-[#1C1B1A] dark:selection:text-[#FAF8F5] transition-colors duration-200">
       {/* Top Announcement Bar */}
       <AnnouncementBar />
 
@@ -187,11 +188,13 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <LanguageProvider>
-        <CartProvider>
-          <AppContent />
-        </CartProvider>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <CartProvider>
+            <AppContent />
+          </CartProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

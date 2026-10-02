@@ -9,6 +9,7 @@ export interface ArtisanProfileData {
   atelierLocation: string;
   establishedText: string;
   avatarUrl: string;
+  avatarPosition?: string;
   stat1Value: string;
   stat1Label: string;
   stat2Value: string;
@@ -33,6 +34,7 @@ export const DEFAULT_ARTISAN_PROFILE: ArtisanProfileData = {
   atelierLocation: 'Chikamugal Atelier • Kathmandu, Nepal',
   establishedText: 'Est. 2021 • 100% Handcrafted in Nepal',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
+  avatarPosition: 'center 20%',
   stat1Value: '9–14 Hours',
   stat1Label: 'Devoted Per Bag',
   stat2Value: '3x Living Wage',

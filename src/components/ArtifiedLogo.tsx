@@ -1,8 +1,9 @@
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 interface ArtifiedLogoProps {
   className?: string;
-  variant?: 'dark' | 'light' | 'gold';
+  variant?: 'auto' | 'dark' | 'light' | 'gold';
   showTagline?: boolean;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   showEmblem?: boolean;
@@ -10,34 +11,42 @@ interface ArtifiedLogoProps {
 
 export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
   className = '',
-  variant = 'dark',
+  variant = 'auto',
   showTagline = true,
   size = 'md',
   showEmblem = false
 }) => {
-  // Theme colors
+  const { isDarkMode } = useTheme();
+
+  // Resolve effective variant if 'auto'
+  const resolvedVariant = 
+    variant === 'auto'
+      ? (isDarkMode ? 'light' : 'dark')
+      : variant;
+
+  // High-contrast Theme colors
   const primaryTextColor = 
-    variant === 'light' 
+    resolvedVariant === 'light' 
       ? '#FFFFFF' 
-      : variant === 'gold' 
+      : resolvedVariant === 'gold' 
       ? '#D4AF37' 
       : '#0D0C0B';
 
   const taglineColor = 
-    variant === 'light' 
-      ? '#F2EDE8' 
-      : variant === 'gold' 
+    resolvedVariant === 'light' 
+      ? '#FCD34D' // Bright luminous gold with AAA contrast on dark backgrounds
+      : resolvedVariant === 'gold' 
       ? '#E2C792' 
       : '#1A1918';
 
   const goldAccentColor =
-    variant === 'light'
-      ? '#F3E5AB'
-      : variant === 'gold'
+    resolvedVariant === 'light'
+      ? '#F59E0B'
+      : resolvedVariant === 'gold'
       ? '#D4AF37'
       : '#C5A880';
 
-  // Responsive height map for balanced, elegant logo presentation (Middle ground)
+  // Responsive height map for balanced, elegant logo presentation
   const sizeMap = {
     xs: 'h-7 sm:h-8',
     sm: 'h-8.5 sm:h-9.5',
@@ -46,7 +55,7 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
     xl: 'h-20 sm:h-24'
   };
 
-  const idSuffix = `${variant}-${size}`;
+  const idSuffix = `${resolvedVariant}-${size}-${isDarkMode ? 'dark' : 'light'}`;
 
   return (
     <div className={`inline-flex flex-col select-none transition-transform duration-200 group ${className}`}>
@@ -57,10 +66,10 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
         aria-label="Artified_np - Handcrafted Elegance Nepal"
       >
         <defs>
-          {/* Subtle handcrafted brush texture filter */}
+          {/* Handcrafted brush texture filter */}
           <filter id={`brush-filter-${idSuffix}`} x="-5%" y="-5%" width="110%" height="110%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale={resolvedVariant === 'light' ? 0.8 : 1.2} xChannelSelector="R" yChannelSelector="G" />
           </filter>
 
           {/* Natural Pearl Luster Radial Gradient */}
@@ -81,14 +90,18 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
 
           {/* Soft shadow for pearls */}
           <filter id={`pearl-shadow-${idSuffix}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.2" floodColor="#000000" floodOpacity="0.18" />
+            <feDropShadow dx="0" dy="1" stdDeviation="1.2" floodColor="#000000" floodOpacity={resolvedVariant === 'light' ? 0.4 : 0.18} />
           </filter>
         </defs>
 
         {/* ============================================================== */}
         {/* WORDMARK: "ARTIFIED" (ICONIC ORIGINAL CALLIGRAPHIC BRUSHWORK)  */}
         {/* ============================================================== */}
-        <g fill={primaryTextColor} filter={`url(#brush-filter-${idSuffix})`}>
+        <g 
+          fill={primaryTextColor} 
+          filter={`url(#brush-filter-${idSuffix})`}
+          style={resolvedVariant === 'light' ? { filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.6))' } : undefined}
+        >
           
           {/* Letter 'A' */}
           <path d="M 52 14 C 47 18 36 48 24 82 C 21 91 19 96 17 99 C 15 101 19 103 24 100 C 27 98 32 86 35 77 C 38 68 47 43 51 28 C 53 23 54 18 52 14 Z" />
@@ -160,7 +173,7 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
         )}
 
         {/* ============================================================== */}
-        {/* TAGLINE: "(Art made with love)" (MIDDLE GROUND PROMINENCE)    */}
+        {/* TAGLINE: "(Art made with love)" (HIGH VISIBILITY & CONTRAST)  */}
         {/* ============================================================== */}
         {showTagline && (
           <text
@@ -173,7 +186,8 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
               fontSize: '36px',
               fontWeight: 700,
               fontStyle: 'italic',
-              letterSpacing: '0.6px'
+              letterSpacing: '0.6px',
+              filter: resolvedVariant === 'light' ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))' : undefined
             }}
           >
             (Art made with love)

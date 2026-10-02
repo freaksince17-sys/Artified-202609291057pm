@@ -195,7 +195,7 @@ export const MainSwipeDeck: React.FC = () => {
   return (
     <div 
       ref={deckRef}
-      className="relative w-full overflow-hidden min-h-screen bg-[#FAF8F5]"
+      className="relative w-full overflow-hidden min-h-screen bg-[#FAF8F5] dark:bg-[#0F0E0E] transition-colors duration-200"
     >
       {/* SWIPEABLE SCREEN TRACK */}
       <div

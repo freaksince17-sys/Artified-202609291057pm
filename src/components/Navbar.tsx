@@ -17,10 +17,13 @@ import {
   User,
   Gift,
   Feather,
-  Globe
+  Globe,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { NavbarSearch } from './NavbarSearch';
 import { ArtifiedLogo } from './ArtifiedLogo';
 
@@ -54,6 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
   } = useCart();
 
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -103,8 +107,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
       <header
         className={`sticky top-0 z-30 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#FAF8F5]/95 backdrop-blur-md shadow-[0_4px_24px_rgba(28,27,26,0.05)] border-b border-[#E8DFD8]'
-            : 'bg-[#FAF8F5] border-b border-[#F0EBE5]'
+            ? 'bg-[#FAF8F5]/95 dark:bg-[#0F0E0E]/95 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.15)] border-b border-[#E8DFD8] dark:border-[#262422]'
+            : 'bg-[#FAF8F5] dark:bg-[#0F0E0E] border-b border-[#F0EBE5] dark:border-[#1E1D1B]'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 text-[#1C1B1A] hover:text-[#C5A880] transition-colors focus:outline-none cursor-pointer"
+                className="lg:hidden p-2 text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] transition-colors focus:outline-none cursor-pointer"
                 aria-label="Open navigation menu"
               >
                 <Menu className="w-5 h-5" />
@@ -125,13 +129,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white/90 hover:bg-white border border-[#E8DFD8] hover:border-[#C5A880] rounded-full text-xs text-[#736C65] hover:text-[#1C1B1A] transition-all shadow-2xs cursor-pointer max-w-[210px] w-full"
+                className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white/90 dark:bg-[#1A1918] hover:bg-white dark:hover:bg-[#22211F] border border-[#E8DFD8] dark:border-[#2E2C29] hover:border-[#C5A880] rounded-full text-xs text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-all shadow-2xs cursor-pointer max-w-[210px] w-full"
                 aria-label="Search catalog for pearl bags, necklaces, and macrame"
                 title="Search products (Press / key)"
               >
                 <Search className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
                 <span className="truncate text-[11px] font-normal">{searchQuery ? `"${searchQuery}"` : "Search creations..."}</span>
-                <kbd className="hidden md:inline-block ml-auto px-1.5 py-0.2 text-[9px] bg-[#FAF8F5] border border-[#D8CFCA] rounded text-[#8C7A6B] font-mono">
+                <kbd className="hidden md:inline-block ml-auto px-1.5 py-0.2 text-[9px] bg-[#FAF8F5] dark:bg-[#121110] border border-[#D8CFCA] dark:border-[#33302C] rounded text-[#8C7A6B] dark:text-[#A69E96] font-mono">
                   /
                 </kbd>
               </button>
@@ -140,10 +144,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="sm:hidden p-2 text-[#1C1B1A] hover:text-[#C5A880] hover:bg-[#E8DFD8]/40 rounded-full transition-colors cursor-pointer"
+                className="sm:hidden p-2 text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] hover:bg-[#E8DFD8]/40 dark:hover:bg-[#262422] rounded-full transition-colors cursor-pointer"
                 aria-label="Search catalog"
               >
-                <Search className="w-4 h-4 text-[#1C1B1A]" />
+                <Search className="w-4 h-4" />
               </button>
             </div>
 
@@ -160,11 +164,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 title="Artified Nepal - Art made with love"
                 aria-label="Artified Nepal Home"
               >
-                <ArtifiedLogo size="md" />
+                <ArtifiedLogo variant={isDarkMode ? 'light' : 'dark'} size="md" />
               </a>
             </div>
 
-            {/* Right: Actions (WhatsApp, Wishlist, Cart) */}
+            {/* Right: Actions (Theme Toggle, WhatsApp, Wishlist, Cart) */}
             <div className="flex items-center justify-end gap-1.5 sm:gap-2">
               {/* WhatsApp direct chat button */}
               <button
@@ -172,22 +176,37 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 onClick={openWhatsApp}
                 title="Chat with Artified on WhatsApp"
                 aria-label="Chat directly with artisan on WhatsApp"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#1C1B1A] hover:text-[#075E54] py-1.5 px-3 rounded-full border border-[#E8DFD8] bg-white hover:border-[#25D366] transition-all cursor-pointer shadow-2xs shrink-0"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#075E54] dark:hover:text-[#25D366] py-1.5 px-3 rounded-full border border-[#E8DFD8] dark:border-[#2E2C29] bg-white dark:bg-[#1A1918] hover:border-[#25D366] transition-all cursor-pointer shadow-2xs shrink-0"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
                 <span className="font-medium text-[11px] tracking-tight whitespace-nowrap">DM WhatsApp</span>
+              </button>
+
+              {/* Dark Theme Toggle Button */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] dark:hover:text-[#E6CA9E] hover:bg-white/80 dark:hover:bg-[#1E1D1B] rounded-full transition-colors cursor-pointer shrink-0"
+                aria-label={isDarkMode ? "Switch to light theme" : "Switch to dark theme"}
+                title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {isDarkMode ? (
+                  <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-[#E6CA9E] transition-transform duration-300 hover:rotate-45" />
+                ) : (
+                  <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-[#1C1B1A] transition-transform duration-300 hover:-rotate-12" />
+                )}
               </button>
 
               {/* Wishlist Button */}
               <button
                 type="button"
                 onClick={() => setIsWishlistOpen(true)}
-                className="relative p-2 text-[#1C1B1A] hover:text-[#C5A880] hover:bg-white/80 rounded-full transition-colors cursor-pointer shrink-0"
+                className="relative p-2 text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] hover:bg-white/80 dark:hover:bg-[#1E1D1B] rounded-full transition-colors cursor-pointer shrink-0"
                 aria-label={`View wishlist, ${wishlist.length} item${wishlist.length === 1 ? '' : 's'} saved`}
               >
                 <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${wishlist.length > 0 ? 'fill-[#C5A880] text-[#C5A880]' : ''}`} />
                 {wishlist.length > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-[#1C1B1A] text-[#FAF8F5] text-[9px] font-semibold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute top-0.5 right-0.5 bg-[#1C1B1A] dark:bg-[#FAF8F5] text-[#FAF8F5] dark:text-[#1C1B1A] text-[9px] font-semibold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                     {wishlist.length}
                   </span>
                 )}
@@ -197,7 +216,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-[#1C1B1A] hover:text-[#C5A880] hover:bg-white/80 rounded-full transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 group"
+                className="relative p-2 text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] hover:bg-white/80 dark:hover:bg-[#1E1D1B] rounded-full transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 group"
                 aria-label={`Shopping bag, ${cartCount} item${cartCount === 1 ? '' : 's'} in cart`}
               >
                 <div className="relative">
@@ -211,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     </span>
                   )}
                 </div>
-                <span className="hidden xl:inline text-xs font-semibold tracking-wider uppercase text-[#1C1B1A]">
+                <span className="hidden xl:inline text-xs font-semibold tracking-wider uppercase text-[#1C1B1A] dark:text-[#F5F2EB]">
                   Bag ({cartCount})
                 </span>
               </button>
@@ -220,7 +239,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
 
           {/* Desktop Navigation Links */}
           <nav 
-            className="hidden lg:flex items-center justify-center gap-5 xl:gap-7 py-1 border-t border-[#E8DFD8]/60 text-[11px] sm:text-xs font-medium tracking-[0.08em] uppercase text-[#4A4541]"
+            className="hidden lg:flex items-center justify-center gap-5 xl:gap-7 py-1 border-t border-[#E8DFD8]/60 dark:border-[#262422] text-[11px] sm:text-xs font-medium tracking-[0.08em] uppercase text-[#4A4541] dark:text-[#A69E96]"
             aria-label="Main desktop navigation"
           >
             {/* Tab 0: Shop */}
@@ -233,10 +252,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Browse creations catalog"
-              className={`hover:text-[#1C1B1A] transition-colors pb-1 border-b-2 cursor-pointer ${
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'home'
-                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
-                  : 'border-transparent text-[#5E5955]'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
               }`}
             >
               {t('navCreations')}
@@ -250,10 +269,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Meet master artisan Sahina Shrestha and read her story"
-              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'artisan'
-                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
-                  : 'border-transparent text-[#8C5D36] hover:border-[#D4AF37]'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#8C5D36] dark:text-[#C5A880] hover:border-[#D4AF37]'
               }`}
               title="Meet founder & artisan Sahina Shrestha"
             >
@@ -269,10 +288,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Watch As Seen On TikTok videos"
-              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'tiktok'
-                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
-                  : 'border-transparent text-[#5E5955]'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
               }`}
             >
               <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
@@ -289,10 +308,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="View Instagram Craft Journal"
-              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'journal'
-                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
-                  : 'border-transparent text-[#5E5955]'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
               }`}
             >
               <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
@@ -307,10 +326,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Read our craft story, heritage, and journal articles"
-              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'craft' || activeNavTab === 'craft-journal'
-                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
-                  : 'border-transparent text-[#5E5955]'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
               }`}
             >
               <Feather className="w-3.5 h-3.5 text-[#C5A880]" />
@@ -325,10 +344,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label="Track order progress and delivery status"
-              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'track'
-                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
-                  : 'border-transparent text-[#5E5955]'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
               }`}
             >
               <Truck className="w-3.5 h-3.5 text-[#C5A880]" />
@@ -344,15 +363,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 aria-label="Seller Studio: Manage order progress"
-                className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer whitespace-nowrap animate-in fade-in duration-150 ${
+                className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer whitespace-nowrap animate-in fade-in duration-150 ${
                   activeNavTab === 'orders'
-                    ? 'border-[#D4AF37] text-[#1C1B1A] font-semibold'
-                    : 'border-transparent text-[#5E5955]'
+                    ? 'border-[#D4AF37] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                    : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
                 }`}
                 title="Seller Studio: Open Order Progress"
               >
                 <ClipboardCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span className="font-semibold text-[#1C1B1A]">Order Progress</span>
+                <span className="font-semibold text-[#1C1B1A] dark:text-[#FAF8F5]">Order Progress</span>
                 <span className="text-[9px] bg-[#D4AF37] text-[#1C1B1A] font-bold px-1.5 py-0.2 rounded-full">
                   Seller
                 </span>
@@ -373,22 +392,52 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="relative w-4/5 max-w-sm bg-[#FAF8F5] h-full shadow-2xl flex flex-col justify-between overflow-y-auto z-10 border-r border-[#E8DFD8]">
+          <div className="relative w-4/5 max-w-sm bg-[#FAF8F5] dark:bg-[#141312] h-full shadow-2xl flex flex-col justify-between overflow-y-auto z-10 border-r border-[#E8DFD8] dark:border-[#2D2B28] text-[#1C1B1A] dark:text-[#F5F2EB]">
             <div className="p-6">
-              <div className="flex items-center justify-between pb-4 border-b border-[#E8DFD8]">
-                <ArtifiedLogo size="sm" />
+              <div className="flex items-center justify-between pb-4 border-b border-[#E8DFD8] dark:border-[#2D2B28]">
+                <ArtifiedLogo variant={isDarkMode ? 'light' : 'dark'} size="sm" />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 text-[#8C847E] hover:text-[#1C1B1A] cursor-pointer"
+                  className="p-2 text-[#8C847E] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] cursor-pointer"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
+              {/* Mobile Quick Action: Theme & Language Toggle */}
+              <div className="mt-3 flex items-center justify-between gap-2 p-2 bg-white/80 dark:bg-[#1C1B1A] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-2xl">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#FAF8F5] dark:bg-[#252422] text-xs font-semibold text-[#1C1B1A] dark:text-[#F5F2EB] shadow-2xs hover:border-[#C5A880] transition-colors"
+                >
+                  {isDarkMode ? (
+                    <>
+                      <Sun className="w-3.5 h-3.5 text-[#E6CA9E]" />
+                      <span>Light Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-3.5 h-3.5 text-[#1C1B1A]" />
+                      <span>Dark Mode</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={toggleLanguage}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#FAF8F5] dark:bg-[#252422] text-xs font-semibold text-[#1C1B1A] dark:text-[#F5F2EB] shadow-2xs hover:border-[#C5A880] transition-colors"
+                >
+                  <Globe className="w-3.5 h-3.5 text-[#C5A880]" />
+                  <span>{language === 'ne' ? 'English' : 'नेपाली'}</span>
+                </button>
+              </div>
+
               {/* Mobile Real-time Search Trigger */}
-              <div className="mt-4">
+              <div className="mt-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -396,20 +445,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     setSearchOpen(true);
                   }}
                   aria-label="Open search catalog modal"
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-[#E8DFD8] rounded-xl text-xs text-[#736C65] hover:border-[#C5A880] transition-colors shadow-2xs"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white dark:bg-[#1C1B1A] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#736C65] dark:text-[#A69E96] hover:border-[#C5A880] transition-colors shadow-2xs"
                 >
                   <span className="flex items-center gap-2">
                     <Search className="w-4 h-4 text-[#C5A880]" />
                     <span>{searchQuery ? `"${searchQuery}"` : t('searchPlaceholder')}</span>
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C5A880] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E8DFD8]">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C5A880] bg-[#FAF8F5] dark:bg-[#141312] px-2 py-0.5 rounded border border-[#E8DFD8] dark:border-[#2D2B28]">
                     Live
                   </span>
                 </button>
               </div>
 
               {/* Navigation links */}
-              <div className="mt-5 flex flex-col space-y-1">
+              <div className="mt-4 flex flex-col space-y-1">
                 {/* 0. Shop */}
                 <button
                   onClick={() => {
@@ -420,8 +469,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   aria-label="Browse all handmade creations"
-                  className={`flex items-center justify-between py-3 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] ${
-                    activeNavTab === 'home' ? 'text-[#C5A880]' : 'text-[#1C1B1A]'
+                  className={`flex items-center justify-between py-2.5 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'home' ? 'text-[#C5A880]' : 'text-[#1C1B1A] dark:text-[#F5F2EB]'
                   }`}
                 >
                   <span>{t('navCreations')}</span>
@@ -436,8 +485,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   aria-label="Meet master artisan Sahina Shrestha"
-                  className={`flex items-center justify-between py-3 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] ${
-                    activeNavTab === 'artisan' ? 'text-[#C5A880] font-bold' : 'text-[#8C5D36]'
+                  className={`flex items-center justify-between py-2.5 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'artisan' ? 'text-[#C5A880] font-bold' : 'text-[#8C5D36] dark:text-[#E6CA9E]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -455,8 +504,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   aria-label="Follow on TikTok"
-                  className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
-                    activeNavTab === 'tiktok' ? 'text-[#C5A880] font-semibold' : 'text-[#4A4541]'
+                  className={`flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'tiktok' ? 'text-[#C5A880] font-semibold' : 'text-[#4A4541] dark:text-[#A69E96]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -476,8 +525,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   aria-label="Follow on Instagram"
-                  className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
-                    activeNavTab === 'journal' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A]'
+                  className={`flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'journal' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A] dark:text-[#F5F2EB]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -495,8 +544,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   aria-label="Read our craft story and atelier heritage"
-                  className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
-                    activeNavTab === 'craft' ? 'text-[#C5A880] font-semibold' : 'text-[#4A4541]'
+                  className={`flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'craft' ? 'text-[#C5A880] font-semibold' : 'text-[#4A4541] dark:text-[#A69E96]'
                   }`}
                 >
                   <span>{language === 'ne' ? 'हाम्रो कथा र जर्नल' : 'Our Story & Journal'}</span>
@@ -511,8 +560,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   aria-label="Track real-time order status"
-                  className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
-                    activeNavTab === 'track' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A]'
+                  className={`flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'track' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A] dark:text-[#F5F2EB]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -531,7 +580,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     aria-label="Seller Studio: Manage order progress"
-                    className={`flex items-center justify-between py-2.5 px-3 my-1 rounded-xl bg-[#1C1B1A] text-white text-xs font-semibold border border-[#D4AF37]/50 ${
+                    className={`flex items-center justify-between py-2.5 px-3 my-1 rounded-xl bg-[#1C1B1A] dark:bg-[#252422] text-white text-xs font-semibold border border-[#D4AF37]/50 ${
                       activeNavTab === 'orders' ? 'ring-2 ring-[#D4AF37]' : ''
                     }`}
                   >
@@ -556,7 +605,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     }, 350);
                   }}
                   aria-label="Read pearl and macrame care guide"
-                  className="flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase text-[#736C65] border-b border-[#F0EBE5]"
+                  className="flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase text-[#736C65] dark:text-[#A69E96] border-b border-[#F0EBE5] dark:border-[#262422]"
                 >
                   <span>Pearl & Macrame Care Guide</span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
@@ -565,7 +614,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
             </div>
 
             {/* Mobile Footer with Social & WhatsApp */}
-            <div className="p-6 bg-white/70 border-t border-[#E8DFD8] space-y-2.5">
+            <div className="p-5 bg-white/70 dark:bg-[#1A1918] border-t border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
               <a
                 href="https://www.instagram.com/artified_np/"
                 target="_blank"
@@ -587,12 +636,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 <span>Chat on WhatsApp (+977)</span>
               </button>
 
-              <div className="pt-2 flex items-center justify-center gap-4 text-xs text-[#736C65]">
+              <div className="pt-1.5 flex items-center justify-center gap-4 text-xs text-[#736C65] dark:text-[#A69E96]">
                 <a
                   href="https://tiktok.com/@artified_np"
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-[#1C1B1A] underline underline-offset-2"
+                  className="hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] underline underline-offset-2"
                 >
                   TikTok: @artified_np
                 </a>
@@ -601,7 +650,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                   href="https://www.instagram.com/artified_np/"
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-[#1C1B1A] underline underline-offset-2"
+                  className="hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] underline underline-offset-2"
                 >
                   Instagram: @artified_np
                 </a>

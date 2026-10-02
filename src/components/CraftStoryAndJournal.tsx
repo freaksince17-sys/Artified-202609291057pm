@@ -201,38 +201,38 @@ export const CraftStoryAndJournal: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF8F5] min-h-screen pt-1 sm:pt-2 pb-8 sm:pb-12 px-3 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-5 sm:space-y-8">
+    <div className="bg-[#FAF8F5] dark:bg-[#0F0E0E] min-h-screen pt-0.5 pb-6 sm:pt-1 sm:pb-8 px-3 sm:px-6 lg:px-8 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
 
         {/* SECTION 1: THE ATELIER STORY & LIVING CRAFT */}
-        <section className="bg-white rounded-3xl p-4 sm:p-7 border border-[#E8DFD8] shadow-sm relative overflow-hidden">
+        <section className="bg-white dark:bg-[#181716] rounded-3xl p-3 sm:p-4.5 border border-[#E8DFD8] dark:border-[#2D2B28] shadow-sm relative overflow-hidden transition-colors">
           {/* Ambient Glow */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#C5A880]/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Section Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 sm:mb-6 pb-4 border-b border-[#F0EBE5]">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-[#FAF8F5] border border-[#E8DFD8] text-[#8C5D36] text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 mb-2.5 sm:mb-3 pb-2 border-b border-[#F0EBE5] dark:border-[#262422]">
+            <div className="space-y-0.5">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-[#8C5D36] dark:text-[#E6CA9E] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
+                <MapPin className="w-3 h-3 text-[#D4AF37]" />
                 <span>Chikamugal Atelier • Kathmandu, Nepal</span>
               </div>
-              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#1C1B1A] font-semibold tracking-tight">
+              <h1 className="font-serif text-lg sm:text-2xl lg:text-3xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold tracking-tight">
                 {isNe ? 'हाम्रो कथा र जीवित शिल्पकारी' : 'Our Story & Living Craft'}
               </h1>
-              <p className="text-xs sm:text-sm text-[#736C65] max-w-2xl leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-[#736C65] dark:text-[#A69E96] max-w-2xl leading-relaxed">
                 {isNe
                   ? 'काठमाडौंको ऐतिहासिक गल्लीमा मोती र म्याक्रामेलाई आधुनिक विलासितामा रूपान्तरण गर्दै।'
-                  : 'In a world of mass production, every pearl strand and cotton cord is knotted with intention and human warmth right here in Kathmandu.'}
+                  : 'Every pearl strand and cotton cord is knotted with intention and human warmth in our Kathmandu workshop.'}
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={openMeetArtisanModal}
-                className="py-2.5 px-4 rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE4] text-[#1C1B1A] border border-[#E8DFD8] text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="py-1 px-2.5 rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE4] dark:bg-[#201F1D] dark:hover:bg-[#282724] text-[#1C1B1A] dark:text-[#F5F2EB] border border-[#E8DFD8] dark:border-[#33302C] text-[11px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
                 <span>Meet Sahina Shrestha</span>
               </button>
 
@@ -240,9 +240,9 @@ export const CraftStoryAndJournal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsCraftStoryModalOpen(true)}
-                  className="py-2.5 px-3 rounded-xl bg-[#1C1B1A] text-[#D4AF37] border border-[#D4AF37]/50 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="py-1 px-2 rounded-xl bg-[#1C1B1A] dark:bg-[#252422] text-[#D4AF37] border border-[#D4AF37]/50 text-[11px] font-bold flex items-center gap-1 cursor-pointer shadow-xs"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
+                  <Edit3 className="w-3 h-3" />
                   <span>Edit Story</span>
                 </button>
               )}
@@ -250,11 +250,11 @@ export const CraftStoryAndJournal: React.FC = () => {
           </div>
 
           {/* Story Showcase: Video & Philosophy Columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 items-center">
             
             {/* Left: Making Video Player */}
             <div 
-              className="lg:col-span-6 relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-[4/5] max-h-[460px] rounded-2xl overflow-hidden bg-[#1C1B1A] shadow-md border border-[#E8DFD8] group cursor-pointer"
+              className="lg:col-span-6 relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3] max-h-[260px] sm:max-h-[290px] rounded-2xl overflow-hidden bg-[#1C1B1A] shadow-sm border border-[#E8DFD8] dark:border-[#2D2B28] group cursor-pointer"
               onMouseEnter={() => setIsCraftHovered(true)}
               onMouseLeave={() => setIsCraftHovered(false)}
               onClick={togglePlay}
@@ -278,15 +278,15 @@ export const CraftStoryAndJournal: React.FC = () => {
 
               {/* Play / Pause indicator button */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className={`w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/50 flex items-center justify-center text-white transition-all transform ${isPlayingVideo ? 'opacity-0 scale-75' : 'opacity-100 scale-100 shadow-xl'}`}>
-                  <Play className="w-6 h-6 fill-white ml-0.5" />
+                <div className={`w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/50 flex items-center justify-center text-white transition-all transform ${isPlayingVideo ? 'opacity-0 scale-75' : 'opacity-100 scale-100 shadow-xl'}`}>
+                  <Play className="w-4 h-4 fill-white ml-0.5" />
                 </div>
               </div>
 
               {/* Top controls */}
-              <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-white text-xs z-10">
-                <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-xs text-[10px] font-bold uppercase tracking-wider border border-white/20 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              <div className="absolute top-2 left-2 right-2 flex items-center justify-between text-white text-xs z-10">
+                <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[9px] font-bold uppercase tracking-wider border border-white/20 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                   <span>Chikamugal Workshop</span>
                 </span>
 
@@ -296,7 +296,7 @@ export const CraftStoryAndJournal: React.FC = () => {
                     e.stopPropagation();
                     toggleMute();
                   }}
-                  className="p-2 rounded-full bg-black/50 backdrop-blur-xs text-white hover:bg-black/70 border border-white/20 transition-all cursor-pointer"
+                  className="p-1.5 rounded-full bg-black/60 backdrop-blur-xs text-white hover:bg-black/80 border border-white/20 transition-all cursor-pointer"
                   aria-label={isSectionMuted ? 'Unmute video' : 'Mute video'}
                 >
                   {isSectionMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
@@ -304,54 +304,54 @@ export const CraftStoryAndJournal: React.FC = () => {
               </div>
 
               {/* Bottom Video Caption */}
-              <div className="absolute bottom-3 left-3 right-3 text-white space-y-1 z-10">
+              <div className="absolute bottom-2 left-2 right-2 text-white space-y-0.5 z-10">
                 <p className="text-xs font-bold font-serif tracking-wide drop-shadow-sm">
                   {story.title || 'Hand-knotted with Reinforced Core Wire'}
                 </p>
-                <p className="text-[10px] text-white/80 line-clamp-2">
+                <p className="text-[10px] text-white/80 line-clamp-1">
                   Each baroque pearl is individually threaded and balanced by hand in our Kathmandu workshop.
                 </p>
               </div>
             </div>
 
             {/* Right: The 3 Core Pillars */}
-            <div className="lg:col-span-6 space-y-4">
+            <div className="lg:col-span-6 space-y-2">
               {/* Pillar 1 */}
-              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8DFD8] hover:border-[#D4AF37]/50 transition-all space-y-1.5">
-                <div className="flex items-center gap-2 text-[#D4AF37]">
-                  <Sparkles className="w-4 h-4" />
-                  <h3 className="font-serif font-bold text-sm sm:text-base text-[#1C1B1A]">
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] hover:border-[#D4AF37]/50 transition-all space-y-0.5">
+                <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
                     {isNe ? '१. १००% मौलिक हस्तनिर्मित' : '1. 100% Patiently Handcrafted'}
                   </h3>
                 </div>
-                <p className="text-xs text-[#5E5955] leading-relaxed">
-                  No factory molding or glued parts. Every bag requires 9 to 14 hours of continuous knotting on high-tensile core threads that last for decades.
+                <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug">
+                  No factory molding. Every piece requires 9 to 14 hours of continuous hand-knotting on high-tensile core threads.
                 </p>
               </div>
 
               {/* Pillar 2 */}
-              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8DFD8] hover:border-[#D4AF37]/50 transition-all space-y-1.5">
-                <div className="flex items-center gap-2 text-[#D4AF37]">
-                  <Heart className="w-4 h-4" />
-                  <h3 className="font-serif font-bold text-sm sm:text-base text-[#1C1B1A]">
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] hover:border-[#D4AF37]/50 transition-all space-y-0.5">
+                <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                  <Heart className="w-3.5 h-3.5" />
+                  <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
                     {isNe ? '२. घरेलु महिला कालिगढको सशक्तीकरण' : '2. Ethical Valley Livelihoods'}
                   </h3>
                 </div>
-                <p className="text-xs text-[#5E5955] leading-relaxed">
-                  Artified pays fair living wages (3x standard piece rates) to skilled home-based women artisans across Kathmandu, Lalitpur, and Bhaktapur.
+                <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug">
+                  Artified pays fair living wages (3x standard piece rates) to skilled home-based women artisans across Kathmandu.
                 </p>
               </div>
 
               {/* Pillar 3 */}
-              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8DFD8] hover:border-[#D4AF37]/50 transition-all space-y-1.5">
-                <div className="flex items-center gap-2 text-[#D4AF37]">
-                  <ShieldCheck className="w-4 h-4" />
-                  <h3 className="font-serif font-bold text-sm sm:text-base text-[#1C1B1A]">
-                    {isNe ? '३. २४ घण्टे सजिलो साटफेर' : '3. Authentic Baroque Freshwater Pearls'}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] hover:border-[#D4AF37]/50 transition-all space-y-0.5">
+                <div className="flex items-center gap-1.5 text-[#D4AF37]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
+                    {isNe ? '३. मौलिक प्राकृतिक मोती' : '3. Authentic Baroque Freshwater Pearls'}
                   </h3>
                 </div>
-                <p className="text-xs text-[#5E5955] leading-relaxed">
-                  We hand-select organic freshwater baroque pearls with deep luster and unique natural contours, creating one-of-a-kind heirlooms.
+                <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug">
+                  We hand-select organic freshwater baroque pearls with deep luster and unique contours, creating one-of-a-kind heirlooms.
                 </p>
               </div>
             </div>
@@ -360,37 +360,37 @@ export const CraftStoryAndJournal: React.FC = () => {
         </section>
 
         {/* SECTION 2: THE CRAFT JOURNAL & HERITAGE LIBRARY */}
-        <section className="space-y-6">
+        <section className="space-y-2.5">
           
           {/* Header & Controls */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[#E8DFD8]">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 pb-1.5 border-b border-[#E8DFD8] dark:border-[#262422]">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-[#C5A880] text-xs font-bold uppercase tracking-wider mb-1">
-                <Feather className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 text-[#C5A880] text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                <Feather className="w-3 h-3" />
                 <span>Artisanal Essays & Heritage Guides</span>
               </div>
-              <h2 className="font-serif text-2xl sm:text-3xl text-[#1C1B1A] font-semibold">
+              <h2 className="font-serif text-lg sm:text-xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold">
                 Craft Journal & Styling Library
               </h2>
             </div>
 
             {/* Actions: Search & Publisher */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Search input */}
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-[#8C847E] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3 h-3 text-[#8C847E] absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search articles..."
-                  className="pl-8 pr-3 py-1.5 bg-white border border-[#E8DFD8] rounded-xl text-xs text-[#1C1B1A] placeholder-[#8C847E] focus:outline-none focus:border-[#C5A880] w-48 sm:w-60 shadow-2xs"
+                  className="pl-7 pr-3 py-1 bg-white dark:bg-[#1A1918] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] placeholder-[#8C847E] focus:outline-none focus:border-[#C5A880] w-40 sm:w-52 shadow-2xs"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8C847E] hover:text-[#1C1B1A]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8C847E] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5]"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -401,9 +401,9 @@ export const CraftStoryAndJournal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsPublishModalOpen(true)}
-                  className="py-1.5 px-3 rounded-xl bg-[#1C1B1A] text-[#D4AF37] border border-[#D4AF37]/50 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+                  className="py-1 px-2.5 rounded-xl bg-[#1C1B1A] dark:bg-[#252422] text-[#D4AF37] border border-[#D4AF37]/50 text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs whitespace-nowrap"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3 h-3" />
                   <span>New Article</span>
                 </button>
               )}
@@ -411,16 +411,16 @@ export const CraftStoryAndJournal: React.FC = () => {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
             {(['All', 'Craft Techniques', 'Nepali Heritage', 'Care Guides', 'Bridal & Styling'] as CategoryFilter[]).map((cat) => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`py-1.5 px-3.5 rounded-full text-xs font-semibold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+                className={`py-1 px-2.5 rounded-full text-[10px] sm:text-[11px] font-semibold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
                   selectedCategory === cat
-                    ? 'bg-[#1C1B1A] text-[#FAF8F5] shadow-xs'
-                    : 'bg-white text-[#736C65] border border-[#E8DFD8] hover:border-[#C5A880] hover:text-[#1C1B1A]'
+                    ? 'bg-[#1C1B1A] dark:bg-[#FAF8F5] text-[#FAF8F5] dark:text-[#1C1B1A] shadow-xs'
+                    : 'bg-white dark:bg-[#1A1918] text-[#736C65] dark:text-[#A69E96] border border-[#E8DFD8] dark:border-[#2D2B28] hover:border-[#C5A880] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5]'
                 }`}
               >
                 {cat}
@@ -429,15 +429,15 @@ export const CraftStoryAndJournal: React.FC = () => {
           </div>
 
           {/* Article Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5">
             {filteredArticles.map((article) => (
               <article
                 key={article.id}
                 onClick={() => setActiveArticle(article)}
-                className="bg-white rounded-2xl overflow-hidden border border-[#E8DFD8] hover:border-[#C5A880] transition-all shadow-2xs hover:shadow-md cursor-pointer flex flex-col group"
+                className="bg-white dark:bg-[#181716] rounded-2xl overflow-hidden border border-[#E8DFD8] dark:border-[#2D2B28] hover:border-[#C5A880] dark:hover:border-[#C5A880] transition-all shadow-2xs hover:shadow-sm cursor-pointer flex flex-col group"
               >
                 {/* Article Cover Photo */}
-                <div className="aspect-[16/10] overflow-hidden bg-[#FAF8F5] relative">
+                <div className="aspect-[16/9] overflow-hidden bg-[#FAF8F5] dark:bg-[#201F1D] relative">
                   <img
                     src={article.coverImage}
                     alt={article.title}
@@ -445,13 +445,13 @@ export const CraftStoryAndJournal: React.FC = () => {
                     decoding="async"
                     className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
                   />
-                  <div className="absolute top-2.5 left-2.5">
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#1C1B1A]/85 backdrop-blur-xs text-[#FAF8F5] text-[10px] font-bold uppercase tracking-wider border border-white/20">
+                  <div className="absolute top-2 left-2">
+                    <span className="px-2 py-0.5 rounded-full bg-[#1C1B1A]/85 backdrop-blur-xs text-[#FAF8F5] text-[9px] font-bold uppercase tracking-wider border border-white/20">
                       {article.category}
                     </span>
                   </div>
-                  <div className="absolute bottom-2.5 right-2.5">
-                    <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium flex items-center gap-1">
+                  <div className="absolute bottom-2 right-2">
+                    <span className="px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[9px] font-medium flex items-center gap-1">
                       <Clock className="w-2.5 h-2.5" />
                       <span>{article.readTime}</span>
                     </span>
@@ -459,24 +459,24 @@ export const CraftStoryAndJournal: React.FC = () => {
                 </div>
 
                 {/* Content Details */}
-                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
-                  <div className="space-y-1.5">
-                    <h3 className="font-serif text-base sm:text-lg font-semibold text-[#1C1B1A] group-hover:text-[#C5A880] transition-colors line-clamp-2 leading-snug">
+                <div className="p-3 flex-1 flex flex-col justify-between space-y-1.5">
+                  <div className="space-y-0.5">
+                    <h3 className="font-serif text-sm sm:text-base font-semibold text-[#1C1B1A] dark:text-[#F5F2EB] group-hover:text-[#C5A880] dark:group-hover:text-[#E6CA9E] transition-colors line-clamp-2 leading-snug">
                       {article.title}
                     </h3>
-                    <p className="text-xs text-[#736C65] line-clamp-2 leading-relaxed">
+                    <p className="text-[11px] text-[#736C65] dark:text-[#A69E96] line-clamp-2 leading-relaxed">
                       {article.excerpt}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-[#F0EBE5] flex items-center justify-between text-xs text-[#8C847E]">
-                    <span className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-[#C5A880]" />
-                      <span className="font-medium text-[#1C1B1A]">{article.author}</span>
+                  <div className="pt-2 border-t border-[#F0EBE5] dark:border-[#262422] flex items-center justify-between text-[10px] sm:text-[11px] text-[#8C847E] dark:text-[#A69E96]">
+                    <span className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-[#C5A880]" />
+                      <span className="font-medium text-[#1C1B1A] dark:text-[#F5F2EB]">{article.author}</span>
                     </span>
                     <span className="text-[#C5A880] group-hover:translate-x-1 transition-transform font-bold inline-flex items-center gap-1">
                       <span>Read</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3 h-3" />
                     </span>
                   </div>
                 </div>
@@ -485,12 +485,12 @@ export const CraftStoryAndJournal: React.FC = () => {
           </div>
 
           {filteredArticles.length === 0 && (
-            <div className="p-12 text-center bg-white rounded-2xl border border-[#E8DFD8]">
-              <p className="text-sm font-semibold text-[#1C1B1A]">No articles found matching &quot;{searchQuery}&quot;</p>
+            <div className="p-8 text-center bg-white dark:bg-[#181716] rounded-2xl border border-[#E8DFD8] dark:border-[#2D2B28]">
+              <p className="text-sm font-semibold text-[#1C1B1A] dark:text-[#F5F2EB]">No articles found matching &quot;{searchQuery}&quot;</p>
               <button
                 type="button"
                 onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
-                className="mt-3 text-xs text-[#C5A880] hover:underline font-bold"
+                className="mt-2 text-xs text-[#C5A880] hover:underline font-bold"
               >
                 Clear filters
               </button>
@@ -504,10 +504,10 @@ export const CraftStoryAndJournal: React.FC = () => {
       {/* ARTICLE READER MODAL */}
       {activeArticle && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs">
-          <div className="bg-[#FAF8F5] rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border border-[#E8DFD8] animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[#FAF8F5] dark:bg-[#141312] rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border border-[#E8DFD8] dark:border-[#2D2B28] animate-in fade-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
-            <div className="px-5 py-3.5 bg-white border-b border-[#E8DFD8] flex items-center justify-between shrink-0">
+            <div className="px-5 py-3 bg-white dark:bg-[#1A1918] border-b border-[#E8DFD8] dark:border-[#2D2B28] flex items-center justify-between shrink-0">
               <span className="text-xs font-bold uppercase tracking-wider text-[#C5A880]">
                 {activeArticle.category}
               </span>
@@ -516,7 +516,7 @@ export const CraftStoryAndJournal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleShareArticle(activeArticle)}
-                  className="p-1.5 rounded-full hover:bg-[#FAF8F5] text-[#736C65] hover:text-[#1C1B1A] cursor-pointer"
+                  className="p-1.5 rounded-full hover:bg-[#FAF8F5] dark:hover:bg-[#252422] text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] cursor-pointer"
                   title="Share article"
                 >
                   {isCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
@@ -525,7 +525,7 @@ export const CraftStoryAndJournal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveArticle(null)}
-                  className="p-1.5 rounded-full hover:bg-[#FAF8F5] text-[#736C65] hover:text-[#1C1B1A] cursor-pointer"
+                  className="p-1.5 rounded-full hover:bg-[#FAF8F5] dark:hover:bg-[#252422] text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -533,7 +533,7 @@ export const CraftStoryAndJournal: React.FC = () => {
             </div>
 
             {/* Reader Content */}
-            <div className="overflow-y-auto p-6 sm:p-8 space-y-6">
+            <div className="overflow-y-auto p-5 sm:p-6 space-y-4">
               <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-xs">
                 <img
                   src={activeArticle.coverImage}
@@ -543,10 +543,10 @@ export const CraftStoryAndJournal: React.FC = () => {
               </div>
 
               <div>
-                <h2 className="font-serif text-2xl sm:text-3xl text-[#1C1B1A] font-semibold leading-tight">
+                <h2 className="font-serif text-xl sm:text-2xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold leading-tight">
                   {activeArticle.title}
                 </h2>
-                <div className="flex items-center gap-3 text-xs text-[#8C847E] mt-2 flex-wrap">
+                <div className="flex items-center gap-2 text-xs text-[#8C847E] dark:text-[#A69E96] mt-1.5 flex-wrap">
                   <span>By {activeArticle.author} ({activeArticle.authorRole})</span>
                   <span>•</span>
                   <span>{activeArticle.publishedDate}</span>
@@ -555,16 +555,16 @@ export const CraftStoryAndJournal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="prose prose-sm max-w-none text-[#5E5955] space-y-4 leading-relaxed font-sans text-xs sm:text-sm">
+              <div className="prose prose-sm max-w-none text-[#5E5955] dark:text-[#C2BBB2] space-y-3 leading-relaxed font-sans text-xs sm:text-sm">
                 {activeArticle.content.map((paragraph, idx) => (
                   <p key={idx}>{paragraph}</p>
                 ))}
               </div>
 
               {/* Tags */}
-              <div className="pt-4 border-t border-[#E8DFD8] flex flex-wrap gap-1.5">
+              <div className="pt-3 border-t border-[#E8DFD8] dark:border-[#2D2B28] flex flex-wrap gap-1.5">
                 {activeArticle.tags.map((tag) => (
-                  <span key={tag} className="px-2.5 py-1 bg-white border border-[#E8DFD8] text-[#736C65] text-[11px] rounded-lg">
+                  <span key={tag} className="px-2 py-0.5 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#33302C] text-[#736C65] dark:text-[#A69E96] text-[10px] rounded-lg">
                     #{tag}
                   </span>
                 ))}
@@ -572,14 +572,14 @@ export const CraftStoryAndJournal: React.FC = () => {
             </div>
 
             {/* Reader Footer */}
-            <div className="px-6 py-3.5 bg-white border-t border-[#E8DFD8] flex items-center justify-between shrink-0">
+            <div className="px-5 py-3 bg-white dark:bg-[#1A1918] border-t border-[#E8DFD8] dark:border-[#2D2B28] flex items-center justify-between shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   setActiveArticle(null);
                   openMeetArtisanModal();
                 }}
-                className="text-xs font-bold text-[#8C5D36] hover:text-[#1C1B1A] transition-colors cursor-pointer flex items-center gap-1.5"
+                className="text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E] hover:underline transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>Meet the Artisan</span>
@@ -588,7 +588,7 @@ export const CraftStoryAndJournal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveArticle(null)}
-                className="py-1.5 px-4 bg-[#1C1B1A] text-white rounded-xl text-xs font-bold cursor-pointer"
+                className="py-1.5 px-4 bg-[#1C1B1A] dark:bg-[#FAF8F5] text-white dark:text-[#1C1B1A] rounded-xl text-xs font-bold cursor-pointer"
               >
                 Close
               </button>
@@ -601,37 +601,37 @@ export const CraftStoryAndJournal: React.FC = () => {
       {/* PUBLISHER MODAL FOR SHOP OWNER (SELLER STUDIO) */}
       {isPublishModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-[#E8DFD8]">
-            <div className="flex items-center justify-between pb-4 border-b border-[#E8DFD8] mb-4">
-              <h3 className="font-serif text-lg font-bold text-[#1C1B1A]">Publish Journal Article</h3>
+          <div className="bg-white dark:bg-[#181716] rounded-3xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-[#E8DFD8] dark:border-[#2D2B28]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E8DFD8] dark:border-[#2D2B28] mb-3">
+              <h3 className="font-serif text-lg font-bold text-[#1C1B1A] dark:text-[#F5F2EB]">Publish Journal Article</h3>
               <button
                 type="button"
                 onClick={() => setIsPublishModalOpen(false)}
-                className="p-1 text-[#8C847E] hover:text-[#1C1B1A]"
+                className="p-1 text-[#8C847E] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveNewArticle} className="space-y-3.5">
+            <form onSubmit={handleSaveNewArticle} className="space-y-3">
               <div>
-                <label className="block text-[11px] font-bold text-[#1C1B1A] uppercase mb-1">Title</label>
+                <label className="block text-[11px] font-bold text-[#1C1B1A] dark:text-[#F5F2EB] uppercase mb-1">Title</label>
                 <input
                   type="text"
                   required
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. The Sacred Knotting of Baroque Pearls"
-                  className="w-full px-3 py-2 border border-[#E8DFD8] rounded-xl text-xs"
+                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#1C1B1A] uppercase mb-1">Category</label>
+                <label className="block text-[11px] font-bold text-[#1C1B1A] dark:text-[#F5F2EB] uppercase mb-1">Category</label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-[#E8DFD8] rounded-xl text-xs bg-white"
+                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB]"
                 >
                   <option value="Craft Techniques">Craft Techniques</option>
                   <option value="Nepali Heritage">Nepali Heritage</option>
@@ -641,25 +641,25 @@ export const CraftStoryAndJournal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#1C1B1A] uppercase mb-1">Cover Image URL</label>
+                <label className="block text-[11px] font-bold text-[#1C1B1A] dark:text-[#F5F2EB] uppercase mb-1">Cover Image URL</label>
                 <input
                   type="text"
                   required
                   value={newCoverImage}
                   onChange={(e) => setNewCoverImage(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E8DFD8] rounded-xl text-xs"
+                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#1C1B1A] uppercase mb-1">Content (Paragraphs)</label>
+                <label className="block text-[11px] font-bold text-[#1C1B1A] dark:text-[#F5F2EB] uppercase mb-1">Content (Paragraphs)</label>
                 <textarea
                   required
-                  rows={5}
+                  rows={4}
                   value={newContentText}
                   onChange={(e) => setNewContentText(e.target.value)}
                   placeholder="Write the article content here. Separate paragraphs with double enter..."
-                  className="w-full px-3 py-2 border border-[#E8DFD8] rounded-xl text-xs"
+                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB]"
                 />
               </div>
 
@@ -667,13 +667,13 @@ export const CraftStoryAndJournal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsPublishModalOpen(false)}
-                  className="py-2 px-4 rounded-xl text-xs font-semibold text-[#736C65]"
+                  className="py-1.5 px-3.5 rounded-xl text-xs font-semibold text-[#736C65] dark:text-[#A69E96]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="py-2 px-5 rounded-xl bg-[#1C1B1A] text-[#D4AF37] font-bold text-xs"
+                  className="py-1.5 px-4 rounded-xl bg-[#1C1B1A] dark:bg-[#FAF8F5] text-[#D4AF37] dark:text-[#1C1B1A] font-bold text-xs"
                 >
                   Publish Article
                 </button>
