@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
   Search, 
@@ -17,11 +17,14 @@ import {
   FileCode,
   Cloud,
   RefreshCw,
-  Star
+  Star,
+  Bell
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { Product } from '../types';
 import { calculateTotalSold, isProductBestSeller, calculateReviewsCount } from '../utils/productStats';
+import { subscribeToWaitlistCounts } from '../utils/waitlistService';
+import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 export const SellerCatalogListModal: React.FC = () => {
   const { 
@@ -67,6 +70,16 @@ export const SellerCatalogListModal: React.FC = () => {
   const [clonedNoticeId, setClonedNoticeId] = useState<string | null>(null);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [batchNotice, setBatchNotice] = useState<string | null>(null);
+  const [waitlistCounts, setWaitlistCounts] = useState<Record<string, number>>({});
+
+  // Real-time Firestore Waitlist subscriber counts per product
+  useEffect(() => {
+    if (!isCatalogListOpen) return;
+    const unsubscribe = subscribeToWaitlistCounts((counts) => {
+      setWaitlistCounts(counts);
+    });
+    return () => unsubscribe();
+  }, [isCatalogListOpen]);
 
   // Live count of New Arrivals
   const newArrivalsCount = useMemo(() => products.filter((p) => p.isNewArrival).length, [products]);
@@ -488,7 +501,7 @@ export const SellerCatalogListModal: React.FC = () => {
             </div>
           ) : (
             filteredProducts.map((prod, index) => {
-              const coverImg = prod.images[0]?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80';
+              const coverImg = getRealProductImage(prod.title, prod.images[0]);
               const isSelected = selectedProductIds.includes(prod.id);
               return (
                 <div 
@@ -552,6 +565,14 @@ export const SellerCatalogListModal: React.FC = () => {
                         ) : (
                           <span className="text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.2 rounded bg-zinc-100 text-zinc-500">
                             {calculateTotalSold(prod)}/{bestsellerThreshold} to Bestseller
+                          </span>
+                        )}
+
+                        {/* Waitlist subscribers count badge */}
+                        {(waitlistCounts[prod.id] || 0) > 0 && (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 shadow-2xs">
+                            <Bell className="w-2.5 h-2.5 text-amber-700 animate-bounce" />
+                            <span>{waitlistCounts[prod.id]} Waiting</span>
                           </span>
                         )}
 
@@ -624,29 +645,41 @@ export const SellerCatalogListModal: React.FC = () => {
                       )}
                     </button>
 
-                    {/* Stock Toggle Button */}
-                    <button
-                      type="button"
-                      onClick={() => toggleProductStock(prod.id)}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 border transition-all ${
-                        prod.inStock 
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' 
-                          : 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100'
-                      }`}
-                      title="Click to toggle In Stock / Sold Out"
-                    >
-                      {prod.inStock ? (
-                        <>
-                          <PackageCheck className="w-3 h-3 text-emerald-600" />
-                          <span>In Stock ({prod.stockCount})</span>
-                        </>
-                      ) : (
-                        <>
-                          <PackageX className="w-3 h-3 text-rose-600" />
-                          <span>Sold Out</span>
-                        </>
-                      )}
-                    </button>
+                    {/* Stock Toggle / Restock & Notify Button */}
+                    {!prod.inStock && (waitlistCounts[prod.id] || 0) > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleProductStock(prod.id)}
+                        className="px-3 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white shadow-sm cursor-pointer animate-pulse"
+                        title={`Restock now: will automatically update Firestore and trigger notifications for ${waitlistCounts[prod.id]} waiting customer${waitlistCounts[prod.id] > 1 ? 's' : ''}!`}
+                      >
+                        <Bell className="w-3.5 h-3.5 fill-white text-white" />
+                        <span>Restock & Notify ({waitlistCounts[prod.id]})</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => toggleProductStock(prod.id)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                          prod.inStock 
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100'
+                        }`}
+                        title="Click to toggle In Stock / Sold Out"
+                      >
+                        {prod.inStock ? (
+                          <>
+                            <PackageCheck className="w-3 h-3 text-emerald-600" />
+                            <span>In Stock ({prod.stockCount})</span>
+                          </>
+                        ) : (
+                          <>
+                            <PackageX className="w-3 h-3 text-rose-600" />
+                            <span>Sold Out</span>
+                          </>
+                        )}
+                      </button>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="flex items-center gap-1">

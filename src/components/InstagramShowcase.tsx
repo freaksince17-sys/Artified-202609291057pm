@@ -188,6 +188,8 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
       <img
         src={item.thumbnail?.trim() || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'}
         alt={item.title || 'Artified craft showcase'}
+        loading="lazy"
+        decoding="async"
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80';
         }}
@@ -348,23 +350,23 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
   return (
     <section 
       id="instagram-section" 
-      className={`py-8 sm:py-12 bg-[#FAF8F5] ${embedded ? '' : 'border-t border-[#E8DFD8]'}`}
+      className={`pt-1 pb-6 sm:pt-2 sm:pb-10 bg-gradient-to-b from-[#FFF0F5] via-[#FFE4EC] to-[#FFF0F5] ${embedded ? '' : 'border-t border-[#FAD2E1]'}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         {!hideHeader && (
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-5 sm:mb-6">
             <div>
-              <div className="flex items-center gap-2 text-[#C5A880] text-xs uppercase tracking-[0.25em] font-semibold mb-2">
-                <span className="w-6 h-[1px] bg-[#C5A880]" />
+              <div className="flex items-center gap-2 text-[#E1306C] text-xs uppercase tracking-[0.25em] font-semibold mb-1.5">
+                <span className="w-6 h-[1px] bg-[#E1306C]" />
                 <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
-                <span>INSTAGRAM JOURNAL • {instagramHandle.toUpperCase()}</span>
+                <span>INSTAGRAM COMMUNITY • {instagramHandle.toUpperCase()}</span>
               </div>
-              <h2 className="font-serif text-3xl sm:text-4xl text-[#1C1B1A] font-semibold">
-                Instagram Journal
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#1C1B1A] font-semibold">
+                Follow on Instagram
               </h2>
-              <p className="text-xs sm:text-sm text-[#736C65] mt-1.5 max-w-lg">
+              <p className="text-xs sm:text-sm text-[#736C65] mt-1 max-w-lg">
                 Discover real customer unboxings, slow-motion pearl shine tests, and wedding styling guides straight from our store in Chikamugal, Kathmandu.
               </p>
             </div>
@@ -378,7 +380,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#D4AF37] text-[#1C1B1A] text-xs font-bold tracking-wider uppercase hover:bg-[#c29f2e] transition-all shadow-xs cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Manage Instagram Journal ({instagramItems.length})</span>
+                  <span>Manage Instagram Posts ({instagramItems.length})</span>
                 </button>
               )}
 
@@ -386,11 +388,11 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                 href={instagramProfileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1C1B1A] text-white text-xs font-semibold tracking-wider uppercase hover:bg-[#34312F] transition-all shadow-xs group"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] text-white text-xs font-bold tracking-wider uppercase hover:opacity-90 transition-all shadow-sm group"
               >
-                <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
+                <Instagram className="w-3.5 h-3.5 text-white" />
                 <span>Follow {instagramHandle}</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#C5A880] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ExternalLink className="w-3.5 h-3.5 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </a>
             </div>
           </div>
@@ -452,8 +454,8 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
         )}
 
         {/* Bottom CTA Card - Direct Link to Instagram Page */}
-        <div className="mt-12 bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DFD8] text-center shadow-xs max-w-3xl mx-auto space-y-4">
-          <div className="w-12 h-12 rounded-full bg-[#FAF8F5] border border-[#E8DFD8] flex items-center justify-center mx-auto text-[#E1306C]">
+        <div className="mt-10 bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-[#FAD2E1] text-center shadow-md max-w-3xl mx-auto space-y-4">
+          <div className="w-12 h-12 rounded-full bg-[#FFF0F5] border border-[#FAD2E1] flex items-center justify-center mx-auto text-[#E1306C]">
             <Instagram className="w-6 h-6" />
           </div>
 
@@ -473,7 +475,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D4AF37] text-[#1C1B1A] text-xs font-bold tracking-wider uppercase hover:bg-[#c29f2e] shadow-sm transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Manage Journal Posts</span>
+                <span>Manage Posts</span>
               </button>
             )}
 
@@ -481,11 +483,11 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
               href={instagramProfileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-[#1C1B1A] text-white text-xs font-bold tracking-wider uppercase hover:bg-[#34312F] shadow-sm transition-all group"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] text-white text-xs font-bold tracking-wider uppercase hover:opacity-95 shadow-sm transition-all group"
             >
-              <Instagram className="w-4 h-4 text-[#E1306C]" />
+              <Instagram className="w-4 h-4 text-white" />
               <span>Visit Official Instagram Page</span>
-              <ExternalLink className="w-4 h-4 text-[#C5A880] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ExternalLink className="w-4 h-4 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           </div>
         </div>
@@ -535,6 +537,8 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                         <img
                           src={posterSrc || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'}
                           alt={activeItem.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover max-h-[550px]"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 flex items-center justify-center">

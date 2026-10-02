@@ -20,6 +20,7 @@ import {
 import { useCart } from '../context/CartContext';
 import { TikTokReel } from '../types';
 import { compressImage } from '../utils/imageCompressor';
+import { getReelCoverImage } from './TikTokShowcase';
 
 export const TikTokManageModal: React.FC = () => {
   const { 

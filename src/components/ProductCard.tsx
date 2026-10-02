@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Eye, ShoppingBag, Check, Star, Edit3 } from 'lucide-react';
+import { Heart, Eye, Star, Edit3, Scale, Bell } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { calculateTotalSold, isProductBestSeller, calculateReviewsCount } from '../utils/productStats';
+import { RestockNotifyModal } from './RestockNotifyModal';
+import { isProductWaitlisted } from '../utils/waitlistService';
 
 interface ProductCardProps {
   product: Product;
@@ -11,7 +14,6 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = false }) => {
   const { 
-    addToCart, 
     toggleWishlist, 
     isWishlisted, 
     setQuickViewProduct,
@@ -19,23 +21,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
     openProductEditor,
     toggleProductNewArrival,
     productImageFit,
-    bestsellerThreshold
+    bestsellerThreshold,
+    toggleCompareProduct,
+    isProductCompared
   } = useCart();
   const [isHovered, setIsHovered] = useState(false);
-  const [justAdded, setJustAdded] = useState(false);
+  const { language, t } = useLanguage();
+  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
+
+  const isOutOfStock = product.inStock === false || (typeof product.stockCount === 'number' && product.stockCount <= 0);
+  const [isWaitlisted, setIsWaitlisted] = useState(() => isProductWaitlisted(product.id));
+
+  useEffect(() => {
+    setIsWaitlisted(isProductWaitlisted(product.id));
+    const handleWaitlistUpdate = () => {
+      setIsWaitlisted(isProductWaitlisted(product.id));
+    };
+    window.addEventListener('artified_waitlist_updated', handleWaitlistUpdate);
+    return () => window.removeEventListener('artified_waitlist_updated', handleWaitlistUpdate);
+  }, [product.id]);
 
   const totalSold = calculateTotalSold(product);
   const isBestSeller = isProductBestSeller(product, bestsellerThreshold);
   const dynamicReviewsCount = calculateReviewsCount(product);
 
   const wishlisted = isWishlisted(product.id);
-
-  const handleQuickAdd = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    addToCart(product, 1);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1600);
-  };
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,15 +98,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
       className="group relative flex flex-col bg-white rounded-lg overflow-hidden border border-[#E5E7EB] hover:border-[#C5A880] transition-all duration-200 shadow-2xs hover:shadow-md cursor-pointer z-0"
     >
       {/* Image Container with secondary flip - 4:3 Compact Aspect Ratio */}
-      <div className="relative aspect-[4/3] max-h-[155px] sm:max-h-[175px] bg-[#F9FAFB] overflow-hidden">
+      <div className="relative aspect-[4/3] max-h-[135px] sm:max-h-[155px] bg-[#F9FAFB] overflow-hidden">
         {/* Badges - positioned strictly in front of product photo */}
-        <div className="absolute top-1.5 left-1.5 z-30 flex flex-col gap-1 items-start pointer-events-none">
-          {isBestSeller && (
+        <div className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 z-30 flex flex-col gap-1 items-start pointer-events-none">
+          {isOutOfStock && !isSellerMode && (
+            <span className="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-[#1C1B1A]/95 text-amber-300 border border-amber-400/50 shadow-xs flex items-center gap-0.5">
+              <Bell className="w-2.5 h-2.5 text-amber-300 animate-pulse" />
+              <span>Sold Out</span>
+            </span>
+          )}
+          {isBestSeller && !isOutOfStock && (
             <span className="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-[#1C1B1A]/95 text-[#E6C687] border border-[#C5A880]/40 shadow-xs flex items-center gap-0.5">
               <span>★</span> Bestseller
             </span>
           )}
-          {product.isNewArrival && !isBestSeller && !isSellerMode && (
+          {product.isNewArrival && !isBestSeller && !isOutOfStock && !isSellerMode && (
             <span className="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-[#C5A880] text-white shadow-xs flex items-center gap-0.5">
               <span>✦</span> New
             </span>
@@ -142,7 +158,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
         <button
           type="button"
           onClick={handleWishlistClick}
-          className={`absolute top-1.5 right-1.5 z-30 w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full flex items-center justify-center transition-all duration-150 ${
+          className={`absolute top-1 right-1 sm:top-1.5 sm:right-1.5 z-30 w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 rounded-full flex items-center justify-center transition-all duration-150 cursor-pointer ${
             wishlisted
               ? 'bg-rose-50 text-rose-500 shadow-2xs'
               : 'bg-white/90 backdrop-blur-2xs text-[#736C65] hover:text-[#1C1B1A] hover:bg-white shadow-2xs'
@@ -152,12 +168,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
           <Heart className={`w-3 h-3 ${wishlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
         </button>
 
+        {/* Compare Button - Sleek, Unobtrusive (Shown on hover) */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleCompareProduct(product);
+          }}
+          className={`absolute top-7.5 sm:top-8.5 right-1 sm:right-1.5 z-30 w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 rounded-full flex items-center justify-center transition-all duration-150 cursor-pointer ${
+            isProductCompared(product.id)
+              ? 'bg-[#1C1B1A] text-[#D4AF37] border border-[#D4AF37] opacity-100 shadow-xs'
+              : 'bg-white/90 backdrop-blur-2xs text-[#736C65] hover:text-[#1C1B1A] hover:bg-white opacity-0 group-hover:opacity-100 shadow-2xs'
+          }`}
+          title={isProductCompared(product.id) ? "Remove from comparison" : "Compare side-by-side"}
+          aria-label="Compare product"
+        >
+          <Scale className="w-3 h-3" />
+        </button>
+
         {/* Ambient background blur when in 'contain' mode so portrait photos blend seamlessly without harsh cutoffs */}
         {productImageFit === 'contain' && (
           <img
             src={currentImg}
             alt=""
             aria-hidden="true"
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover blur-md scale-125 opacity-20 pointer-events-none"
           />
         )}
@@ -166,6 +202,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
         <img
           src={currentImg}
           alt={product.title}
+          loading="lazy"
+          decoding="async"
           onError={() => {
             if (currentImg !== defaultFallback) {
               setCurrentImg(defaultFallback);
@@ -180,12 +218,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
               ? 'opacity-0 scale-102'
               : 'opacity-100 scale-100'
           }`}
-          loading="lazy"
         />
         {currentSecImg && currentSecImg !== currentImg && (
           <img
             src={currentSecImg}
             alt={`${product.title} alternate view`}
+            loading="lazy"
+            decoding="async"
             onError={() => setCurrentSecImg(currentImg)}
             className={`absolute inset-0 z-0 w-full h-full transition-all duration-300 ${
               productImageFit === 'contain'
@@ -194,7 +233,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
             } ${
               isHovered ? 'opacity-100 scale-102' : 'opacity-0 scale-100'
             }`}
-            loading="lazy"
           />
         )}
       </div>
@@ -223,49 +261,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
           </div>
         </div>
 
-        {/* Pricing & Add block */}
-        <div className="mt-0.5 pt-0.5 border-t border-[#F3F4F6]">
-          {/* Strikethrough price */}
+        {/* Pricing & Status block - Clean, uncongested, concise layout */}
+        <div className="mt-1 pt-1 border-t border-[#F3F4F6]">
+          {/* Strikethrough original price */}
           <div className="text-[9px] sm:text-[10px] text-[#8C847E] line-through leading-none">
             NPR{displayOriginalPrice.toLocaleString()}.00
           </div>
 
-          {/* Current bold price + Add to bag icon button */}
-          <div className="flex items-center justify-between gap-1 mt-0.5">
+          {/* Current bold price */}
+          <div className="flex items-baseline justify-between gap-1 mt-0.5">
             <span className="text-xs sm:text-[13px] font-bold text-[#1C1B1A] tracking-tight leading-tight">
               NPR{product.price.toLocaleString()}.00
             </span>
-
-            <button
-              type="button"
-              onClick={handleQuickAdd}
-              className={`p-1 rounded-md transition-all shrink-0 ${
-                justAdded
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-[#FAF8F5] text-[#1C1B1A] border border-[#E8DFD8] hover:bg-[#1C1B1A] hover:text-white'
-              }`}
-              title="Add to bag"
-              aria-label={`Add ${product.title} to bag`}
-            >
-              {justAdded ? (
-                <Check className="w-3 h-3" />
-              ) : (
-                <ShoppingBag className="w-3 h-3" />
-              )}
-            </button>
+            {isOutOfStock && (
+              <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200">
+                Sold Out
+              </span>
+            )}
           </div>
 
-          {/* Green discount percentage badge */}
-          <div className="text-[9px] sm:text-[10px] font-bold text-emerald-600 leading-none mt-0.5">
-            {discountPercent}% OFF
-          </div>
-
-          {/* Number of products sold below % off */}
-          <div className="text-[9px] sm:text-[10px] text-[#736C65] font-medium leading-none mt-1">
-            {totalSold} sold
+          {/* Discount & Sold count row */}
+          <div className="flex items-center justify-between gap-1 mt-0.5 text-[9px] sm:text-[10px] leading-tight">
+            <span className="font-bold text-emerald-600">
+              {discountPercent}% {t('offPercent')}
+            </span>
+            <span className="text-[#736C65] font-medium">
+              {totalSold} {t('soldCount')}
+            </span>
           </div>
         </div>
       </div>
+
+      {/* Restock Notification Modal for Card */}
+      <RestockNotifyModal
+        product={product}
+        isOpen={isNotifyModalOpen}
+        onClose={() => setIsNotifyModalOpen(false)}
+        onSuccess={() => setIsWaitlisted(true)}
+      />
     </div>
   );
 };

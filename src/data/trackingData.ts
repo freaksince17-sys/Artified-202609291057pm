@@ -1,4 +1,7 @@
 import { TrackedOrderData, OrderDetails, OrderProductionPhase, TrackingMilestone } from '../types';
+import { recordOrderStatusChange } from '../utils/orderNotificationManager';
+import { saveOrderToFirestore } from '../services/orderTrackingService';
+import { CAVIAR_PEARL_BAG_IMAGE, getRealProductImage } from '../utils/productImages';
 
 /**
  * Builds the 4 exact milestones requested:
@@ -80,7 +83,7 @@ export const DEMO_TRACKED_ORDERS: Record<string, TrackedOrderData> = {
     items: [
       {
         title: 'Caviar Pearl Bag',
-        image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+        image: CAVIAR_PEARL_BAG_IMAGE,
         quantity: 1,
         price: 2499,
         customization: 'Handcrafted by Sahina Shrestha'
@@ -100,6 +103,19 @@ export const DEMO_TRACKED_ORDERS: Record<string, TrackedOrderData> = {
 };
 
 /**
+ * Normalizes item images to authentic product photos
+ */
+export function sanitizeOrderItems(order: TrackedOrderData): TrackedOrderData {
+  return {
+    ...order,
+    items: (order.items || []).map((item) => ({
+      ...item,
+      image: getRealProductImage(item.title, item.image)
+    }))
+  };
+}
+
+/**
  * Normalizes input order id (e.g. "#art-2026-8842" -> "ART-2026-8842")
  */
 export function normalizeOrderId(id: string): string {
@@ -116,6 +132,13 @@ export function saveTrackedOrder(order: TrackedOrderData): void {
     const norm = normalizeOrderId(order.orderId);
     map[norm] = order;
     localStorage.setItem('artified_tracked_orders', JSON.stringify(map));
+
+    // Real-time Firestore sync
+    saveOrderToFirestore(order).catch((err) => {
+      console.warn('Notice: Firestore order tracking save:', err);
+    });
+
+    recordOrderStatusChange(order.orderId, order.currentPhase, order.customerName);
     window.dispatchEvent(new CustomEvent('artified_order_updated', { detail: order }));
   } catch (e) {
     console.warn('Failed to save tracked order to localStorage', e);
@@ -171,7 +194,7 @@ export function getTrackedOrder(orderIdInput: string): TrackedOrderData | null {
     if (raw) {
       const map: Record<string, TrackedOrderData> = JSON.parse(raw);
       if (map[normalized]) {
-        return map[normalized];
+        return sanitizeOrderItems(map[normalized]);
       }
     }
   } catch {
@@ -180,7 +203,7 @@ export function getTrackedOrder(orderIdInput: string): TrackedOrderData | null {
 
   // 2. Check pre-configured demo orders
   if (DEMO_TRACKED_ORDERS[normalized]) {
-    return DEMO_TRACKED_ORDERS[normalized];
+    return sanitizeOrderItems(DEMO_TRACKED_ORDERS[normalized]);
   }
 
   // 3. Check locally placed orders in browser storage
@@ -190,7 +213,7 @@ export function getTrackedOrder(orderIdInput: string): TrackedOrderData | null {
       const orders: OrderDetails[] = JSON.parse(savedOrdersRaw);
       const matched = orders.find((o) => normalizeOrderId(o.orderId) === normalized);
       if (matched) {
-        return buildTrackedOrderFromOrderDetails(matched);
+        return sanitizeOrderItems(buildTrackedOrderFromOrderDetails(matched));
       }
     }
   } catch {
@@ -199,7 +222,7 @@ export function getTrackedOrder(orderIdInput: string): TrackedOrderData | null {
 
   // 4. If user entered a realistic ART- format, generate realistic tracking
   if (normalized.startsWith('ART-') || normalized.startsWith('ART')) {
-    return generateDynamicTrackedOrder(normalized);
+    return sanitizeOrderItems(generateDynamicTrackedOrder(normalized));
   }
 
   return null;
@@ -261,10 +284,10 @@ export function getAllOrdersForSeller(): TrackedOrderData[] {
     console.warn('Error reading tracked orders overlay', e);
   }
 
-  return Object.values(result);
+  return Object.values(result).map((o) => sanitizeOrderItems(o));
 }
 
-function buildTrackedOrderFromOrderDetails(order: OrderDetails): TrackedOrderData {
+export function buildTrackedOrderFromOrderDetails(order: OrderDetails): TrackedOrderData {
   const phase: OrderProductionPhase = 'confirmed';
   return {
     orderId: order.orderId,
@@ -281,7 +304,7 @@ function buildTrackedOrderFromOrderDetails(order: OrderDetails): TrackedOrderDat
     paymentStatus: order.paymentMethod === 'cod' ? 'Pay on Delivery' : 'Paid & Verified',
     items: order.items.map((i) => ({
       title: i.product.title,
-      image: i.product.images[0],
+      image: getRealProductImage(i.product.title, i.product.images[0]),
       quantity: i.quantity,
       price: i.product.price,
       customization: i.customizationNote,
@@ -317,7 +340,7 @@ function generateDynamicTrackedOrder(orderId: string): TrackedOrderData {
     items: [
       {
         title: 'Handcrafted Pearl Creation',
-        image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+        image: CAVIAR_PEARL_BAG_IMAGE,
         quantity: 1,
         price: 4200,
         customization: 'Handmade slow-fashion piece'

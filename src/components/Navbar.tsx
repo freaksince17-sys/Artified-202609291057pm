@@ -11,10 +11,18 @@ import {
   ChevronDown,
   Truck,
   Instagram,
-  ClipboardCheck
+  ClipboardCheck,
+  Star,
+  Crown,
+  User,
+  Gift,
+  Feather,
+  Globe
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { NavbarSearch } from './NavbarSearch';
+import { ArtifiedLogo } from './ArtifiedLogo';
 
 interface NavbarProps {
   onOpenSearch?: () => void;
@@ -37,8 +45,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
     setActiveNavTab,
     isSellerMode,
     setIsSellerAuthModalOpen,
-    openOrderManager
+    openOrderManager,
+    openAccountModal,
+    loyaltyPointsBalance,
+    openReferralModal,
+    openMeetArtisanModal,
+    cartAnimationKey
   } = useCart();
+
+  const { language, setLanguage, toggleLanguage, t } = useLanguage();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -93,125 +108,110 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
-            {/* Left: Mobile Menu Toggle & Search */}
-            <div className="flex items-center gap-2 sm:gap-3 lg:w-1/4">
+          <div className="grid grid-cols-3 items-center h-14 sm:h-16">
+            
+            {/* Left: Mobile Menu Toggle & Search Bar */}
+            <div className="flex items-center justify-start gap-2">
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 text-[#1C1B1A] hover:text-[#C5A880] transition-colors focus:outline-none"
+                className="lg:hidden p-2 text-[#1C1B1A] hover:text-[#C5A880] transition-colors focus:outline-none cursor-pointer"
                 aria-label="Open navigation menu"
               >
                 <Menu className="w-5 h-5" />
+              </button>
+
+              {/* Search Trigger Button / Bar */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white/90 hover:bg-white border border-[#E8DFD8] hover:border-[#C5A880] rounded-full text-xs text-[#736C65] hover:text-[#1C1B1A] transition-all shadow-2xs cursor-pointer max-w-[210px] w-full"
+                aria-label="Search catalog for pearl bags, necklaces, and macrame"
+                title="Search products (Press / key)"
+              >
+                <Search className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
+                <span className="truncate text-[11px] font-normal">{searchQuery ? `"${searchQuery}"` : "Search creations..."}</span>
+                <kbd className="hidden md:inline-block ml-auto px-1.5 py-0.2 text-[9px] bg-[#FAF8F5] border border-[#D8CFCA] rounded text-[#8C7A6B] font-mono">
+                  /
+                </kbd>
               </button>
 
               {/* Mobile Search Icon Button */}
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="sm:hidden p-2 text-[#1C1B1A] hover:text-[#C5A880] transition-colors relative"
+                className="sm:hidden p-2 text-[#1C1B1A] hover:text-[#C5A880] hover:bg-[#E8DFD8]/40 rounded-full transition-colors cursor-pointer"
                 aria-label="Search catalog"
               >
-                <Search className="w-5 h-5" />
-                {searchQuery && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C5A880]" />
-                )}
-              </button>
-
-              {/* Desktop / Tablet Search Trigger Pill */}
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                className="hidden sm:flex items-center gap-2 text-xs text-[#5E5955] hover:text-[#1C1B1A] transition-all py-1.5 px-3 rounded-full border border-[#E8DFD8] bg-white/80 hover:border-[#C5A880] hover:bg-white shadow-2xs group"
-              >
-                <Search className="w-3.5 h-3.5 text-[#C5A880] group-hover:scale-110 transition-transform" />
-                <span className="tracking-wide text-[11px]">
-                  {searchQuery ? (
-                    <span className="font-semibold text-[#1C1B1A] flex items-center gap-1">
-                      <span>&ldquo;{searchQuery}&rdquo;</span>
-                      <span className="text-[10px] bg-[#FAF8F5] border border-[#E8DFD8] px-1.5 py-0.2 rounded text-[#8C7A6B]">
-                        Filtered
-                      </span>
-                    </span>
-                  ) : (
-                    <span>Search pearls, bags...</span>
-                  )}
-                </span>
-                <kbd className="hidden md:inline-block ml-2 px-1.5 py-0.5 text-[9px] font-mono text-[#8C7A6B] bg-[#FAF8F5] border border-[#E8DFD8] rounded">
-                  /
-                </kbd>
+                <Search className="w-4 h-4 text-[#1C1B1A]" />
               </button>
             </div>
 
-            {/* Center: Brand Identity */}
-            <div className="flex-1 text-center lg:w-2/4">
+            {/* Center: Artified Brand Logo */}
+            <div className="flex items-center justify-center">
               <a
                 href="#top"
                 onClick={(e) => {
                   e.preventDefault();
+                  setActiveNavTab('home');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="inline-block group"
+                className="inline-flex items-center justify-center group py-1"
+                title="Artified Nepal - Art made with love"
+                aria-label="Artified Nepal Home"
               >
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="font-serif tracking-[0.25em] text-xl sm:text-2xl text-[#1C1B1A] font-semibold uppercase group-hover:text-[#C5A880] transition-colors leading-tight">
-                    Artified_np
-                  </span>
-                </div>
-                <div className="flex items-center justify-center gap-1.5 mt-0">
-                  <span className="h-[1px] w-3 bg-[#C5A880]/60"></span>
-                  <span className="text-[9px] sm:text-[10px] tracking-[0.25em] uppercase text-[#736C65] font-medium">
-                    Handcrafted Elegance • Nepal
-                  </span>
-                  <span className="h-[1px] w-3 bg-[#C5A880]/60"></span>
-                </div>
+                <ArtifiedLogo size="md" />
               </a>
             </div>
 
-            {/* Right: Actions (Wishlist, Cart, WhatsApp) */}
-            <div className="flex items-center justify-end gap-2 sm:gap-4 lg:w-1/4">
+            {/* Right: Actions (WhatsApp, Wishlist, Cart) */}
+            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
               {/* WhatsApp direct chat button */}
               <button
                 type="button"
                 onClick={openWhatsApp}
                 title="Chat with Artified on WhatsApp"
-                className="hidden md:flex items-center gap-1.5 text-xs text-[#1C1B1A] hover:text-[#075E54] py-1 px-2.5 rounded-full border border-[#E8DFD8] bg-white/60 hover:border-[#25D366] transition-all"
+                aria-label="Chat directly with artisan on WhatsApp"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#1C1B1A] hover:text-[#075E54] py-1.5 px-3 rounded-full border border-[#E8DFD8] bg-white hover:border-[#25D366] transition-all cursor-pointer shadow-2xs shrink-0"
               >
-                <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-                <span className="font-medium text-[11px] tracking-wide">DM WhatsApp</span>
+                <MessageCircle className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
+                <span className="font-medium text-[11px] tracking-tight whitespace-nowrap">DM WhatsApp</span>
               </button>
 
               {/* Wishlist Button */}
               <button
                 type="button"
                 onClick={() => setIsWishlistOpen(true)}
-                className="relative p-1.5 text-[#1C1B1A] hover:text-[#C5A880] transition-colors"
-                aria-label={`Wishlist (${wishlist.length} items)`}
+                className="relative p-2 text-[#1C1B1A] hover:text-[#C5A880] hover:bg-white/80 rounded-full transition-colors cursor-pointer shrink-0"
+                aria-label={`View wishlist, ${wishlist.length} item${wishlist.length === 1 ? '' : 's'} saved`}
               >
                 <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${wishlist.length > 0 ? 'fill-[#C5A880] text-[#C5A880]' : ''}`} />
                 {wishlist.length > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-[#1C1B1A] text-[#FAF8F5] text-[9px] font-semibold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                  <span className="absolute top-0.5 right-0.5 bg-[#1C1B1A] text-[#FAF8F5] text-[9px] font-semibold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                     {wishlist.length}
                   </span>
                 )}
               </button>
 
-              {/* Shopping Bag Button */}
+              {/* Shopping Bag Button with smooth visual feedback */}
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-1.5 text-[#1C1B1A] hover:text-[#C5A880] transition-colors flex items-center gap-1.5"
-                aria-label={`Shopping bag (${cartCount} items)`}
+                className="relative p-2 text-[#1C1B1A] hover:text-[#C5A880] hover:bg-white/80 rounded-full transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 group"
+                aria-label={`Shopping bag, ${cartCount} item${cartCount === 1 ? '' : 's'} in cart`}
               >
                 <div className="relative">
-                  <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ShoppingBag className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${cartAnimationKey > 0 ? 'scale-110 text-[#C5A880]' : ''}`} />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#C5A880] text-[#1C1B1A] text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center animate-pulse">
+                    <span 
+                      key={cartAnimationKey}
+                      className="absolute -top-1 -right-1 bg-[#C5A880] text-[#1C1B1A] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-scale-bounce"
+                    >
                       {cartCount}
                     </span>
                   )}
                 </div>
-                <span className="hidden xl:inline text-xs font-medium tracking-wider uppercase text-[#1C1B1A]">
+                <span className="hidden xl:inline text-xs font-semibold tracking-wider uppercase text-[#1C1B1A]">
                   Bag ({cartCount})
                 </span>
               </button>
@@ -219,7 +219,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center justify-center gap-6 sm:gap-8 py-1.5 sm:py-2 border-t border-[#E8DFD8]/60 text-[11px] sm:text-xs font-medium tracking-[0.12em] uppercase text-[#4A4541]">
+          <nav 
+            className="hidden lg:flex items-center justify-center gap-5 xl:gap-7 py-1 border-t border-[#E8DFD8]/60 text-[11px] sm:text-xs font-medium tracking-[0.08em] uppercase text-[#4A4541]"
+            aria-label="Main desktop navigation"
+          >
             {/* Tab 0: Shop */}
             <button
               type="button"
@@ -229,13 +232,33 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 setSearchQuery('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              aria-label="Browse creations catalog"
               className={`hover:text-[#1C1B1A] transition-colors pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'home'
                   ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
                   : 'border-transparent text-[#5E5955]'
               }`}
             >
-              Shop
+              {t('navCreations')}
+            </button>
+
+            {/* Meet the Artisan (Sahina Shrestha) */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveNavTab('artisan');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              aria-label="Meet master artisan Sahina Shrestha and read her story"
+              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+                activeNavTab === 'artisan'
+                  ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
+                  : 'border-transparent text-[#8C5D36] hover:border-[#D4AF37]'
+              }`}
+              title="Meet founder & artisan Sahina Shrestha"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{t('navMeetArtisan')}</span>
             </button>
 
             {/* Tab 1: As Seen On TikTok */}
@@ -245,6 +268,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 setActiveNavTab('tiktok');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              aria-label="Watch As Seen On TikTok videos"
               className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'tiktok'
                   ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
@@ -254,7 +278,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
               </svg>
-              <span>As Seen On TikTok</span>
+              <span>{t('navTikTok')}</span>
             </button>
 
             {/* Tab 2: Instagram Journal */}
@@ -264,6 +288,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 setActiveNavTab('journal');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              aria-label="View Instagram Craft Journal"
               className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'journal'
                   ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
@@ -271,32 +296,35 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               }`}
             >
               <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
-              <span>Instagram Journal</span>
+              <span>{t('navJournal')}</span>
             </button>
 
-            {/* Tab 3: Our Craft & Story */}
+            {/* Tab 3: Our Story & Journal (Merged) */}
             <button
               type="button"
               onClick={() => {
                 setActiveNavTab('craft');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`hover:text-[#1C1B1A] transition-colors pb-1 border-b-2 cursor-pointer ${
-                activeNavTab === 'craft'
+              aria-label="Read our craft story, heritage, and journal articles"
+              className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+                activeNavTab === 'craft' || activeNavTab === 'craft-journal'
                   ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
                   : 'border-transparent text-[#5E5955]'
               }`}
             >
-              Our Craft & Story
+              <Feather className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>{language === 'ne' ? 'हाम्रो कथा र जर्नल' : 'Our Story & Journal'}</span>
             </button>
 
-            {/* Tab 4: Track Order */}
+            {/* Tab 5: Track Order */}
             <button
               type="button"
               onClick={() => {
                 setActiveNavTab('track');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              aria-label="Track order progress and delivery status"
               className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'track'
                   ? 'border-[#C5A880] text-[#1C1B1A] font-semibold'
@@ -304,10 +332,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               }`}
             >
               <Truck className="w-3.5 h-3.5 text-[#C5A880]" />
-              <span>Track Order</span>
+              <span>{t('navTrackOrder')}</span>
             </button>
 
-            {/* Tab 5: Order Progress (Strictly for Seller - Only visible when Seller Studio is active) */}
+            {/* Tab 6: Order Progress (Strictly for Seller) */}
             {isSellerMode && (
               <button
                 type="button"
@@ -315,6 +343,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                   setActiveNavTab('orders');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
+                aria-label="Seller Studio: Manage order progress"
                 className={`hover:text-[#1C1B1A] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer whitespace-nowrap animate-in fade-in duration-150 ${
                   activeNavTab === 'orders'
                     ? 'border-[#D4AF37] text-[#1C1B1A] font-semibold'
@@ -346,19 +375,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
 
           <div className="relative w-4/5 max-w-sm bg-[#FAF8F5] h-full shadow-2xl flex flex-col justify-between overflow-y-auto z-10 border-r border-[#E8DFD8]">
             <div className="p-6">
-              <div className="flex items-center justify-between pb-6 border-b border-[#E8DFD8]">
-                <div>
-                  <h3 className="font-serif tracking-widest text-xl text-[#1C1B1A] uppercase font-semibold">
-                    Artified_np
-                  </h3>
-                  <p className="text-[10px] tracking-widest uppercase text-[#8C847E]">
-                    Handcrafted in Kathmandu
-                  </p>
-                </div>
+              <div className="flex items-center justify-between pb-4 border-b border-[#E8DFD8]">
+                <ArtifiedLogo size="sm" />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 text-[#8C847E] hover:text-[#1C1B1A]"
+                  className="p-2 text-[#8C847E] hover:text-[#1C1B1A] cursor-pointer"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
@@ -366,18 +388,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               </div>
 
               {/* Mobile Real-time Search Trigger */}
-              <div className="mt-5">
+              <div className="mt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     setSearchOpen(true);
                   }}
+                  aria-label="Open search catalog modal"
                   className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-[#E8DFD8] rounded-xl text-xs text-[#736C65] hover:border-[#C5A880] transition-colors shadow-2xs"
                 >
                   <span className="flex items-center gap-2">
                     <Search className="w-4 h-4 text-[#C5A880]" />
-                    <span>{searchQuery ? `"${searchQuery}"` : 'Search entire catalog...'}</span>
+                    <span>{searchQuery ? `"${searchQuery}"` : t('searchPlaceholder')}</span>
                   </span>
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C5A880] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E8DFD8]">
                     Live
@@ -386,7 +409,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               </div>
 
               {/* Navigation links */}
-              <div className="mt-6 flex flex-col space-y-1">
+              <div className="mt-5 flex flex-col space-y-1">
                 {/* 0. Shop */}
                 <button
                   onClick={() => {
@@ -396,21 +419,42 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  aria-label="Browse all handmade creations"
                   className={`flex items-center justify-between py-3 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] ${
                     activeNavTab === 'home' ? 'text-[#C5A880]' : 'text-[#1C1B1A]'
                   }`}
                 >
-                  <span>Shop</span>
+                  <span>{t('navCreations')}</span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
 
-                {/* 1. As Seen On TikTok */}
+                {/* Meet the Artisan (Sahina Shrestha) */}
+                <button
+                  onClick={() => {
+                    setActiveNavTab('artisan');
+                    setMobileMenuOpen(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  aria-label="Meet master artisan Sahina Shrestha"
+                  className={`flex items-center justify-between py-3 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] ${
+                    activeNavTab === 'artisan' ? 'text-[#C5A880] font-bold' : 'text-[#8C5D36]'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                    <span>{t('navMeetArtisan')} (Sahina Shrestha)</span>
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-[#8C847E]" />
+                </button>
+
+                {/* 1. Follow on TikTok */}
                 <button
                   onClick={() => {
                     setActiveNavTab('tiktok');
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  aria-label="Follow on TikTok"
                   className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
                     activeNavTab === 'tiktok' ? 'text-[#C5A880] font-semibold' : 'text-[#4A4541]'
                   }`}
@@ -419,25 +463,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
                     </svg>
-                    <span>As Seen On TikTok (@artified_np)</span>
+                    <span>Follow on TikTok (@artified_np)</span>
                   </span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
 
-                {/* 2. Instagram Journal */}
+                {/* 2. Follow on Instagram */}
                 <button
                   onClick={() => {
                     setActiveNavTab('journal');
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  aria-label="Follow on Instagram"
                   className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
                     activeNavTab === 'journal' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
                     <Instagram className="w-4 h-4 text-[#E1306C]" />
-                    <span>Instagram Journal (@artified_np)</span>
+                    <span>Follow on Instagram (@artified_np)</span>
                   </span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
@@ -449,11 +494,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  aria-label="Read our craft story and atelier heritage"
                   className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
                     activeNavTab === 'craft' ? 'text-[#C5A880] font-semibold' : 'text-[#4A4541]'
                   }`}
                 >
-                  <span>Our Craft & Story</span>
+                  <span>{language === 'ne' ? 'हाम्रो कथा र जर्नल' : 'Our Story & Journal'}</span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
 
@@ -464,13 +510,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  aria-label="Track real-time order status"
                   className={`flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] ${
                     activeNavTab === 'track' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
                     <Truck className="w-4 h-4 text-[#C5A880]" />
-                    <span>Track Your Order</span>
+                    <span>{t('navTrackOrder')}</span>
                   </span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
@@ -483,6 +530,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                       setMobileMenuOpen(false);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
+                    aria-label="Seller Studio: Manage order progress"
                     className={`flex items-center justify-between py-2.5 px-3 my-1 rounded-xl bg-[#1C1B1A] text-white text-xs font-semibold border border-[#D4AF37]/50 ${
                       activeNavTab === 'orders' ? 'ring-2 ring-[#D4AF37]' : ''
                     }`}
@@ -507,6 +555,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }, 350);
                   }}
+                  aria-label="Read pearl and macrame care guide"
                   className="flex items-center justify-between py-3 text-xs font-medium tracking-wider uppercase text-[#736C65] border-b border-[#F0EBE5]"
                 >
                   <span>Pearl & Macrame Care Guide</span>
@@ -521,6 +570,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 href="https://www.instagram.com/artified_np/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Follow Artified Nepal on Instagram"
                 className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-lg text-xs font-semibold tracking-wider uppercase hover:opacity-95 transition-opacity shadow-sm"
               >
                 <Instagram className="w-4 h-4" />
@@ -530,7 +580,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               <button
                 type="button"
                 onClick={openWhatsApp}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-[#20ba5a] transition-colors shadow-sm"
+                aria-label="Start WhatsApp live chat with atelier"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-[#20ba5a] transition-colors shadow-sm cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Chat on WhatsApp (+977)</span>

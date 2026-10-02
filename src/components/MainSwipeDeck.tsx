@@ -4,13 +4,16 @@ import {
   Instagram, 
   BookOpen, 
   Truck,
-  ClipboardCheck
+  ClipboardCheck,
+  Feather,
+  Sparkles
 } from 'lucide-react';
 import { useCart, AppNavTab } from '../context/CartContext';
 import { ProductGrid } from './ProductGrid';
+import { MeetArtisanSection } from './MeetArtisanSection';
 import { TikTokShowcase } from './TikTokShowcase';
 import { InstagramShowcase } from './InstagramShowcase';
-import { AboutCraftSection } from './AboutCraftSection';
+import { CraftStoryAndJournal } from './CraftStoryAndJournal';
 import { OrderTrackerSection } from './OrderTrackerSection';
 import { OrderProgressManagerSection } from './OrderProgressManagerSection';
 
@@ -26,12 +29,13 @@ const TikTokIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
   </svg>
 );
 
-// Exact sequential order: Shop -> As Seen On TikTok -> Instagram Journal -> Our Craft & Story -> Track Order -> Order Progress
+// Unified sequence: Shop -> Meet the Artisan -> Follow on TikTok -> Follow on Instagram -> Our Story & Journal (Merged) -> Track Order -> Order Progress
 export const TABS_SEQUENCE: TabMeta[] = [
   { id: 'home', label: 'Shop', icon: Home },
-  { id: 'tiktok', label: 'As Seen On TikTok', icon: TikTokIcon },
-  { id: 'journal', label: 'Instagram Journal', icon: Instagram },
-  { id: 'craft', label: 'Our Craft & Story', icon: BookOpen },
+  { id: 'artisan', label: 'Meet the Artisan', icon: Sparkles },
+  { id: 'tiktok', label: 'Follow on TikTok', icon: TikTokIcon },
+  { id: 'journal', label: 'Follow on Instagram', icon: Instagram },
+  { id: 'craft', label: 'Our Story & Journal', icon: Feather },
   { id: 'track', label: 'Track Order', icon: Truck },
   { id: 'orders', label: 'Order Progress', icon: ClipboardCheck },
 ];
@@ -59,6 +63,9 @@ export const MainSwipeDeck: React.FC = () => {
   useEffect(() => {
     if (!isSellerMode && activeNavTab === 'orders') {
       setActiveNavTab('track');
+    }
+    if (activeNavTab === 'craft-journal') {
+      setActiveNavTab('craft');
     }
   }, [isSellerMode, activeNavTab, setActiveNavTab]);
 
@@ -217,7 +224,14 @@ export const MainSwipeDeck: React.FC = () => {
             </div>
           </div>
 
-          {/* TAB 1: AS SEEN ON TIKTOK */}
+          {/* TAB 1: MEET THE ARTISAN */}
+          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
+            <div className="w-full">
+              <MeetArtisanSection />
+            </div>
+          </div>
+
+          {/* TAB 2: AS SEEN ON TIKTOK */}
           <div style={{ width: `${screenPercent}%` }} className="shrink-0">
             <div className="w-full">
               <TikTokShowcase />
@@ -231,10 +245,10 @@ export const MainSwipeDeck: React.FC = () => {
             </div>
           </div>
 
-          {/* TAB 3: OUR CRAFT & STORY */}
+          {/* TAB 3: OUR STORY & CRAFT JOURNAL (MERGED) */}
           <div style={{ width: `${screenPercent}%` }} className="shrink-0">
             <div className="w-full">
-              <AboutCraftSection />
+              <CraftStoryAndJournal />
             </div>
           </div>
 

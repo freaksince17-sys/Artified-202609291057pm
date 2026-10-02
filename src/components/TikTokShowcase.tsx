@@ -28,8 +28,51 @@ export interface TikTokShowcaseProps {
   hideHeader?: boolean;
 }
 
+export const KNOWN_LOCAL_COVERS: Record<string, string> = {
+  '7363984155060817160': '/tiktok_videos/7363984155060817160_cover.jpg',
+  '7625655459537603860': '/tiktok_videos/7625655459537603860_cover.jpg',
+  '7495598629625842952': '/tiktok_videos/7495598629625842952_cover.jpg',
+  '7453859527411125512': '/tiktok_videos/7453859527411125512_cover.jpg',
+};
+
+export const getReelCoverImage = (reel?: TikTokReel | null, index = 0): string => {
+  if (!reel) return '/tiktok_videos/7363984155060817160_cover.jpg';
+
+  const vidId = reel.videoUrl?.match(/\/video\/(\d+)/)?.[1] || reel.id.replace(/[^0-9]/g, '');
+  if (vidId && KNOWN_LOCAL_COVERS[vidId]) {
+    return KNOWN_LOCAL_COVERS[vidId];
+  }
+
+  const thumb = reel.thumbnail?.trim();
+  if (
+    thumb &&
+    !thumb.includes('/api/proxy-thumbnail') &&
+    !thumb.includes('tiktokcdn') &&
+    !thumb.includes('photo-1584917865442-de89df76afd3')
+  ) {
+    return thumb;
+  }
+
+  for (const [id, cover] of Object.entries(KNOWN_LOCAL_COVERS)) {
+    if (reel.videoUrl?.includes(id) || reel.id?.includes(id) || thumb?.includes(id)) {
+      return cover;
+    }
+  }
+
+  const distinctFallbacks = [
+    '/tiktok_videos/7363984155060817160_cover.jpg',
+    '/tiktok_videos/7625655459537603860_cover.jpg',
+    '/tiktok_videos/7495598629625842952_cover.jpg',
+    '/tiktok_videos/7453859527411125512_cover.jpg',
+    'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'
+  ];
+  return distinctFallbacks[index % distinctFallbacks.length];
+};
+
 interface TikTokReelCardProps {
   reel: TikTokReel;
+  index: number;
   isSellerMode: boolean;
   isConfirmingDelete: boolean;
   isMuted: boolean;
@@ -42,6 +85,7 @@ interface TikTokReelCardProps {
 
 const TikTokReelCard: React.FC<TikTokReelCardProps> = ({
   reel,
+  index,
   isSellerMode,
   isConfirmingDelete,
   isMuted,
@@ -60,6 +104,7 @@ const TikTokReelCard: React.FC<TikTokReelCardProps> = ({
   });
 
   const playableUrl = getPlayableVideoUrl(reel);
+  const coverUrl = getReelCoverImage(reel, index);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -82,12 +127,18 @@ const TikTokReelCard: React.FC<TikTokReelCardProps> = ({
       className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-black cursor-pointer shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 select-none"
       title="Hover to play video • Click to open"
     >
-      {/* 1. High quality cover thumbnail (always visible when not hovered or video loading) */}
+      {/* 1. High quality cover thumbnail (always authentic local or dedicated cover) */}
       <img
-        src={reel.thumbnail?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80'}
+        src={coverUrl}
         alt={reel.title}
+        loading="lazy"
+        decoding="async"
         onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80';
+          const target = e.currentTarget as HTMLImageElement;
+          const fallback = getReelCoverImage(reel, index);
+          if (target.src !== fallback && !target.src.endsWith(fallback)) {
+            target.src = fallback;
+          }
         }}
         className={`w-full h-full object-cover transition-transform duration-500 ${
           isHovered && playableUrl ? 'opacity-0 scale-105' : 'opacity-100 group-hover:scale-105'
@@ -349,30 +400,30 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
   return (
     <section 
       id="tiktok-section" 
-      className={`${embedded ? 'pt-2 pb-6' : 'py-14 sm:py-18 bg-[#F4EFEB] border-t border-b border-[#E8DFD8]'}`}
+      className={`${embedded ? 'pt-1 pb-4' : 'pt-1 pb-6 sm:pt-2 sm:pb-10 bg-[#0A0A0B] text-white border-t border-b border-[#222225]'}`}
     >
       <div className={embedded ? 'w-full' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'}>
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-5 sm:mb-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#E8DFD8] text-[10px] tracking-[0.2em] font-bold uppercase text-[#8C7A6B] mb-3">
-              <Sparkles className="w-3 h-3 text-[#D4AF37]" />
-              <span>Viral on TikTok • @artified_np</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] tracking-[0.2em] font-bold uppercase text-[#00F2FE] mb-2">
+              <Sparkles className="w-3 h-3 text-[#FE2C55]" />
+              <span>TikTok Community • @artified_np</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#1C1B1A] font-semibold">
-              As Seen On TikTok
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-semibold">
+              Follow on TikTok
             </h2>
-            <p className="text-xs sm:text-sm text-[#736C65] mt-1.5 max-w-lg">
+            <p className="text-xs sm:text-sm text-neutral-300 mt-1 max-w-lg">
               Watch real customer unboxings, slow-motion pearl bag shine tests, and wedding styling guides straight from our store in Chikamugal, Kathmandu.
             </p>
           </div>
 
           <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
             {/* Hover to Play Indicator & Mute Audio Browsing Control */}
-            <div className="inline-flex items-center bg-white border border-[#E8DFD8] rounded-full p-1 shadow-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#736C65] font-medium">
-                <Play className="w-3 h-3 text-[#D4AF37] fill-[#D4AF37]" />
+            <div className="inline-flex items-center bg-[#18181B] border border-white/10 rounded-full p-1 shadow-xs">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-300 font-medium">
+                <Play className="w-3 h-3 text-[#00F2FE] fill-[#00F2FE]" />
                 <span>Hover to Play</span>
               </span>
 
@@ -381,19 +432,19 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
                 onClick={() => setIsMuted(!isMuted)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   !isMuted 
-                    ? 'bg-[#D4AF37] text-[#1C1B1A]' 
-                    : 'text-[#736C65] hover:text-[#1C1B1A]'
+                    ? 'bg-[#FE2C55] text-white' 
+                    : 'text-neutral-400 hover:text-white'
                 }`}
                 title={isMuted ? "Turn Sound On" : "Mute Sound"}
               >
                 {isMuted ? (
                   <>
-                    <VolumeX className="w-3.5 h-3.5 text-[#8C7A6B]" />
+                    <VolumeX className="w-3.5 h-3.5 text-neutral-400" />
                     <span>Muted</span>
                   </>
                 ) : (
                   <>
-                    <Volume2 className="w-3.5 h-3.5 text-[#1C1B1A] animate-pulse" />
+                    <Volume2 className="w-3.5 h-3.5 text-white animate-pulse" />
                     <span>Sound On</span>
                   </>
                 )}
@@ -444,10 +495,11 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {reels.map((reel) => (
+            {reels.map((reel, index) => (
               <TikTokReelCard
                 key={reel.id}
                 reel={reel}
+                index={index}
                 isSellerMode={isSellerMode}
                 isConfirmingDelete={confirmDeleteCardId === reel.id}
                 isMuted={isMuted}
@@ -462,18 +514,18 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
         )}
 
         {/* Bottom CTA Card - Direct Link to TikTok Page */}
-        <div className="mt-12 bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DFD8] text-center shadow-xs max-w-3xl mx-auto space-y-4">
-          <div className="w-12 h-12 rounded-full bg-[#FAF8F5] border border-[#E8DFD8] flex items-center justify-center mx-auto text-[#1C1B1A]">
-            <svg className="w-6 h-6 fill-current text-[#1C1B1A]" viewBox="0 0 24 24">
+        <div className="mt-10 bg-[#141416] rounded-3xl p-6 sm:p-8 border border-white/10 text-center shadow-lg max-w-3xl mx-auto space-y-4">
+          <div className="w-12 h-12 rounded-full bg-white/10 border border-white/15 flex items-center justify-center mx-auto text-white">
+            <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
               <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.46 6.3 6.3 0 0 0 1.94-4.45V8.82a8.28 8.28 0 0 0 4.83 1.55V6.92a4.85 4.85 0 0 1-1-.23z"/>
             </svg>
           </div>
 
-          <h3 className="font-serif text-xl sm:text-2xl text-[#1C1B1A] font-semibold">
+          <h3 className="font-serif text-xl sm:text-2xl text-white font-semibold">
             Follow @artified_np on TikTok
           </h3>
 
-          <p className="text-xs sm:text-sm text-[#736C65] max-w-md mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-neutral-300 max-w-md mx-auto leading-relaxed">
             Stay updated with daily store clips, fresh product drops, customer reviews, and handcrafted pearl creations directly from Chikamugal, Kathmandu.
           </p>
 
@@ -493,13 +545,13 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
               href="https://tiktok.com/@artified_np"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-[#1C1B1A] text-white text-xs font-bold tracking-wider uppercase hover:bg-[#34312F] shadow-sm transition-all group"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-[#FE2C55] text-white text-xs font-bold tracking-wider uppercase hover:bg-[#e0264b] shadow-sm transition-all group"
             >
-              <svg className="w-4 h-4 fill-current text-[#D4AF37]" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
                 <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.46 6.3 6.3 0 0 0 1.94-4.45V8.82a8.28 8.28 0 0 0 4.83 1.55V6.92a4.85 4.85 0 0 1-1-.23z"/>
               </svg>
               <span>Visit Official TikTok Page</span>
-              <ExternalLink className="w-4 h-4 text-[#C5A880] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ExternalLink className="w-4 h-4 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           </div>
         </div>
@@ -550,7 +602,7 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
                         ref={videoRef}
                         key={playableUrl}
                         src={playableUrl!}
-                        poster={activeReel.thumbnail?.trim() || undefined}
+                        poster={getReelCoverImage(activeReel)}
                         autoPlay
                         muted={isMuted}
                         loop={reels.length <= 1}
@@ -772,8 +824,10 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
                           <div className="flex items-center gap-2 overflow-hidden">
                             <div className="w-9 h-9 rounded-lg overflow-hidden bg-[#FAF8F5] shrink-0 border border-[#E8DFD8]">
                               <img 
-                                src={activeReel.thumbnail?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80'} 
+                                src={getReelCoverImage(activeReel)} 
                                 alt="" 
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full h-full object-cover" 
                               />
                             </div>
@@ -863,8 +917,10 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
                             <div className="flex items-center gap-2 overflow-hidden">
                               <div className="w-9 h-9 rounded-lg overflow-hidden bg-[#FAF8F5] shrink-0 border border-[#E8DFD8]">
                                 <img 
-                                  src={activeReel.thumbnail?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80'} 
+                                  src={getReelCoverImage(activeReel)} 
                                   alt="" 
+                                  loading="lazy"
+                                  decoding="async"
                                   className="w-full h-full object-cover" 
                                 />
                               </div>
@@ -892,8 +948,10 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
               return (
                 <>
                   <img
-                    src={activeReel.thumbnail?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=80'}
+                    src={getReelCoverImage(activeReel)}
                     alt={activeReel.title}
+                    loading="lazy"
+                    decoding="async"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60 pointer-events-none" />

@@ -5,21 +5,14 @@ import {
   ChevronLeft,
   ChevronRight,
   SearchX, 
-  Star, 
-  CheckCircle2, 
-  MapPin, 
-  RotateCcw, 
-  MessageSquare, 
-  Send, 
-  Quote, 
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  Star
 } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { useCart } from '../context/CartContext';
-import { TESTIMONIALS } from '../data/products';
-import { Testimonial } from '../types';
-import { isProductBestSeller, sanitizeReviewItem } from '../utils/productStats';
+import { isProductBestSeller } from '../utils/productStats';
+import { GlobalSearchBar } from './GlobalSearchBar';
 
 type SortOption = 'featured' | 'newest' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
@@ -53,56 +46,6 @@ export const ProductGrid: React.FC = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Customer Reviews state at bottom of product catalog
-  const [reviewsList, setReviewsList] = useState<Testimonial[]>(() => {
-    try {
-      const saved = localStorage.getItem('artified_grid_reviews_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(sanitizeReviewItem);
-      }
-    } catch {}
-    return TESTIMONIALS.map(sanitizeReviewItem);
-  });
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewAuthor, setReviewAuthor] = useState('');
-  const [reviewLocation, setReviewLocation] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
-  const [reviewProduct, setReviewProduct] = useState('Handcrafted Pearl Bag');
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
-
-  const handleAddReview = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reviewAuthor.trim() || !reviewComment.trim()) return;
-
-    const newRev: Testimonial = {
-      id: `rev-${Date.now()}`,
-      author: reviewAuthor.trim(),
-      location: reviewLocation.trim() || 'Kathmandu, Nepal',
-      rating: reviewRating,
-      comment: reviewComment.trim(),
-      productName: reviewProduct.trim() || 'Handcrafted Pearl Piece',
-      date: 'Just now',
-      verifiedPurchase: true
-    };
-
-    const updated = [newRev, ...reviewsList];
-    setReviewsList(updated);
-    try {
-      localStorage.setItem('artified_grid_reviews_v2', JSON.stringify(updated));
-    } catch {}
-
-    setReviewSubmitted(true);
-    setTimeout(() => {
-      setShowReviewForm(false);
-      setReviewSubmitted(false);
-      setReviewAuthor('');
-      setReviewLocation('');
-      setReviewComment('');
-    }, 1800);
-  };
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -184,10 +127,10 @@ export const ProductGrid: React.FC = () => {
     categories.find((cat) => cat.id === selectedCategory)?.label || 'All Creations';
 
   return (
-    <section id="shop-section" className="pt-1 sm:pt-2 pb-10 sm:pb-14 px-2.5 sm:px-4 lg:px-6 max-w-[1440px] mx-auto">
-      {/* Category Dropdown, Select Product Navigation (with green arrows), & Sort Bar - In ONE SINGLE LINE */}
-      <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 mb-2 sm:mb-2.5 relative z-50 flex-nowrap w-full">
-        {/* Category Dropdown (All Creations, Pearl Bags, Pearl Necklaces, Macrame, Accessories, New Arrivals, Best Sellers) */}
+    <section id="shop-section" className="pt-0 sm:pt-1 pb-8 sm:pb-12 px-2 sm:px-3 lg:px-4 max-w-[1440px] mx-auto">
+      {/* Category Dropdown (All Creations), Centered Search Bar, & Custom Sort Bar */}
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 mb-2 sm:mb-3 relative z-50 w-full flex-wrap sm:flex-nowrap">
+        {/* Left: Category Dropdown (All Creations, Pearl Bags, Pearl Necklaces, Macrame, Accessories, New Arrivals, Best Sellers) */}
         <div ref={categoryDropdownRef} className="relative z-[60] shrink-0">
           <button
             type="button"
@@ -195,7 +138,7 @@ export const ProductGrid: React.FC = () => {
               setIsCategoryOpen(!isCategoryOpen);
               setIsSortOpen(false);
             }}
-            className="flex items-center justify-between gap-1.5 sm:gap-2.5 bg-white border border-[#D1D5DB] rounded-md px-2.5 sm:px-3 py-1.5 text-xs text-[#111827] min-w-[125px] sm:min-w-[170px] shadow-2xs hover:border-[#9CA3AF] focus:outline-none transition-colors"
+            className="flex items-center justify-between gap-1.5 sm:gap-2 bg-white border border-[#D1D5DB] rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs text-[#111827] min-w-[125px] sm:min-w-[160px] shadow-2xs hover:border-[#9CA3AF] focus:outline-none transition-colors cursor-pointer"
           >
             <span className="font-normal flex items-center gap-1.5 truncate">
               {selectedCategory === 'new-arrivals' && <Sparkles className="w-3.5 h-3.5 text-[#C5A880] fill-[#C5A880] shrink-0" />}
@@ -210,7 +153,7 @@ export const ProductGrid: React.FC = () => {
           </button>
 
           {isCategoryOpen && (
-            <div className="absolute left-0 mt-1 w-full min-w-[210px] bg-white border border-[#D1D5DB] rounded-md shadow-2xl py-1.5 z-[100] animate-fade-in">
+            <div className="absolute left-0 mt-1.5 w-full min-w-[210px] bg-white border border-[#D1D5DB] rounded-2xl shadow-2xl py-1.5 z-[100] animate-fade-in">
               {categories.map((cat) => {
                 const isSelected = selectedCategory === cat.id;
                 const isDividerBefore = cat.id === 'new-arrivals';
@@ -229,7 +172,7 @@ export const ProductGrid: React.FC = () => {
                         setSelectedCategory(cat.id);
                         setIsCategoryOpen(false);
                       }}
-                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between cursor-pointer ${
                         isSelected
                           ? 'bg-[#E5E5E5] text-[#111827] font-semibold'
                           : cat.isSpecial
@@ -253,15 +196,20 @@ export const ProductGrid: React.FC = () => {
           )}
         </div>
 
-        {/* Custom Sort Dropdown */}
-        <div ref={sortDropdownRef} className="relative shrink-0 z-[60]">
+        {/* Center: Search Bar inside Shop between All Creations and Sort by */}
+        <div className="flex-1 min-w-[180px] order-3 sm:order-2 w-full sm:w-auto">
+          <GlobalSearchBar />
+        </div>
+
+        {/* Right: Custom Sort Dropdown */}
+        <div ref={sortDropdownRef} className="relative shrink-0 z-[60] order-2 sm:order-3">
           <button
             type="button"
             onClick={() => {
               setIsSortOpen(!isSortOpen);
               setIsCategoryOpen(false);
             }}
-            className="flex items-center justify-between gap-1.5 sm:gap-2.5 bg-white border border-[#D1D5DB] rounded-md px-2.5 sm:px-3 py-1.5 text-xs text-[#111827] min-w-[115px] sm:min-w-[155px] shadow-2xs hover:border-[#9CA3AF] focus:outline-none transition-colors"
+            className="flex items-center justify-between gap-1.5 sm:gap-2.5 bg-white border border-[#D1D5DB] rounded-xl px-3 sm:px-3.5 py-2 text-xs text-[#111827] min-w-[115px] sm:min-w-[155px] shadow-2xs hover:border-[#9CA3AF] focus:outline-none transition-colors cursor-pointer"
           >
             <span className="font-normal">{currentSortLabel}</span>
             {isSortOpen ? (
@@ -315,9 +263,9 @@ export const ProductGrid: React.FC = () => {
         </div>
       )}
 
-      {/* Product Grid - 5 columns on desktop, 10 items fully visible in viewport */}
+      {/* Product Grid - 5 columns on desktop, concise spacing */}
       {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-2.5 lg:gap-3 relative z-0 isolate">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-2 lg:gap-2.5 relative z-0 isolate">
           {filteredProducts.map((product) => (
             <ProductCard 
               key={product.id} 
@@ -356,264 +304,6 @@ export const ProductGrid: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* ========================================================
-          CUSTOMER REVIEWS SECTION - Placed directly at the bottom 
-          of the product catalog shown in the photo
-          ======================================================== */}
-      <div className="mt-12 sm:mt-16 pt-8 border-t border-[#E8DFD8]">
-        {/* Reassurance Badges Banner */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-8">
-          <div className="p-3 bg-white rounded-xl border border-[#E8DFD8] shadow-2xs flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#E8DFD8] text-[#C5A880] flex items-center justify-center shrink-0">
-              <MapPin className="w-4 h-4 text-[#D4AF37]" />
-            </div>
-            <div className="min-w-0">
-              <span className="block text-[10px] uppercase tracking-wider text-[#736C65] font-semibold">Store Location</span>
-              <span className="block text-xs font-bold text-[#1C1B1A] truncate">Chikamugal, Kathmandu</span>
-            </div>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-emerald-200/80 shadow-2xs flex items-center gap-2.5 bg-emerald-50/30">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100/70 border border-emerald-300 text-emerald-700 flex items-center justify-center shrink-0">
-              <RotateCcw className="w-4 h-4 text-emerald-700" />
-            </div>
-            <div className="min-w-0">
-              <span className="block text-[10px] uppercase tracking-wider text-emerald-700 font-bold">Exchange Guarantee</span>
-              <span className="block text-xs font-bold text-emerald-900 truncate">Easy exchange within 24 hrs</span>
-            </div>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E8DFD8] shadow-2xs flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#E8DFD8] text-amber-500 flex items-center justify-center shrink-0">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            </div>
-            <div className="min-w-0">
-              <span className="block text-[10px] uppercase tracking-wider text-[#736C65] font-semibold">Patron Rating</span>
-              <span className="block text-xs font-bold text-[#1C1B1A] truncate">4.9 / 5.0 (1,200+ Delivered)</span>
-            </div>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E8DFD8] shadow-2xs flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#E8DFD8] text-emerald-600 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="min-w-0">
-              <span className="block text-[10px] uppercase tracking-wider text-[#736C65] font-semibold">Nepal Dispatch</span>
-              <span className="block text-xs font-bold text-[#1C1B1A] truncate">Fast Valley & All-Nepal</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Section Header with 'Write a Review' Button */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-bold text-[#8C7A6B] mb-1">
-              <Quote className="w-3.5 h-3.5 text-[#C5A880]" />
-              <span>Voices of Artified Patrons</span>
-            </div>
-            <h2 className="font-serif text-2xl sm:text-3xl text-[#1C1B1A] font-semibold">
-              Loved Across Nepal • Customer Reviews
-            </h2>
-            <p className="text-xs text-[#736C65] mt-1 max-w-xl">
-              Handcrafted with pride at our workshop in <strong>Chikamugal, Kathmandu</strong>. Every delivery includes an authentic handmade quality check by <strong>Sahina Shrestha</strong> with our <strong>easy exchange within 24 hrs</strong> policy.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-            {isSellerMode && (
-              <button
-                type="button"
-                onClick={() => openReviewsManager(null)}
-                className="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
-                title="Manage and edit all customer reviews with Seller Studio"
-              >
-                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                <span>Seller Studio Reviews</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setShowReviewForm(!showReviewForm)}
-              className="px-4 py-2.5 bg-[#1C1B1A] hover:bg-[#34312F] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors self-start sm:self-auto shadow-xs cursor-pointer"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-[#C5A880]" />
-              <span>{showReviewForm ? 'Close Review Form' : 'Write a Review'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Inline Review Submission Form */}
-        {showReviewForm && (
-          <form onSubmit={handleAddReview} className="mb-8 p-5 bg-white rounded-2xl border border-[#C5A880]/50 shadow-sm space-y-4 animate-fade-in max-w-2xl">
-            <div className="flex items-center justify-between border-b border-[#F0EBE5] pb-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#1C1B1A]">
-                Review Your Handcrafted Piece
-              </h4>
-              <div className="flex items-center gap-1">
-                <span className="text-[11px] text-[#736C65] mr-1">Rating:</span>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setReviewRating(star)}
-                    className="p-0.5 focus:outline-none cursor-pointer"
-                  >
-                    <Star
-                      className={`w-4 h-4 ${
-                        star <= reviewRating
-                          ? 'fill-amber-400 text-amber-400'
-                          : 'text-zinc-300'
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
-                  Your Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={reviewAuthor}
-                  onChange={(e) => setReviewAuthor(e.target.value)}
-                  placeholder="e.g. Alisha Shrestha"
-                  className="w-full text-xs p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-lg focus:outline-none focus:border-[#C5A880]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
-                  Location in Nepal
-                </label>
-                <input
-                  type="text"
-                  value={reviewLocation}
-                  onChange={(e) => setReviewLocation(e.target.value)}
-                  placeholder="e.g. Chikamugal, Kathmandu / Pokhara"
-                  className="w-full text-xs p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-lg focus:outline-none focus:border-[#C5A880]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
-                Product Purchased
-              </label>
-              <input
-                type="text"
-                value={reviewProduct}
-                onChange={(e) => setReviewProduct(e.target.value)}
-                placeholder="e.g. Maya Aurelia Pearl Bag"
-                className="w-full text-xs p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-lg focus:outline-none focus:border-[#C5A880]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
-                Your Review & Experience *
-              </label>
-              <textarea
-                required
-                rows={3}
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                placeholder="Tell others about the bead shine, craftsmanship, delivery from Chikamugal, and easy exchange reassurance..."
-                className="w-full text-xs p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-lg focus:outline-none focus:border-[#C5A880]"
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-[10px] text-[#736C65]">
-                📍 Delivered from Chikamugal, Kathmandu • 24h easy exchange
-              </span>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#C5A880] hover:bg-[#b5966a] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>{reviewSubmitted ? 'Review Published!' : 'Submit Review'}</span>
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Customer Reviews Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          {reviewsList.map((rev) => (
-            <div
-              key={rev.id}
-              className="p-4 bg-white rounded-xl border border-[#E8DFD8] shadow-2xs hover:border-[#C5A880]/70 transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center text-amber-400">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star
-                        key={s}
-                        className={`w-3.5 h-3.5 ${
-                          s <= Math.round(rev.rating) ? 'fill-amber-400 text-amber-400' : 'text-zinc-200'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[10px] text-[#A69E96]">{rev.date}</span>
-                </div>
-
-                <p className="text-xs text-[#3E3A36] leading-relaxed mb-3">
-                  &ldquo;{rev.comment}&rdquo;
-                </p>
-              </div>
-
-              <div className="pt-2.5 border-t border-[#F5F2ED] flex items-center justify-between text-[11px]">
-                <div className="min-w-0 pr-2">
-                  <span className="font-semibold text-[#1C1B1A] block truncate">{rev.author}</span>
-                  <span className="text-[10px] text-[#8C7A6B] block truncate leading-tight mt-0.5">{rev.location}</span>
-                  <span className="text-[9px] text-[#C5A880] font-medium block truncate mt-0.5">
-                    {rev.productName}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {isSellerMode && (
-                    <button
-                      type="button"
-                      onClick={() => openReviewsManager(null)}
-                      className="px-2 py-0.5 text-[10px] font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded shadow-2xs transition-colors cursor-pointer"
-                      title="Edit this review in Seller Studio"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  {rev.verifiedPurchase && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded shrink-0">
-                      <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                      <span>Verified</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom Storefront Reassurance Note */}
-        <div className="mt-5 p-3.5 bg-white/80 rounded-xl border border-[#E8DFD8] flex items-center justify-between text-xs text-[#5E5955] flex-wrap gap-2.5">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-[#D4AF37]" />
-            <span>Store: <strong>Chikamugal, Kathmandu, Nepal</strong></span>
-          </div>
-          <div className="flex items-center gap-2">
-            <RotateCcw className="w-4 h-4 text-emerald-600" />
-            <span><strong>Easy exchange within 24 hrs</strong> of delivery across Nepal</span>
-          </div>
-        </div>
-      </div>
     </section>
   );
 };

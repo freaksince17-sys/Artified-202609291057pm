@@ -10,9 +10,13 @@ import {
   Feather, 
   Instagram, 
   Star, 
-  RefreshCw 
+  RefreshCw,
+  QrCode,
+  KeyRound 
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { SellerPaymentSettingsModal } from './SellerPaymentSettingsModal';
+import { SellerChangePasswordModal } from './SellerChangePasswordModal';
 
 export const SellerToolbar: React.FC = () => {
   const { 
@@ -35,6 +39,8 @@ export const SellerToolbar: React.FC = () => {
 
   const [isMinimized, setIsMinimized] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
+  const [isPaymentSettingsOpen, setIsPaymentSettingsOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const handleManualSync = async () => {
     setIsManualSyncing(true);
@@ -160,6 +166,16 @@ export const SellerToolbar: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => setIsPaymentSettingsOpen(true)}
+              className="w-full py-1.5 px-2.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/10"
+              title="Configure Sahina Shrestha's free QR codes & bank details"
+            >
+              <QrCode className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>Personal QR & Payment Setup (Free)</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsWebsiteExportOpen(true)}
               className="w-full py-1.5 px-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[11px] font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-amber-500/40"
             >
@@ -181,6 +197,16 @@ export const SellerToolbar: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => setIsChangePasswordOpen(true)}
+              className="w-full py-1.5 px-2.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/10"
+              title="Change your private Seller Studio password"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Change Studio Password</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsSellerMode(false)}
               className="w-full py-1.5 px-2.5 bg-white/5 hover:bg-rose-950/40 text-[11px] text-rose-300 rounded-lg flex items-center justify-center gap-1.5 border border-rose-900/30 transition-colors"
               title="Exit seller mode to view site as customer"
@@ -191,6 +217,18 @@ export const SellerToolbar: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Seller Personal Payment & QR Settings Modal */}
+      <SellerPaymentSettingsModal
+        isOpen={isPaymentSettingsOpen}
+        onClose={() => setIsPaymentSettingsOpen(false)}
+      />
+
+      {/* Seller Change Password Modal */}
+      <SellerChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
     </aside>
   );
 };

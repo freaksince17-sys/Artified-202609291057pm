@@ -12,6 +12,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 type HeroDisplayMode = 'compact' | 'full' | 'collapsed' | 'hidden';
 
@@ -116,7 +117,7 @@ export const HeroSection: React.FC = () => {
   // 3. STATE: Compact (Default Minimized Mode) or Full Mode
   return (
     <section className={`relative overflow-hidden bg-[#FAF8F5] border-b border-[#E8DFD8]/70 transition-all ${
-      isFull ? 'pt-6 pb-12 md:py-14' : 'py-5 sm:py-7 md:py-8'
+      isFull ? 'pt-5 pb-10 md:py-12' : 'py-3 sm:py-4 md:py-5'
     }`}>
       {/* Decorative ambient background accents */}
       <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#F4EFEB] rounded-full filter blur-3xl opacity-50 pointer-events-none -z-0"></div>
@@ -125,7 +126,7 @@ export const HeroSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Top Space-Saving Controls Bar */}
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E8DFD8]/50">
+        <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-[#E8DFD8]/50">
           <div className="inline-flex items-center gap-2 bg-white/80 border border-[#E8DFD8] rounded-full px-3 py-1 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880] animate-pulse"></span>
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-[#736C65]">
@@ -268,7 +269,7 @@ export const HeroSection: React.FC = () => {
                 aria-label={`View ${featuredProduct?.title || 'Featured Piece'}`}
               >
                 <img
-                  src={featuredProduct?.images[0]?.trim() || "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80"}
+                  src={getRealProductImage(featuredProduct?.title, featuredProduct?.images[0])}
                   alt={featuredProduct?.title || "Artified_np Signature Handcrafted Pearl Evening Bag"}
                   className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
                 />

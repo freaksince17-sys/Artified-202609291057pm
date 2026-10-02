@@ -51,6 +51,97 @@
         "taggedProductPrice": { "type": "number" }
       },
       "required": ["id", "title", "postUrl"]
+    },
+    "WaitlistSubscriber": {
+      "title": "WaitlistSubscriber",
+      "description": "User subscription for out-of-stock product restock notification alert",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productTitle": { "type": "string", "maxLength": 256 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "phone": { "type": "string", "maxLength": 64 },
+        "requestedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "notified"] },
+        "notified": { "type": "boolean" },
+        "notifiedAt": { "type": "string" },
+        "restockedStockCount": { "type": "number" }
+      },
+      "required": ["productId", "email", "requestedAt"]
+    },
+    "NewsletterSubscriber": {
+      "title": "NewsletterSubscriber",
+      "description": "Subscriber record for new collection launches and secret drops",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "subscribedAt": { "type": "string" },
+        "source": { "type": "string", "maxLength": 64 },
+        "discountCode": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["email", "subscribedAt"]
+    },
+    "UserWishlist": {
+      "title": "UserWishlist",
+      "description": "Customer persistent wishlist collection synced across devices",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "productIds": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "productIds", "updatedAt"]
+    },
+    "TrackedOrder": {
+      "title": "TrackedOrder",
+      "description": "Customer order with real-time handcrafting and delivery status updates",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 256 },
+        "phone": { "type": "string", "maxLength": 64 },
+        "deliveryAddress": { "type": "string", "maxLength": 1000 },
+        "deliveryZoneName": { "type": "string", "maxLength": 256 },
+        "paymentMethodText": { "type": "string", "maxLength": 128 },
+        "paymentStatus": { "type": "string", "maxLength": 128 },
+        "items": { "type": "array" },
+        "total": { "type": "number" },
+        "orderPlacedDate": { "type": "string", "maxLength": 128 },
+        "estimatedDeliveryDate": { "type": "string", "maxLength": 128 },
+        "currentPhase": { "type": "string", "maxLength": 128 },
+        "progressPercentage": { "type": "number" },
+        "artisanName": { "type": "string", "maxLength": 128 },
+        "artisanRole": { "type": "string", "maxLength": 128 },
+        "studioLocation": { "type": "string", "maxLength": 256 },
+        "liveCraftNotes": { "type": "string", "maxLength": 2000 },
+        "milestones": { "type": "array" },
+        "riderName": { "type": "string", "maxLength": 128 },
+        "riderPhone": { "type": "string", "maxLength": 64 },
+        "trackingNumber": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["orderId", "customerName", "currentPhase", "progressPercentage"]
+    },
+    "ProductReview": {
+      "title": "ProductReview",
+      "description": "Customer rating and text feedback submitted for a handcrafted product",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productTitle": { "type": "string", "maxLength": 256 },
+        "author": { "type": "string", "maxLength": 128 },
+        "location": { "type": "string", "maxLength": 128 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 4000 },
+        "verified": { "type": "boolean" },
+        "date": { "type": "string", "maxLength": 64 },
+        "customerPhoto": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "productId", "author", "rating", "comment"]
     }
   },
   "firestore": {
@@ -61,6 +152,26 @@
     "/instagram_journal/{itemId}": {
       "schema": "InstagramJournalItem",
       "description": "Instagram journal posts editable by admins"
+    },
+    "/waitlist_subscribers/{subscriberId}": {
+      "schema": "WaitlistSubscriber",
+      "description": "Waitlist subscriptions for restock alert notifications"
+    },
+    "/newsletter_subscribers/{subscriberId}": {
+      "schema": "NewsletterSubscriber",
+      "description": "Subscribers for upcoming collection drops"
+    },
+    "/user_wishlists/{userId}": {
+      "schema": "UserWishlist",
+      "description": "Customer wishlist synchronized to cloud"
+    },
+    "/tracked_orders/{orderId}": {
+      "schema": "TrackedOrder",
+      "description": "Real-time orders with shipping and crafting milestone status"
+    },
+    "/product_reviews/{reviewId}": {
+      "schema": "ProductReview",
+      "description": "Customer reviews and feedback with ratings for products"
     }
   }
 }

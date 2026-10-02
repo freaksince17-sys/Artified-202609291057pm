@@ -18,6 +18,7 @@ import {
 import { useCart } from '../context/CartContext';
 import { ProductReviewItem, Product } from '../types';
 import { getProductReviews } from '../utils/productStats';
+import { getRealProductImage } from '../utils/productImages';
 
 interface ReviewWithProduct extends ProductReviewItem {
   productId: string;
@@ -75,7 +76,7 @@ export const SellerReviewsModal: React.FC = () => {
           ...rev,
           productId: prod.id,
           productTitle: prod.title,
-          productImage: prod.images[0] || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80',
+          productImage: getRealProductImage(prod.title, prod.images[0]),
         });
       });
     });

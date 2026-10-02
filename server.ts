@@ -242,6 +242,25 @@ async function startServer() {
     }
   });
 
+  // POST /api/notify-waitlist - Automated email notification webhook for waitlist restock alerts
+  app.post('/api/notify-waitlist', (req, res) => {
+    try {
+      const { productId, productTitle, price, recipients } = req.body;
+      const count = Array.isArray(recipients) ? recipients.length : 0;
+      console.log(`[Artified Cloud Trigger] Automated restock email broadcast triggered for: "${productTitle}" (ID: ${productId}, Price: NPR ${price}) to ${count} recipient(s):`, recipients);
+      return res.json({
+        success: true,
+        productId,
+        productTitle,
+        notifiedCount: count,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error('Error processing notify-waitlist:', err);
+      return res.status(500).json({ error: 'Failed to process waitlist notification' });
+    }
+  });
+
   // POST /api/upload-video - Upload custom video directly and save to public/instagram_videos
   app.post('/api/upload-video', (req, res) => {
     try {

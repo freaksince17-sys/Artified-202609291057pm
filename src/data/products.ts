@@ -50,8 +50,8 @@ export const TESTIMONIALS: Testimonial[] = [
     author: 'Aayushi Khadgi',
     location: 'Baluwatar, Kathmandu',
     rating: 5,
-    comment: 'Received the bag safely in very cute packaging! The pearls are tightly woven and not loose at all. Carried it for my cousin wedding party and everyone was asking where I bought it from. Thank you Artified!',
-    productName: 'The Maya Aurelia Structured Pearl Bag',
+    comment: 'Honestly, I was not sure about ordering bags online because sometimes pearls look cheap plastic. But this Red Pearl Beaded Bag is surprisingly heavy and well made. The red pearls shine nicely under hall lights and it easily fits my mobile phone, handkerchief and compact powder. Delivery rider called before arriving. Everyone in wedding was asking where I got it from!',
+    productName: 'Red Pearl Beaded Bag',
     date: '2 weeks ago',
     verifiedPurchase: true
   },
@@ -60,8 +60,8 @@ export const TESTIMONIALS: Testimonial[] = [
     author: 'Prerana Shahi',
     location: 'Jhamsikhel, Lalitpur',
     rating: 5,
-    comment: 'Asked for custom length on WhatsApp and they replied fast and politely. Delivery inside Ring Road took only 1 day with COD. Choker looks very pretty with saree, happy with the purchase!',
-    productName: 'Chandra Asymmetric Baroque Pearl Choker',
+    comment: 'I ordered this choker after seeing their reel on Instagram. My neck is bit thin so normal fixed chokers become loose on me, but this one has adjustable chain at back so I could fit it properly. Wore it with black sari for college farewell. Beads are smooth and did not scratch my skin. Very happy with the purchase at this price.',
+    productName: 'Pearl Beaded Adjustable Choker',
     date: '1 month ago',
     verifiedPurchase: true
   },
@@ -70,8 +70,8 @@ export const TESTIMONIALS: Testimonial[] = [
     author: 'Bhawana Gurung',
     location: 'Lakeside, Pokhara',
     rating: 5,
-    comment: 'Was bit worried about delivery to Pokhara, but received in 3 days safely with tracking SMS. The bag looks even nicer in hand than in TikTok video! Very happy with the quality.',
-    productName: 'Himalayan Breeze Knotted Macrame Bag',
+    comment: 'I live in Pokhara so I was little worried whether pearl bag might get pressed or damaged during courier transport. But the seller packed it inside solid box with lots of bubble wrap. The round shape is very unique and sturdy. It is slightly heavy in hand because of solid beads, but look is 100% royal.',
+    productName: 'Round Pearl Bag',
     date: '3 weeks ago',
     verifiedPurchase: true
   }

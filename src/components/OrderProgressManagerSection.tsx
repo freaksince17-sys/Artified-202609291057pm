@@ -25,6 +25,7 @@ import {
   getProgressPercentage,
   buildMilestonesForPhase 
 } from '../data/trackingData';
+import { getRealProductImage } from '../utils/productImages';
 import { TrackedOrderData, OrderProductionPhase } from '../types';
 
 export const OrderProgressManagerSection: React.FC = () => {
@@ -155,7 +156,7 @@ export const OrderProgressManagerSection: React.FC = () => {
       items: [
         {
           title: newItemTitle.trim() || 'Caviar Pearl Bag',
-          image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+          image: getRealProductImage(newItemTitle.trim() || 'Caviar Pearl Bag'),
           quantity: 1,
           price: Number(newTotal) || 2499,
           customization: 'Handcrafted by Sahina Shrestha'
@@ -580,7 +581,7 @@ export const OrderProgressManagerSection: React.FC = () => {
                     {/* 2. Ordered Items */}
                     <div className="md:col-span-3 flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-[#E8DFD8]/80 min-w-0">
                       <img
-                        src={order.items[0]?.image}
+                        src={getRealProductImage(order.items[0]?.title, order.items[0]?.image)}
                         alt={order.items[0]?.title}
                         className="w-9 h-9 rounded-md object-cover border border-[#E8DFD8] shrink-0"
                       />

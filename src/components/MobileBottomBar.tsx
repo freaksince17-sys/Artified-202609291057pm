@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Heart, Sparkles, Truck, Compass } from 'lucide-react';
+import { ShoppingBag, Heart, Sparkles, Truck, Compass, Crown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const MobileBottomBar: React.FC = () => {
@@ -9,7 +9,9 @@ export const MobileBottomBar: React.FC = () => {
     wishlist, 
     setIsWishlistOpen, 
     setSelectedCategory,
-    openTracker
+    openTracker,
+    openAccountModal,
+    loyaltyPointsBalance
   } = useCart();
 
   const scrollToShop = () => {
@@ -19,24 +21,39 @@ export const MobileBottomBar: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md border-t border-[#E8DFD8] lg:hidden shadow-[0_-4px_20px_rgba(28,27,26,0.06)] px-3 py-2">
+    <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md border-t border-[#E8DFD8] lg:hidden shadow-[0_-4px_20px_rgba(28,27,26,0.06)] px-2 py-1.5">
       <div className="flex items-center justify-around max-w-md mx-auto">
         
         {/* Explore Shop */}
         <button
           type="button"
           onClick={scrollToShop}
-          className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-[#5E5955] hover:text-[#1C1B1A]"
+          className="flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] hover:text-[#1C1B1A]"
         >
           <Compass className="w-5 h-5 text-[#1C1B1A]" />
           <span className="text-[10px] font-medium tracking-wider uppercase mt-0.5">Explore</span>
+        </button>
+
+        {/* Loyalty Rewards */}
+        <button
+          type="button"
+          onClick={() => openAccountModal('rewards')}
+          className="relative flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] hover:text-[#D4AF37]"
+        >
+          <div className="relative">
+            <Crown className="w-5 h-5 text-[#D4AF37]" />
+            <span className="absolute -top-1 -right-2 bg-[#D4AF37] text-[#1C1B1A] text-[8px] font-black px-1 rounded-full">
+              {loyaltyPointsBalance}
+            </span>
+          </div>
+          <span className="text-[10px] font-bold tracking-wider uppercase mt-0.5 text-[#1C1B1A]">Rewards</span>
         </button>
 
         {/* Live Order Tracker */}
         <button
           type="button"
           onClick={() => openTracker()}
-          className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-[#5E5955] hover:text-[#C5A880]"
+          className="flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] hover:text-[#C5A880]"
         >
           <Truck className="w-5 h-5 text-[#C5A880]" />
           <span className="text-[10px] font-medium tracking-wider uppercase mt-0.5">Track</span>
@@ -46,7 +63,7 @@ export const MobileBottomBar: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsWishlistOpen(true)}
-          className="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-[#5E5955] hover:text-[#1C1B1A]"
+          className="relative flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] hover:text-[#1C1B1A]"
         >
           <div className="relative">
             <Heart className={`w-5 h-5 ${wishlist.length > 0 ? 'fill-rose-500 text-rose-500' : 'text-[#1C1B1A]'}`} />
@@ -63,7 +80,7 @@ export const MobileBottomBar: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-[#1C1B1A]"
+          className="relative flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#1C1B1A]"
         >
           <div className="relative">
             <ShoppingBag className="w-5 h-5 text-[#1C1B1A]" />

@@ -12,35 +12,43 @@ import {
   User,
   ExternalLink
 } from 'lucide-react';
-import { getTrackedOrder, updateOrderPhase, normalizeOrderId } from '../data/trackingData';
+import { getTrackedOrder, updateOrderPhase, normalizeOrderId, sanitizeOrderItems } from '../data/trackingData';
 import { TrackedOrderData, OrderProductionPhase } from '../types';
 import { useCart } from '../context/CartContext';
 import { OrderProgressManagerModal } from './OrderProgressManagerModal';
+import { CustomerReviews } from './CustomerReviews';
+import { subscribeToTrackedOrder } from '../services/orderTrackingService';
+import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 export const OrderTrackerSection: React.FC = () => {
   const { trackingOrderId, setTrackingOrderId, setActiveNavTab } = useCart();
   const [inputOrderId, setInputOrderId] = useState<string>(trackingOrderId || 'ART-2026-5526');
-  const [trackedOrder, setTrackedOrder] = useState<TrackedOrderData | null>(() => {
-    return getTrackedOrder(trackingOrderId || 'ART-2026-5526');
-  });
+  const [trackedOrder, setTrackedOrder] = useState<TrackedOrderData | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
 
-  // Sync when trackingOrderId changes or on custom update event
+  const unsubscribeRef = React.useRef<(() => void) | null>(null);
+
+  // Sync when trackingOrderId changes or on mount
   useEffect(() => {
-    if (trackingOrderId) {
-      setInputOrderId(trackingOrderId);
-      const o = getTrackedOrder(trackingOrderId);
-      if (o) setTrackedOrder(o);
-    }
+    const targetId = trackingOrderId || 'ART-2026-5526';
+    setInputOrderId(targetId);
+    performLookup(targetId);
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+    };
   }, [trackingOrderId]);
 
   useEffect(() => {
     const handleUpdate = (e: Event) => {
       const customEvent = e as CustomEvent<TrackedOrderData>;
       if (customEvent.detail && trackedOrder && normalizeOrderId(customEvent.detail.orderId) === normalizeOrderId(trackedOrder.orderId)) {
-        setTrackedOrder(customEvent.detail);
+        setTrackedOrder(sanitizeOrderItems(customEvent.detail));
       }
     };
     window.addEventListener('artified_order_updated', handleUpdate);
@@ -57,17 +65,29 @@ export const OrderTrackerSection: React.FC = () => {
     setIsSearching(true);
     setErrorMsg(null);
 
-    setTimeout(() => {
-      const order = getTrackedOrder(idToLookup);
-      if (order) {
-        setTrackedOrder(order);
-        setTrackingOrderId(order.orderId);
-      } else {
-        setTrackedOrder(null);
-        setErrorMsg(`We couldn't find an order for "${idToLookup}". Please check the ID or contact us on WhatsApp.`);
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+
+    unsubscribeRef.current = subscribeToTrackedOrder(
+      idToLookup,
+      (order) => {
+        setIsSearching(false);
+        if (order) {
+          const sanitized = sanitizeOrderItems(order);
+          setTrackedOrder(sanitized);
+          setTrackingOrderId(sanitized.orderId);
+          setErrorMsg(null);
+        } else {
+          setTrackedOrder(null);
+          setErrorMsg(`We couldn't find an order for "${idToLookup}". Please check the ID or contact us on WhatsApp.`);
+        }
+      },
+      () => {
+        setIsSearching(false);
       }
-      setIsSearching(false);
-    }, 400);
+    );
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -288,10 +308,10 @@ export const OrderTrackerSection: React.FC = () => {
                   {trackedOrder.items.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-3">
                       <img 
-                        src={item.image?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80'} 
+                        src={getRealProductImage(item.title, item.image)} 
                         alt={item.title} 
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80';
+                          (e.currentTarget as HTMLImageElement).src = CAVIAR_PEARL_BAG_IMAGE;
                         }}
                         className="w-11 h-11 rounded-lg object-cover border border-[#E8DFD8] shrink-0"
                       />
@@ -370,6 +390,11 @@ export const OrderTrackerSection: React.FC = () => {
           initialOrderId={trackedOrder?.orderId}
         />
 
+      </div>
+
+      {/* Customer Reviews Section transferred to bottom of Track Order */}
+      <div className="mt-8 border-t border-[#E8DFD8]">
+        <CustomerReviews />
       </div>
     </section>
   );

@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
-import { Lock, KeyRound, Sparkles, X, Check, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Lock, KeyRound, Sparkles, X, Check, ShieldCheck, HelpCircle, Key } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { validateSellerPassword, isCustomPasswordSet } from '../utils/sellerAuthService';
+import { SellerChangePasswordModal } from './SellerChangePasswordModal';
 
 export const SellerAuthModal: React.FC = () => {
-  const { isSellerAuthModalOpen, setIsSellerAuthModalOpen, setIsSellerMode, openProductEditor } = useCart();
+  const { isSellerAuthModalOpen, setIsSellerAuthModalOpen, setIsSellerMode } = useCart();
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   if (!isSellerAuthModalOpen) return null;
 
+  const hasCustom = isCustomPasswordSet();
+
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
-    // Default PIN: 1234
-    if (pin.trim() === '1234' || pin.trim() === 'artified' || pin.trim() === 'admin') {
+    if (validateSellerPassword(pin)) {
       setError(false);
       setSuccess(true);
       setTimeout(() => {
@@ -80,7 +84,7 @@ export const SellerAuthModal: React.FC = () => {
                   setError(false);
                 }}
                 autoFocus
-                placeholder="Enter passcode (default: 1234)"
+                placeholder={hasCustom ? "Enter your secure passcode" : "Enter passcode (default: 1234)"}
                 className={`w-full pl-10 pr-4 py-2.5 bg-white border text-sm rounded-xl focus:outline-none transition-colors ${
                   error 
                     ? 'border-rose-400 focus:ring-1 focus:ring-rose-400' 
@@ -90,7 +94,9 @@ export const SellerAuthModal: React.FC = () => {
             </div>
             {error && (
               <p className="text-xs text-rose-600 mt-1.5 font-medium">
-                Incorrect passcode. Default studio passcode is 1234.
+                {hasCustom 
+                  ? 'Incorrect passcode. Please check your secure password.' 
+                  : 'Incorrect passcode. Default studio passcode is 1234.'}
               </p>
             )}
             {success && (
@@ -99,6 +105,19 @@ export const SellerAuthModal: React.FC = () => {
                 Passcode verified. Unlocking Seller Mode...
               </p>
             )}
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] pt-0.5">
+            <span className="text-[#8C7A6B]">
+              {hasCustom ? '🔒 Custom password active' : '🔑 Using default passcode'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsChangePasswordOpen(true)}
+              className="text-[#8C5D36] hover:text-[#1C1B1A] font-semibold underline cursor-pointer"
+            >
+              Change Passcode
+            </button>
           </div>
 
           <div className="bg-[#F4EFEB] p-3 rounded-xl border border-[#E8DFD8] text-[11px] text-[#736C65] flex items-start gap-2">
@@ -126,6 +145,11 @@ export const SellerAuthModal: React.FC = () => {
           </div>
         </form>
       </div>
+
+      <SellerChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
     </div>
   );
 };

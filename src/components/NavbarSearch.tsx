@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 interface NavbarSearchProps {
   isOpen: boolean;
@@ -158,13 +159,15 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
                   }
                 }}
                 placeholder="Search by product name, pearl type, macrame, or category..."
+                aria-label="Search by product name, pearl type, macrame, or category"
                 className="w-full pl-12 pr-10 py-3.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl text-sm text-[#1C1B1A] placeholder-[#9E9791] focus:outline-none focus:border-[#C5A880] focus:bg-white transition-all shadow-inner"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 p-1 rounded-full text-[#8C847E] hover:text-[#1C1B1A] hover:bg-[#E8DFD8] transition-colors"
+                  aria-label="Clear search input"
+                  className="absolute right-3 p-1 rounded-full text-[#8C847E] hover:text-[#1C1B1A] hover:bg-[#E8DFD8] transition-colors cursor-pointer"
                   title="Clear search"
                 >
                   <X className="w-4 h-4" />
@@ -175,7 +178,8 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
             <button
               type="button"
               onClick={onClose}
-              className="p-3 text-[#5E5955] hover:text-[#1C1B1A] hover:bg-[#FAF8F5] rounded-xl transition-colors border border-[#E8DFD8] text-xs font-semibold uppercase tracking-wider shrink-0 flex items-center gap-1.5"
+              aria-label="Close search modal"
+              className="p-3 text-[#5E5955] hover:text-[#1C1B1A] hover:bg-[#FAF8F5] rounded-xl transition-colors border border-[#E8DFD8] text-xs font-semibold uppercase tracking-wider shrink-0 flex items-center gap-1.5 cursor-pointer"
             >
               <span>Close</span>
               <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-[#FAF8F5] border border-[#D8CFCA] rounded text-[#8C7A6B]">
@@ -185,7 +189,7 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
           </div>
 
           {/* Real-time Category Filter Pills */}
-          <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 text-xs no-scrollbar" role="group" aria-label="Category filters">
             <span className="text-[11px] font-semibold text-[#8C7A6B] uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
               <SlidersHorizontal className="w-3.5 h-3.5 text-[#C5A880]" />
               Filter:
@@ -205,7 +209,8 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
                   key={cat.id}
                   type="button"
                   onClick={() => setSearchCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all whitespace-nowrap ${
+                  aria-label={`Filter by ${cat.label}`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'bg-[#1C1B1A] text-white shadow-xs'
                       : 'bg-[#FAF8F5] text-[#5E5955] border border-[#E8DFD8] hover:border-[#C5A880] hover:text-[#1C1B1A]'
@@ -299,10 +304,12 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
                       {/* Product Thumbnail */}
                       <div className="w-20 h-24 rounded-lg overflow-hidden bg-[#FAF8F5] shrink-0 border border-[#F0EBE5] relative">
                         <img
-                          src={product.images[0]?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80'}
+                          src={getRealProductImage(product.title, product.images[0])}
                           alt={product.title}
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80';
+                            (e.currentTarget as HTMLImageElement).src = CAVIAR_PEARL_BAG_IMAGE;
                           }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -354,7 +361,8 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
                                 e.stopPropagation();
                                 handleViewProduct(product);
                               }}
-                              className="p-1.5 rounded-lg border border-[#E8DFD8] text-[#5E5955] hover:text-[#1C1B1A] hover:bg-white transition-colors"
+                              aria-label={`Quick view details for ${product.title}`}
+                              className="p-1.5 rounded-lg border border-[#E8DFD8] text-[#5E5955] hover:text-[#1C1B1A] hover:bg-white transition-colors cursor-pointer"
                               title="Quick View Details"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -363,7 +371,8 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
                             <button
                               type="button"
                               onClick={(e) => handleAddDirect(product, e)}
-                              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider flex items-center gap-1 transition-all ${
+                              aria-label={`Add ${product.title} to shopping bag`}
+                              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer ${
                                 isAdded
                                   ? 'bg-emerald-600 text-white'
                                   : 'bg-[#1C1B1A] text-white hover:bg-[#34312F]'

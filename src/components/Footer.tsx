@@ -11,17 +11,33 @@ import {
   Check,
   Lock,
   Instagram,
-  ArrowUpRight
+  ArrowUpRight,
+  Users,
+  ExternalLink,
+  HelpCircle,
+  ArrowRight,
+  Crown,
+  Gift,
+  Globe
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
+import { ArtifiedLogo } from './ArtifiedLogo';
 
 export const Footer: React.FC = () => {
   const { 
     setSelectedCategory, 
     openTracker, 
     setIsSellerAuthModalOpen, 
-    setActiveNavTab 
+    setActiveNavTab,
+    openOrderFAQsModal,
+    openSizeGuideModal,
+    openAccountModal,
+    openReferralModal,
+    loyaltyPointsBalance
   } = useCart();
+  const { language, setLanguage, t } = useLanguage();
+  const isNe = language === 'ne';
   const [emailInput, setEmailInput] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -47,7 +63,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-[#1C1B1A] text-[#FAF8F5] pt-14 pb-24 lg:pb-14 border-t border-[#2B2927]">
+    <footer className="bg-[#1C1B1A] text-[#FAF8F5] pt-10 pb-20 lg:pb-12 border-t border-[#2B2927]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Middle Footer Columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -55,57 +71,46 @@ export const Footer: React.FC = () => {
           {/* Column 1: Brand Info */}
           <div className="space-y-4">
             <div>
-              <h4 className="font-serif text-xl tracking-[0.2em] font-semibold uppercase text-white">
-                Artified_np
-              </h4>
-              <p className="text-[10px] tracking-widest uppercase text-[#C5A880] mt-0.5 font-medium">
-                Handcrafted Elegance | Wearable Art
+              <ArtifiedLogo variant="light" size="lg" />
+              <p className="text-[10px] tracking-widest uppercase text-[#C5A880] mt-1 font-medium">
+                Chikamugal Atelier • Kathmandu
               </p>
             </div>
             <p className="text-xs text-[#A69E96] leading-relaxed">
               Handmade pearl evening bags, freshwater baroque chokers, and macrame creations woven with patient mastery in Kathmandu, Nepal.
             </p>
             <div className="flex flex-col gap-2 pt-1 text-xs">
+              <span className="text-[10px] uppercase font-bold text-[#8C7A6B] tracking-wider block">
+                Official Channels:
+              </span>
               <a
                 href="https://www.instagram.com/artified_np/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-r from-[#833ab4]/20 via-[#fd1d1d]/20 to-[#fcb045]/20 text-white rounded-xl border border-[#E1306C]/40 hover:border-[#E1306C] transition-all group"
+                className="inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#833ab4]/20 via-[#fd1d1d]/20 to-[#fcb045]/20 bg-[#E1306C]/15 border border-[#E1306C]/40 hover:border-[#E1306C] hover:bg-[#E1306C]/25 text-white transition-all group shadow-xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] flex items-center justify-center shadow-md shrink-0">
-                    <Instagram className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <div>
-                    <span className="font-semibold text-xs block text-white group-hover:text-[#fcb045] transition-colors">
-                      @artified_np
-                    </span>
-                    <span className="text-[10px] text-[#A69E96]">Instagram Store & Journal</span>
-                  </div>
+                <Instagram className="w-4 h-4 text-[#E1306C] group-hover:scale-110 transition-transform" />
+                <div className="text-left flex-1 min-w-0">
+                  <span className="font-semibold text-xs block text-white group-hover:text-pink-200 transition-colors">@artified_np</span>
+                  <span className="text-[10px] text-[#D8B4C8]">Instagram • Store & Journal</span>
                 </div>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#C5A880] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ExternalLink className="w-3.5 h-3.5 text-[#E1306C] group-hover:text-white" />
               </a>
 
               <a
                 href="https://tiktok.com/@artified_np"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-r from-[#00f2fe]/20 via-[#010101] to-[#fe0979]/20 text-white rounded-xl border border-[#00f2fe]/40 hover:border-[#fe0979] transition-all group"
+                className="inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-white transition-all group shadow-xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-[#010101] border border-[#00f2fe]/60 flex items-center justify-center shadow-md shrink-0 text-white">
-                    <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
-                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-xs block text-white group-hover:text-[#25F4EE] transition-colors">
-                      @artified_np
-                    </span>
-                    <span className="text-[10px] text-[#A69E96]">TikTok Showcase & Clips</span>
-                  </div>
+                <svg className="w-4 h-4 fill-white group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
+                </svg>
+                <div className="text-left flex-1 min-w-0">
+                  <span className="font-semibold text-xs block text-white group-hover:text-zinc-200 transition-colors">@artified_np</span>
+                  <span className="text-[10px] text-[#A69E96]">TikTok • Viral Clips & Drops</span>
                 </div>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#C5A880] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white" />
               </a>
             </div>
           </div>
@@ -113,7 +118,7 @@ export const Footer: React.FC = () => {
           {/* Column 2: Artisanal Categories */}
           <div>
             <h5 className="text-xs font-bold uppercase tracking-[0.18em] text-[#C5A880] mb-4">
-              Creations
+              {t('navCreations')}
             </h5>
             <ul className="space-y-2.5 text-xs text-[#A69E96]">
               <li>
@@ -122,7 +127,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleNavCategory('pearl-bags')}
                   className="hover:text-white transition-colors cursor-pointer text-left block"
                 >
-                  Pearl Bags
+                  {t('navPearlBags')}
                 </button>
               </li>
               <li>
@@ -131,7 +136,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleNavCategory('pearl-necklaces')}
                   className="hover:text-white transition-colors cursor-pointer text-left block"
                 >
-                  Pearl Necklaces
+                  {t('navPearlNecklaces')}
                 </button>
               </li>
               <li>
@@ -140,7 +145,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleNavCategory('macrame')}
                   className="hover:text-white transition-colors cursor-pointer text-left block"
                 >
-                  Macrame
+                  {t('navMacrame')}
                 </button>
               </li>
               <li>
@@ -149,7 +154,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleNavCategory('accessories')}
                   className="hover:text-white transition-colors cursor-pointer text-left block"
                 >
-                  Accessories
+                  {t('navAccessories')}
                 </button>
               </li>
               <li>
@@ -158,7 +163,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleNavCategory('new-arrivals')}
                   className="hover:text-white transition-colors cursor-pointer text-left block"
                 >
-                  New Arrivals
+                  {t('navNewArrivals')}
                 </button>
               </li>
               <li>
@@ -167,7 +172,7 @@ export const Footer: React.FC = () => {
                   onClick={() => handleNavCategory('best-sellers')}
                   className="hover:text-white transition-colors cursor-pointer text-left block"
                 >
-                  Best Sellers
+                  {t('navBestSellers')}
                 </button>
               </li>
               <li>
@@ -182,7 +187,7 @@ export const Footer: React.FC = () => {
                   <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
                     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
                   </svg>
-                  <span>As Seen On TikTok</span>
+                  <span>Follow on TikTok</span>
                 </button>
               </li>
               <li>
@@ -195,7 +200,7 @@ export const Footer: React.FC = () => {
                   className="hover:text-white transition-colors flex items-center gap-1.5 text-left cursor-pointer"
                 >
                   <Instagram className="w-3.5 h-3.5 text-[#E1306C] shrink-0" />
-                  <span>Instagram Journal</span>
+                  <span>Follow on Instagram</span>
                 </button>
               </li>
             </ul>
@@ -221,19 +226,62 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
-                <a href="#care-section" className="hover:text-white transition-colors block">
-                  Pearl & Macrame Care Guide
-                </a>
+                <button
+                  type="button"
+                  onClick={openOrderFAQsModal}
+                  className="hover:text-white text-[#D4AF37] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Order FAQs & Policies (Shipping, Durability, Returns)</span>
+                </button>
               </li>
               <li>
-                <a href="#care-section" className="hover:text-white transition-colors block">
-                  Delivery Rates & Valley Timelines
-                </a>
+                <button
+                  type="button"
+                  onClick={() => openSizeGuideModal('necklaces')}
+                  className="hover:text-white transition-colors block text-left cursor-pointer"
+                >
+                  📐 Size & Fit Guide (Necklaces & Rings)
+                </button>
               </li>
               <li>
-                <span className="hover:text-white transition-colors block">
-                  Easy exchange within 24 hrs
-                </span>
+                <button
+                  type="button"
+                  onClick={openOrderFAQsModal}
+                  className="hover:text-white transition-colors block text-left cursor-pointer"
+                >
+                  🚚 Delivery Rates & 77 Districts Timelines
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={openOrderFAQsModal}
+                  className="hover:text-white transition-colors block text-left cursor-pointer"
+                >
+                  🔄 24-Hr Easy Exchange & Guarantee
+                </button>
+              </li>
+              {/* Patron Perks & Community Rewards */}
+              <li className="pt-1.5 border-t border-[#3E3A36]">
+                <button
+                  type="button"
+                  onClick={() => openAccountModal('rewards')}
+                  className="hover:text-[#D4AF37] text-amber-200/90 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Patron Rewards ({loyaltyPointsBalance} pts)</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={openReferralModal}
+                  className="hover:text-[#D4AF37] text-[#D4AF37] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Refer a Friend (Get 10% Off)</span>
+                </button>
               </li>
               <li>
                 <a
@@ -306,8 +354,8 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-[#2B2927] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#736C65]">
-          <div className="flex items-center gap-3">
-            <p>© {new Date().getFullYear()} Artified_np. All rights reserved. Intricately Handcrafted in Nepal.</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p>© {new Date().getFullYear()} Artified_np. {t('rightsReserved')}</p>
             <span className="text-[#3A3530]">•</span>
             {/* Discreet Studio Portal Access for the seller (Hidden from regular shoppers) */}
             <button
@@ -321,14 +369,44 @@ export const Footer: React.FC = () => {
             </button>
           </div>
           
-          <div className="flex items-center gap-4">
-            <span className="text-[11px]">Pricing in NPR (Rs.)</span>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Language Switcher */}
+            <div className="flex items-center gap-1 bg-[#262320] p-1 rounded-xl border border-[#3E3A36] shadow-xs">
+              <Globe className="w-3.5 h-3.5 text-[#C5A880] ml-1.5" />
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                aria-label="Switch website language to English"
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-[#FAF8F5] text-[#1C1B1A] font-bold shadow-xs'
+                    : 'text-[#A69E96] hover:text-white'
+                }`}
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('ne')}
+                aria-label="Switch website language to Nepali"
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-serif font-bold transition-all cursor-pointer ${
+                  language === 'ne'
+                    ? 'bg-[#FAF8F5] text-[#1C1B1A] font-bold shadow-xs'
+                    : 'text-[#A69E96] hover:text-white'
+                }`}
+              >
+                नेपाली
+              </button>
+            </div>
+
+            <span className="hidden sm:inline text-[#3A3530]">•</span>
+            <span className="text-[11px]">{t('pricingInNpr')}</span>
             <span>•</span>
             <button
               onClick={scrollToTop}
-              className="flex items-center gap-1 text-[#A69E96] hover:text-white transition-colors"
+              className="flex items-center gap-1 text-[#A69E96] hover:text-white transition-colors cursor-pointer"
             >
-              <span>Back to Top</span>
+              <span>{t('backToTop')}</span>
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
           </div>

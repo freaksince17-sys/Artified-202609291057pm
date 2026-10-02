@@ -11,12 +11,19 @@ import {
   User, 
   AlertCircle,
   ExternalLink,
-  Edit3
+  Edit3,
+  Compass,
+  Map,
+  Bell,
+  Check
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getTrackedOrder, updateOrderPhase, normalizeOrderId } from '../data/trackingData';
 import { TrackedOrderData, OrderProductionPhase } from '../types';
+import { getStoredOrderNotifications, markNotificationsAsRead, OrderNotification } from '../utils/orderNotificationManager';
 import { OrderProgressManagerModal } from './OrderProgressManagerModal';
+import { DeliveryProgressMap } from './DeliveryProgressMap';
+import { subscribeToTrackedOrder } from '../services/orderTrackingService';
 
 export const OrderTrackerModal: React.FC = () => {
   const { 
@@ -33,6 +40,17 @@ export const OrderTrackerModal: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
+  const [activeTrackerTab, setActiveTrackerTab] = useState<'map' | 'milestones'>('map');
+  const [activeAlert, setActiveAlert] = useState<OrderNotification | null>(null);
+  const [recentNotifications, setRecentNotifications] = useState<OrderNotification[]>([]);
+
+  // Load existing notifications from localStorage
+  useEffect(() => {
+    setRecentNotifications(getStoredOrderNotifications());
+  }, [isTrackerOpen]);
+
+  // Active Firestore unsubscribe reference
+  const unsubscribeRef = React.useRef<(() => void) | null>(null);
 
   // When trackingOrderId changes or modal opens, automatically perform lookup
   useEffect(() => {
@@ -41,9 +59,16 @@ export const OrderTrackerModal: React.FC = () => {
       setInputOrderId(targetId);
       performLookup(targetId);
     }
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+    };
   }, [isTrackerOpen, trackingOrderId, completedOrder]);
 
-  // Listen for order updates
+  // Listen for order updates and status alerts from localStorage
   useEffect(() => {
     const handleUpdate = (e: Event) => {
       const customEvent = e as CustomEvent<TrackedOrderData>;
@@ -51,8 +76,21 @@ export const OrderTrackerModal: React.FC = () => {
         setTrackedOrder(customEvent.detail);
       }
     };
+
+    const handleAlert = (e: Event) => {
+      const customEvent = e as CustomEvent<OrderNotification>;
+      if (customEvent.detail) {
+        setActiveAlert(customEvent.detail);
+        setRecentNotifications(getStoredOrderNotifications());
+      }
+    };
+
     window.addEventListener('artified_order_updated', handleUpdate);
-    return () => window.removeEventListener('artified_order_updated', handleUpdate);
+    window.addEventListener('artified_order_status_alert', handleAlert);
+    return () => {
+      window.removeEventListener('artified_order_updated', handleUpdate);
+      window.removeEventListener('artified_order_status_alert', handleAlert);
+    };
   }, [trackedOrder]);
 
   const performLookup = (idToLookup: string) => {
@@ -65,17 +103,29 @@ export const OrderTrackerModal: React.FC = () => {
     setIsSearching(true);
     setErrorMsg(null);
 
-    setTimeout(() => {
-      const order = getTrackedOrder(idToLookup);
-      if (order) {
-        setTrackedOrder(order);
-        setErrorMsg(null);
-      } else {
-        setTrackedOrder(null);
-        setErrorMsg(`We couldn't locate an order with ID "${idToLookup}". Please verify your order number or consult our WhatsApp support.`);
+    // Unsubscribe from previous order listener
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+
+    // Set up real-time listener on Firestore document
+    unsubscribeRef.current = subscribeToTrackedOrder(
+      idToLookup,
+      (order) => {
+        setIsSearching(false);
+        if (order) {
+          setTrackedOrder(order);
+          setErrorMsg(null);
+        } else {
+          setTrackedOrder(null);
+          setErrorMsg(`We couldn't locate an order with ID "${idToLookup}". Please verify your order number or consult our WhatsApp support.`);
+        }
+      },
+      () => {
+        setIsSearching(false);
       }
-      setIsSearching(false);
-    }, 250);
+    );
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -123,8 +173,12 @@ export const OrderTrackerModal: React.FC = () => {
               <Truck className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-serif text-base sm:text-lg font-semibold tracking-wide flex items-center gap-2">
+              <h3 className="font-serif text-base sm:text-lg font-semibold tracking-wide flex items-center gap-2 flex-wrap">
                 <span>Handmade Order & Delivery Tracker</span>
+                <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 px-2 py-0.5 rounded-full font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Real-time Firestore Sync</span>
+                </span>
                 {isSellerMode && (
                   <span className="text-[10px] bg-[#D4AF37] text-[#1C1B1A] font-bold px-1.5 py-0.5 rounded">
                     Seller Active
@@ -202,6 +256,46 @@ export const OrderTrackerModal: React.FC = () => {
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
           
+          {/* Active LocalStorage Status Change Notification Banner */}
+          {activeAlert && (
+            <div className={`p-4 rounded-2xl border-2 flex items-start justify-between gap-3 animate-in slide-in-from-top-2 duration-300 shadow-sm ${
+              activeAlert.type === 'delivered' 
+                ? 'bg-emerald-50 border-emerald-500 text-emerald-950' 
+                : 'bg-amber-50 border-amber-500 text-amber-950'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className={`p-2 rounded-xl text-white shrink-0 ${
+                  activeAlert.type === 'delivered' ? 'bg-emerald-600' : 'bg-amber-600'
+                }`}>
+                  <Bell className="w-4 h-4 animate-bounce" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-xs">{activeAlert.title}</h4>
+                    <span className="text-[9px] bg-white px-2 py-0.5 rounded-full border border-black/10 font-mono">
+                      {activeAlert.timestamp}
+                    </span>
+                  </div>
+                  <p className="text-xs mt-0.5 leading-relaxed text-black/80">
+                    {activeAlert.message}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  markNotificationsAsRead(activeAlert.orderId);
+                  setActiveAlert(null);
+                }}
+                className="p-1 rounded-lg hover:bg-black/10 transition-colors text-black/60 cursor-pointer"
+                title="Dismiss notification"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Error Message */}
           {errorMsg && (
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-xs text-amber-900">
@@ -217,6 +311,44 @@ export const OrderTrackerModal: React.FC = () => {
 
           {trackedOrder && (
             <div className="space-y-6">
+
+              {/* Status Simulation Controls for Quick Testing */}
+              <div className="p-3 bg-[#FAF8F5] rounded-2xl border border-[#E8DFD8] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-[#8C7A6B] flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                    <span>Notification System:</span>
+                  </span>
+                  <span className="text-[11px] text-[#5E5955]">
+                    Current: <strong className="text-[#1C1B1A] uppercase">{trackedOrder.currentPhase.replace(/_/g, ' ')}</strong>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => handleInlinePhaseChange('out_for_delivery')}
+                    className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-lg border transition-all cursor-pointer ${
+                      trackedOrder.currentPhase === 'out_for_delivery'
+                        ? 'bg-[#1C1B1A] text-[#D4AF37] border-[#1C1B1A]'
+                        : 'bg-white hover:bg-amber-50 border-[#E8DFD8] text-[#1C1B1A]'
+                    }`}
+                  >
+                    ⚡ Move to Shipped (Out for Delivery)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInlinePhaseChange('delivered')}
+                    className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-lg border transition-all cursor-pointer ${
+                      trackedOrder.currentPhase === 'delivered'
+                        ? 'bg-emerald-700 text-white border-emerald-700'
+                        : 'bg-white hover:bg-emerald-50 border-[#E8DFD8] text-emerald-800'
+                    }`}
+                  >
+                    ⚡ Move to Delivered
+                  </button>
+                </div>
+              </div>
               
               {/* Order High-Level Status Card */}
               <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-xs space-y-4">
@@ -310,59 +442,92 @@ export const OrderTrackerModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Handcrafted Milestone Timeline */}
-              <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-xs">
-                <h4 className="font-serif text-sm font-semibold uppercase tracking-wider text-[#1C1B1A] mb-4 pb-2 border-b border-[#F0EBE5]">
-                  Craft & Logistics Milestones
-                </h4>
+              {/* View Switcher: Delivery Route Map vs Milestones */}
+              <div className="flex items-center gap-1.5 p-1 bg-[#FAF8F5] border border-[#E8DFD8] rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setActiveTrackerTab('map')}
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    activeTrackerTab === 'map'
+                      ? 'bg-[#1C1B1A] text-white shadow-sm'
+                      : 'text-[#736C65] hover:text-[#1C1B1A]'
+                  }`}
+                >
+                  <Compass className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Nepal Delivery Route Map & Regional ETAs</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTrackerTab('milestones')}
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    activeTrackerTab === 'milestones'
+                      ? 'bg-[#1C1B1A] text-white shadow-sm'
+                      : 'text-[#736C65] hover:text-[#1C1B1A]'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
+                  <span>Craft & Logistics Milestones</span>
+                </button>
+              </div>
 
-                <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-[#E8DFD8]">
-                  {trackedOrder.milestones.map((m, idx) => {
-                    return (
-                      <div key={idx} className="relative group">
-                        {/* Dot indicator */}
-                        <div 
-                          className={`absolute -left-6 top-1 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                            m.completed 
-                              ? 'bg-emerald-600 border-emerald-600 text-white' 
-                              : m.current
-                              ? 'bg-[#1C1B1A] border-[#C5A880] text-[#C5A880] ring-4 ring-[#C5A880]/20'
-                              : 'bg-white border-[#D8CFCA] text-[#A69E96]'
-                          }`}
-                        >
-                          {m.completed ? (
-                            <CheckCircle2 className="w-3 h-3" />
-                          ) : m.current ? (
-                            <div className="w-2 h-2 rounded-full bg-[#C5A880] animate-pulse" />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#D8CFCA]" />
-                          )}
-                        </div>
+              {/* Dynamic View Display */}
+              {activeTrackerTab === 'map' ? (
+                <DeliveryProgressMap order={trackedOrder} />
+              ) : (
+                /* Handcrafted Milestone Timeline */
+                <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-xs">
+                  <h4 className="font-serif text-sm font-semibold uppercase tracking-wider text-[#1C1B1A] mb-4 pb-2 border-b border-[#F0EBE5]">
+                    Craft & Logistics Milestones
+                  </h4>
 
-                        {/* Content */}
-                        <div className="space-y-0.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className={`font-semibold ${m.current ? 'text-[#C5A880]' : m.completed ? 'text-[#1C1B1A]' : 'text-[#8C847E]'}`}>
-                              {m.label}
-                            </span>
-                            <span className="text-[10px] text-[#8C847E] font-medium">
-                              {m.timestamp}
-                            </span>
+                  <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-[#E8DFD8]">
+                    {trackedOrder.milestones.map((m, idx) => {
+                      return (
+                        <div key={idx} className="relative group">
+                          {/* Dot indicator */}
+                          <div 
+                            className={`absolute -left-6 top-1 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                              m.completed 
+                                ? 'bg-emerald-600 border-emerald-600 text-white' 
+                                : m.current
+                                ? 'bg-[#1C1B1A] border-[#C5A880] text-[#C5A880] ring-4 ring-[#C5A880]/20'
+                                : 'bg-white border-[#D8CFCA] text-[#A69E96]'
+                            }`}
+                          >
+                            {m.completed ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : m.current ? (
+                              <div className="w-2 h-2 rounded-full bg-[#C5A880] animate-pulse" />
+                            ) : (
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#D8CFCA]" />
+                            )}
                           </div>
 
-                          <p className="text-xs text-[#5E5955] leading-relaxed">
-                            {m.description}
-                          </p>
+                          {/* Content */}
+                          <div className="space-y-0.5">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className={`font-semibold ${m.current ? 'text-[#C5A880]' : m.completed ? 'text-[#1C1B1A]' : 'text-[#8C847E]'}`}>
+                                {m.label}
+                              </span>
+                              <span className="text-[10px] text-[#8C847E] font-medium">
+                                {m.timestamp}
+                              </span>
+                            </div>
 
-                          <p className="text-[10px] text-[#A69E96]">
-                            📍 {m.location}
-                          </p>
+                            <p className="text-xs text-[#5E5955] leading-relaxed">
+                              {m.description}
+                            </p>
+
+                            <p className="text-[10px] text-[#A69E96]">
+                              📍 {m.location}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Order Items & Destination Details */}
               <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-xs space-y-4">

@@ -205,6 +205,8 @@ export const AboutCraftSection: React.FC = () => {
                       <img
                         src={getSafeImageUrl(story.image2)}
                         alt="Natural materials & craft detailing"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80';
                         }}
@@ -284,6 +286,8 @@ export const AboutCraftSection: React.FC = () => {
                       <img
                         src={getSafeImageUrl(story.image1)}
                         alt="Handmade bead weaving in Kathmandu"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80';
                         }}
@@ -304,6 +308,8 @@ export const AboutCraftSection: React.FC = () => {
                       <img
                         src={getSafeImageUrl(story.image2)}
                         alt="Natural materials & craft detailing"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80';
                         }}
@@ -318,6 +324,8 @@ export const AboutCraftSection: React.FC = () => {
                     <img
                       src={getSafeImageUrl(hasImage1 ? story.image1 : story.image2)}
                       alt="Artified craft detail"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80';
                       }}

@@ -1,3 +1,13 @@
+export interface ArtisanalSpotlightPoint {
+  id: string;
+  title: string;
+  tag: string; // e.g. "Pearl Grade", "Clasp Quality", "Hand-Knotting", "Tensile Wire", "Base Structure"
+  description: string;
+  specHighlight?: string; // e.g. "Grade AAA Mirror Luster", "18k Champagne Gold Plated", "15kg Tensile Strength"
+  x: number; // percentage coordinate 0-100 on photo
+  y: number; // percentage coordinate 0-100 on photo
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -24,6 +34,7 @@ export interface Product {
   careNotes: string[];
   images: string[];
   tags: string[];
+  spotlights?: ArtisanalSpotlightPoint[];
 }
 
 export interface CartItem {
@@ -57,6 +68,8 @@ export interface OrderDetails {
   paymentMethod: PaymentMethod;
   giftPackaging: boolean;
   giftMessage?: string;
+  recipientName?: string;
+  senderName?: string;
   orderNote?: string;
   subtotal: number;
   deliveryFee: number;
@@ -66,6 +79,40 @@ export interface OrderDetails {
   transactionId?: string;
   paymentScreenshot?: string;
   createdAt: string;
+  earnedLoyaltyPoints?: number;
+}
+
+export type LoyaltyTier = 'Pearl Bronze' | 'Silver Baroque' | 'Gold Sovereign';
+
+export interface LoyaltyTransaction {
+  id: string;
+  type: 'earn' | 'redeem' | 'welcome' | 'bonus';
+  points: number;
+  description: string;
+  orderId?: string;
+  date: string;
+}
+
+export interface LoyaltyRewardVoucher {
+  id: string;
+  code: string;
+  title: string;
+  pointsCost: number;
+  discountAmount: number;
+  description: string;
+  type: 'discount' | 'free_gift_wrap';
+}
+
+export interface LoyaltyAccount {
+  customerId: string;
+  customerName: string;
+  phone: string;
+  email: string;
+  pointsBalance: number;
+  lifetimePoints: number;
+  tier: LoyaltyTier;
+  history: LoyaltyTransaction[];
+  claimedVouchers: string[];
 }
 
 export interface ProductReviewItem {
@@ -168,6 +215,8 @@ export interface TrackedOrderData {
   studioLocation: string;
   courierPartner?: string;
   consignmentCode?: string;
+  riderName?: string;
+  riderPhone?: string;
   liveCraftNotes: string;
   milestones: TrackingMilestone[];
 }
@@ -192,4 +241,36 @@ export interface CraftStoryData {
   pillar3Title: string;
   pillar3Desc: string;
 }
+
+export interface CraftArticle {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  excerpt: string;
+  content: string[];
+  category: 'Craft Techniques' | 'Nepali Heritage' | 'Care Guides' | 'Bridal & Styling';
+  author: string;
+  authorRole: string;
+  publishedDate: string;
+  readTime: string;
+  coverImage: string;
+  featuredProductId?: string;
+  featuredProductTitle?: string;
+  tags: string[];
+  seoKeywords: string[];
+  viewsCount?: number;
+}
+
+export interface ReferralRewardData {
+  referralCode: string;
+  referralLink: string;
+  friendsInvited: number;
+  successfulPurchases: number;
+  rewardCode: string;
+  rewardDiscountAmount: number;
+  friendDiscountPercent: number;
+  hasClaimedReward: boolean;
+}
+
 

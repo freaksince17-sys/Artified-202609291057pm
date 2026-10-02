@@ -9,7 +9,14 @@ import {
   DEFAULT_INSTAGRAM_HANDLE,
   DEFAULT_INSTAGRAM_PROFILE_URL
 } from '../data/products';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
+import { 
+  User, 
+  onAuthStateChanged, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut 
+} from 'firebase/auth';
 import { 
   collection, 
   doc, 
@@ -23,12 +30,26 @@ import { handleFirestoreError, OperationType } from '../utils/firestoreErrors';
 import { compressImage } from '../utils/imageCompressor';
 import { sanitizeForFirestore } from '../utils/firestoreSanitizer';
 import { sanitizeReviewItem, getProductReviews, isProductBestSeller } from '../utils/productStats';
+import { getLoyaltyAccount, earnPurchasePoints } from '../data/loyaltyData';
+import { LoyaltyAccount } from '../types';
+import { buildTrackedOrderFromOrderDetails } from '../data/trackingData';
+import { saveOrderToFirestore, seedDemoOrdersToFirestore } from '../services/orderTrackingService';
+import { 
+  triggerRestockNotifications, 
+  getCustomerRestockAlerts, 
+  dismissCustomerRestockAlert, 
+  RestockAlertItem 
+} from '../utils/waitlistService';
 
-export type AppNavTab = 'home' | 'tiktok' | 'journal' | 'craft' | 'track' | 'orders';
+export type AppNavTab = 'home' | 'artisan' | 'tiktok' | 'journal' | 'craft' | 'craft-journal' | 'track' | 'orders';
 
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number, customizationNote?: string, selectedColorOrStyle?: string) => void;
+  quickBuy: (product: Product, quantity?: number, customizationNote?: string, selectedColorOrStyle?: string) => void;
+  lastAddedItem: { product: Product; quantity: number; color?: string; timestamp: number } | null;
+  clearLastAddedItem: () => void;
+  cartAnimationKey: number;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, newQty: number) => void;
   clearCart: () => void;
@@ -51,6 +72,23 @@ interface CartContextType {
   promoSuccess: string | null;
   applyPromoCode: (code: string) => void;
   removePromoCode: () => void;
+  // Refer a Friend Community Rewards
+  isReferralOpen: boolean;
+  setIsReferralOpen: (val: boolean) => void;
+  openReferralModal: () => void;
+  // Size Guide Modal
+  isSizeGuideOpen: boolean;
+  setIsSizeGuideOpen: (val: boolean) => void;
+  openSizeGuideModal: (tab?: 'necklaces' | 'rings' | 'bags') => void;
+  sizeGuideDefaultTab: 'necklaces' | 'rings' | 'bags';
+  // Order FAQs Modal
+  isOrderFAQsOpen: boolean;
+  setIsOrderFAQsOpen: (val: boolean) => void;
+  openOrderFAQsModal: () => void;
+  // Meet the Artisan Modal
+  isMeetArtisanOpen: boolean;
+  setIsMeetArtisanOpen: (val: boolean) => void;
+  openMeetArtisanModal: () => void;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   isCheckoutOpen: boolean;
@@ -60,6 +98,12 @@ interface CartContextType {
   wishlist: string[];
   toggleWishlist: (productId: string) => void;
   isWishlisted: (productId: string) => boolean;
+  // Multi-Device Customer Authentication & Cloud Wishlist Sync
+  currentUser: User | null;
+  isUserLoggedIn: boolean;
+  loginWithGoogle: () => Promise<void>;
+  logoutUser: () => Promise<void>;
+  isWishlistCloudSynced: boolean;
   quickViewProduct: Product | null;
   setQuickViewProduct: (product: Product | null) => void;
   activeReel: TikTokReel | null;
@@ -78,6 +122,22 @@ interface CartContextType {
   isOrderManagerOpen: boolean;
   setIsOrderManagerOpen: (val: boolean) => void;
   openOrderManager: (orderId?: string) => void;
+  // Customer Account & Loyalty Points Dashboard
+  isAccountModalOpen: boolean;
+  setIsAccountModalOpen: (val: boolean) => void;
+  openAccountModal: (tab?: 'rewards' | 'history' | 'tiers' | 'profile') => void;
+  accountModalTab: 'rewards' | 'history' | 'tiers' | 'profile';
+  setAccountModalTab: (tab: 'rewards' | 'history' | 'tiers' | 'profile') => void;
+  loyaltyPointsBalance: number;
+  loyaltyAccount: LoyaltyAccount;
+  // Product Comparison Feature
+  compareProducts: Product[];
+  isCompareOpen: boolean;
+  setIsCompareOpen: (val: boolean) => void;
+  toggleCompareProduct: (product: Product) => void;
+  isProductCompared: (id: string) => boolean;
+  clearCompare: () => void;
+  openCompareModal: () => void;
   // Seller / Atelier Mode (Invisible to regular buyers)
   products: Product[];
   updateProduct: (updated: Product) => Promise<void>;
@@ -99,6 +159,11 @@ interface CartContextType {
   toggleProductStock: (id: string) => Promise<void>;
   toggleProductNewArrival: (id: string) => Promise<void>;
   batchSetNewArrival: (ids: string[], isNew: boolean) => Promise<void>;
+  // Restock Waitlist Notifications & In-App Alerts
+  restockAlerts: RestockAlertItem[];
+  dismissRestockAlert: (alertId: string) => void;
+  lastRestockNotice: string | null;
+  setLastRestockNotice: (notice: string | null) => void;
   // TikTok Reels Management
   reels: TikTokReel[];
   isTikTokManagerOpen: boolean;
@@ -242,23 +307,311 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [completedOrder, setCompletedOrderState] = useState<OrderDetails | null>(null);
 
-  // TikTok Reels State - Guaranteed 4 viral reels from TIKTOK_REELS
+  // Smooth Non-Intrusive Add-to-Cart Visual Feedback State
+  const [lastAddedItem, setLastAddedItem] = useState<{
+    product: Product;
+    quantity: number;
+    color?: string;
+    timestamp: number;
+  } | null>(null);
+  const [cartAnimationKey, setCartAnimationKey] = useState<number>(0);
+
+  const clearLastAddedItem = () => setLastAddedItem(null);
+  
+  // Product Comparison Feature State
+  const [compareProducts, setCompareProducts] = useState<Product[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('artified_compare_products');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCompareOpen, setIsCompareOpen] = useState<boolean>(false);
+
+  // Refer a Friend Community Rewards State
+  const [isReferralOpen, setIsReferralOpen] = useState<boolean>(false);
+  const openReferralModal = () => setIsReferralOpen(true);
+
+  // Size Guide Modal State
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState<boolean>(false);
+  const [sizeGuideDefaultTab, setSizeGuideDefaultTab] = useState<'necklaces' | 'rings' | 'bags'>('necklaces');
+  const openSizeGuideModal = (tab: 'necklaces' | 'rings' | 'bags' = 'necklaces') => {
+    setSizeGuideDefaultTab(tab);
+    setIsSizeGuideOpen(true);
+  };
+
+  // Order FAQs Modal State
+  const [isOrderFAQsOpen, setIsOrderFAQsOpen] = useState<boolean>(false);
+  const openOrderFAQsModal = () => setIsOrderFAQsOpen(true);
+
+  // Meet the Artisan Navigation (slides directly to Meet the Artisan tab in swipe deck)
+  const [isMeetArtisanOpen, setIsMeetArtisanOpen] = useState<boolean>(false);
+  const openMeetArtisanModal = () => {
+    setActiveNavTab('artisan');
+    setIsMeetArtisanOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleCompareProduct = (product: Product) => {
+    setCompareProducts((prev) => {
+      let updated: Product[];
+      if (prev.some((p) => p.id === product.id)) {
+        updated = prev.filter((p) => p.id !== product.id);
+      } else {
+        if (prev.length >= 2) {
+          // Replace second item to maintain 2 items side-by-side
+          updated = [prev[0], product];
+        } else {
+          updated = [...prev, product];
+        }
+      }
+      try {
+        sessionStorage.setItem('artified_compare_products', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const isProductCompared = (id: string) => compareProducts.some((p) => p.id === id);
+
+  const clearCompare = () => {
+    setCompareProducts([]);
+    try {
+      sessionStorage.removeItem('artified_compare_products');
+    } catch {}
+  };
+
+  const openCompareModal = () => {
+    setIsCompareOpen(true);
+  };
+
+  // URL Shared Wishlist and Referral hydration
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sharedWishlist = params.get('wishlist');
+      if (sharedWishlist) {
+        const ids = sharedWishlist.split(',').map((s) => s.trim()).filter(Boolean);
+        if (ids.length > 0) {
+          setWishlist((prev) => Array.from(new Set([...prev, ...ids])));
+          setIsWishlistOpen(true);
+        }
+      }
+      const refCode = params.get('ref');
+      if (refCode) {
+        // Automatically reward the referred friend with 10% off
+        applyPromoCode('FRIEND10');
+      }
+    } catch {}
+  }, []);
+
+  // Restock Waitlist Notifications & In-App Alerts State
+  const [restockAlerts, setRestockAlerts] = useState<RestockAlertItem[]>(() => getCustomerRestockAlerts());
+  const [lastRestockNotice, setLastRestockNotice] = useState<string | null>(null);
+
+  const dismissRestockAlert = (alertId: string) => {
+    dismissCustomerRestockAlert(alertId);
+    setRestockAlerts(getCustomerRestockAlerts());
+  };
+
+  useEffect(() => {
+    const handleRestockAlertsUpdated = () => {
+      setRestockAlerts(getCustomerRestockAlerts());
+    };
+    const handleRestockTriggered = (e: Event) => {
+      const custom = e as CustomEvent<{ productTitle: string; notifiedCount: number; stockCount: number }>;
+      if (custom.detail) {
+        setRestockAlerts(getCustomerRestockAlerts());
+        if (custom.detail.notifiedCount > 0) {
+          setLastRestockNotice(`🔔 Restock alert sent to ${custom.detail.notifiedCount} waiting customer${custom.detail.notifiedCount > 1 ? 's' : ''} in Firestore for ${custom.detail.productTitle}!`);
+          setTimeout(() => setLastRestockNotice(null), 5000);
+        }
+      }
+    };
+    window.addEventListener('artified_restock_alerts_updated', handleRestockAlertsUpdated);
+    window.addEventListener('artified_restock_triggered', handleRestockTriggered);
+    return () => {
+      window.removeEventListener('artified_restock_alerts_updated', handleRestockAlertsUpdated);
+      window.removeEventListener('artified_restock_triggered', handleRestockTriggered);
+    };
+  }, []);
+
+  // Multi-Device Customer Authentication State & Firestore Wishlist Sync
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isWishlistCloudSynced, setIsWishlistCloudSynced] = useState<boolean>(false);
+
+  // Listen to Firebase Auth state
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) {
+        // When logged in, listen to the user's Firestore Wishlist
+        const wishlistDocRef = doc(db, 'user_wishlists', user.uid);
+        const unsubscribeWishlist = onSnapshot(
+          wishlistDocRef,
+          (snapshot) => {
+            if (snapshot.exists()) {
+              const cloudData = snapshot.data();
+              const cloudIds: string[] = Array.isArray(cloudData.productIds) ? cloudData.productIds : [];
+              
+              setWishlist((currentLocal) => {
+                // Merge cloud items with any local items
+                const merged = Array.from(new Set([...cloudIds, ...currentLocal]));
+                try {
+                  localStorage.setItem('artified_wishlist', JSON.stringify(merged));
+                } catch {}
+
+                // If local had extra items not in cloud, sync merged list back to cloud
+                if (merged.length > cloudIds.length) {
+                  setDoc(wishlistDocRef, {
+                    userId: user.uid,
+                    productIds: merged,
+                    updatedAt: new Date().toISOString()
+                  }, { merge: true }).catch(() => {});
+                }
+
+                return merged;
+              });
+              setIsWishlistCloudSynced(true);
+            } else {
+              // Doc doesn't exist yet in cloud: push local wishlist to Firestore
+              setWishlist((currentLocal) => {
+                if (currentLocal.length > 0) {
+                  setDoc(wishlistDocRef, {
+                    userId: user.uid,
+                    productIds: currentLocal,
+                    updatedAt: new Date().toISOString()
+                  }, { merge: true }).catch(() => {});
+                }
+                return currentLocal;
+              });
+              setIsWishlistCloudSynced(true);
+            }
+          },
+          (error) => {
+            console.warn('Firestore user wishlist subscription notice:', error);
+            setIsWishlistCloudSynced(false);
+          }
+        );
+
+        return () => {
+          unsubscribeWishlist();
+        };
+      } else {
+        setIsWishlistCloudSynced(false);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      console.error('Failed to sign in with Google:', err);
+      throw err;
+    }
+  };
+
+  const logoutUser = async () => {
+    try {
+      await signOut(auth);
+      setIsWishlistCloudSynced(false);
+    } catch (err) {
+      console.error('Failed to sign out:', err);
+    }
+  };
+
+  // Save wishlist to localStorage on updates
+  useEffect(() => {
+    try {
+      localStorage.setItem('artified_wishlist', JSON.stringify(wishlist));
+    } catch {}
+  }, [wishlist]);
+
+  // Customer Loyalty & Account Modal State
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
+  const [accountModalTab, setAccountModalTab] = useState<'rewards' | 'history' | 'tiers' | 'profile'>('rewards');
+  const [loyaltyAccount, setLoyaltyAccount] = useState<LoyaltyAccount>(() => getLoyaltyAccount());
+  const [loyaltyPointsBalance, setLoyaltyPointsBalance] = useState<number>(() => getLoyaltyAccount().pointsBalance);
+
+  const openAccountModal = (tab: 'rewards' | 'history' | 'tiers' | 'profile' = 'rewards') => {
+    setAccountModalTab(tab);
+    setIsAccountModalOpen(true);
+  };
+
+  useEffect(() => {
+    const handleLoyaltyChange = () => {
+      const fresh = getLoyaltyAccount();
+      setLoyaltyAccount(fresh);
+      setLoyaltyPointsBalance(fresh.pointsBalance);
+    };
+    window.addEventListener('artified_loyalty_updated', handleLoyaltyChange);
+    return () => window.removeEventListener('artified_loyalty_updated', handleLoyaltyChange);
+  }, []);
+
+  // Known local cover images for TikTok reels in /public/tiktok_videos
+  const KNOWN_LOCAL_TIKTOK_COVERS: Record<string, string> = {
+    '7363984155060817160': '/tiktok_videos/7363984155060817160_cover.jpg',
+    '7625655459537603860': '/tiktok_videos/7625655459537603860_cover.jpg',
+    '7495598629625842952': '/tiktok_videos/7495598629625842952_cover.jpg',
+    '7453859527411125512': '/tiktok_videos/7453859527411125512_cover.jpg',
+  };
+
+  const sanitizeTikTokReelsList = (list: TikTokReel[]): TikTokReel[] => {
+    return list.map((r, i) => {
+      const defaultReel = TIKTOK_REELS[i % TIKTOK_REELS.length];
+      const ttId = r.videoUrl?.match(/\/video\/(\d+)/)?.[1] || defaultReel.videoUrl?.match(/\/video\/(\d+)/)?.[1];
+      
+      const isBadThumb = !r.thumbnail ||
+        r.thumbnail.includes('/api/proxy-thumbnail') ||
+        r.thumbnail.includes('tiktokcdn') ||
+        r.thumbnail.includes('photo-1584917865442-de89df76afd3');
+
+      let cleanThumbnail = r.thumbnail;
+      if (isBadThumb) {
+        if (ttId && KNOWN_LOCAL_TIKTOK_COVERS[ttId]) {
+          cleanThumbnail = KNOWN_LOCAL_TIKTOK_COVERS[ttId];
+        } else {
+          cleanThumbnail = defaultReel.thumbnail;
+        }
+      }
+
+      const cleanVideoUrl = (!r.videoUrl || (r.videoUrl.includes('@artified_np') && !r.videoUrl.includes('/video/')))
+        ? defaultReel.videoUrl
+        : r.videoUrl;
+
+      return {
+        ...r,
+        thumbnail: cleanThumbnail,
+        videoUrl: cleanVideoUrl
+      };
+    });
+  };
+
+  // TikTok Reels State - Guaranteed 4 viral reels from TIKTOK_REELS with self-healing thumbnails
   const [reels, setReels] = useState<TikTokReel[]>(() => {
     try {
       const saved = localStorage.getItem('artified_tiktok_reels');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= TIKTOK_REELS.length) {
-          return parsed.map((r, i) => ({
-            ...r,
-            videoUrl: (!r.videoUrl || (r.videoUrl.includes('@artified_np') && !r.videoUrl.includes('/video/')))
-              ? TIKTOK_REELS[i % TIKTOK_REELS.length].videoUrl
-              : r.videoUrl
-          }));
+          const sanitized = sanitizeTikTokReelsList(parsed);
+          try {
+            localStorage.setItem('artified_tiktok_reels', JSON.stringify(sanitized));
+          } catch {}
+          return sanitized;
         }
       }
     } catch {}
-    return TIKTOK_REELS;
+    const defaultSanitized = sanitizeTikTokReelsList(TIKTOK_REELS);
+    try {
+      localStorage.setItem('artified_tiktok_reels', JSON.stringify(defaultSanitized));
+    } catch {}
+    return defaultSanitized;
   });
   const [isTikTokManagerOpen, setIsTikTokManagerOpen] = useState<boolean>(false);
   const [editingReel, setEditingReel] = useState<TikTokReel | null>(null);
@@ -336,6 +689,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then((res) => res.json())
       .then((items) => {
         if (Array.isArray(items) && items.length > 0) {
+          const cleanServerItems = sanitizeTikTokReelsList(items);
           let shouldAdopt = false;
           try {
             const localSaved = localStorage.getItem('artified_tiktok_reels');
@@ -343,8 +697,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               shouldAdopt = true;
             } else {
               const parsed = JSON.parse(localSaved);
-              if (!Array.isArray(parsed) || parsed.length < items.length) {
+              if (!Array.isArray(parsed) || parsed.length < cleanServerItems.length) {
                 shouldAdopt = true;
+              } else {
+                // If any item in local storage still has a bad/expired thumbnail or orange handbag, force adopt clean server items!
+                const hasBadThumbs = parsed.some(
+                  (p: TikTokReel) =>
+                    !p.thumbnail ||
+                    p.thumbnail.includes('/api/proxy-thumbnail') ||
+                    p.thumbnail.includes('tiktokcdn') ||
+                    p.thumbnail.includes('photo-1584917865442-de89df76afd3')
+                );
+                if (hasBadThumbs) {
+                  shouldAdopt = true;
+                }
               }
             }
           } catch {
@@ -352,9 +718,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
 
           if (shouldAdopt) {
-            setReels(items);
+            setReels(cleanServerItems);
             try {
-              localStorage.setItem('artified_tiktok_reels', JSON.stringify(items));
+              localStorage.setItem('artified_tiktok_reels', JSON.stringify(cleanServerItems));
             } catch {}
           }
         }
@@ -415,6 +781,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       })
       .catch(() => {});
+
+    // 6. Ensure standard orders exist in Firestore for real-time tracking
+    seedDemoOrdersToFirestore().catch(() => {});
   }, []);
 
   const [isInstagramManagerOpen, setIsInstagramManagerOpen] = useState<boolean>(false);
@@ -1142,6 +1511,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const docRef = doc(db, 'products', cleanedProduct.id);
       setDoc(docRef, sanitizeForFirestore(cleanedProduct)).catch(() => {});
     } catch {}
+
+    // 4. If product was previously out-of-stock and is now marked restocked, trigger waitlist notifications in Firestore
+    const previous = products.find((p) => p.id === cleanedProduct.id);
+    const wasOutOfStock = previous 
+      ? (previous.inStock === false || (typeof previous.stockCount === 'number' && previous.stockCount <= 0))
+      : false;
+    const isNowInStock = cleanedProduct.inStock === true && (typeof cleanedProduct.stockCount === 'number' ? cleanedProduct.stockCount > 0 : true);
+
+    if (wasOutOfStock && isNowInStock) {
+      triggerRestockNotifications(cleanedProduct.id, cleanedProduct.title, cleanedProduct.stockCount || 1).catch((err) => {
+        console.warn('Notice: Restock notification trigger:', err);
+      });
+    }
   };
 
   const addProduct = async (newProduct: Product) => {
@@ -1564,6 +1946,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (e) {
         console.warn('Failed to persist order to storage', e);
       }
+
+      // Automatically construct and sync tracked order to Firestore
+      try {
+        const tracked = buildTrackedOrderFromOrderDetails(order);
+        saveOrderToFirestore(tracked).catch(() => {});
+      } catch (e) {
+        console.warn('Notice: Firestore tracked order initialization:', e);
+      }
     }
   };
 
@@ -1633,7 +2023,52 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ];
       }
     });
-    setIsCartOpen(true);
+
+    // Trigger smooth, non-intrusive visual feedback & cart badge animation
+    setLastAddedItem({
+      product,
+      quantity,
+      color: selectedColorOrStyle?.trim(),
+      timestamp: Date.now()
+    });
+    setCartAnimationKey((k) => k + 1);
+  };
+
+  const quickBuy = (
+    product: Product,
+    quantity = 1,
+    customizationNote?: string,
+    selectedColorOrStyle?: string
+  ) => {
+    setCart((prev) => {
+      const noteHash = (customizationNote || '').trim().toLowerCase();
+      const styleHash = (selectedColorOrStyle || '').trim().toLowerCase();
+      const itemId = `${product.id}-${noteHash}-${styleHash}`;
+
+      const existingIndex = prev.findIndex((item) => item.id === itemId);
+      if (existingIndex > -1) {
+        const next = [...prev];
+        next[existingIndex] = {
+          ...next[existingIndex],
+          quantity: Math.max(next[existingIndex].quantity, quantity),
+        };
+        return next;
+      } else {
+        return [
+          ...prev,
+          {
+            id: itemId,
+            product,
+            quantity,
+            customizationNote: customizationNote?.trim() || undefined,
+            selectedColorOrStyle: selectedColorOrStyle?.trim() || undefined,
+          },
+        ];
+      }
+    });
+    setQuickViewProduct(null);
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
   };
 
   const removeFromCart = (itemId: string) => {
@@ -1663,12 +2098,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPromoSuccess(null);
   };
 
-  const toggleWishlist = (productId: string) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
+  const toggleWishlist = async (productId: string) => {
+    let nextWishlist: string[] = [];
+    setWishlist((prev) => {
+      nextWishlist = prev.includes(productId)
         ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+        : [...prev, productId];
+      try {
+        localStorage.setItem('artified_wishlist', JSON.stringify(nextWishlist));
+      } catch {}
+      return nextWishlist;
+    });
+
+    if (currentUser) {
+      try {
+        const docRef = doc(db, 'user_wishlists', currentUser.uid);
+        await setDoc(docRef, {
+          userId: currentUser.uid,
+          productIds: nextWishlist,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        setIsWishlistCloudSynced(true);
+      } catch (err) {
+        console.warn('Notice: Wishlist local update:', err);
+      }
+    }
   };
 
   const isWishlisted = (productId: string) => wishlist.includes(productId);
@@ -1685,14 +2139,50 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPromoCode(clean);
       setPromoSuccess(`10% discount voucher applied (-Rs. ${calculatedDiscount.toLocaleString()})`);
       setPromoError(null);
-    } else if (clean === 'NEPALFIRST') {
-      const calculatedDiscount = 250;
+    } else if (clean === 'NEPALFIRST' || clean === 'BAROQUE250') {
+      const calculatedDiscount = Math.min(subtotal, 250);
       setDiscount(calculatedDiscount);
       setPromoCode(clean);
-      setPromoSuccess(`Festive offer applied (-Rs. 250)`);
+      setPromoSuccess(`Patron voucher applied (-Rs. 250)`);
+      setPromoError(null);
+    } else if (clean === 'PEARL100') {
+      const calculatedDiscount = Math.min(subtotal, 100);
+      setDiscount(calculatedDiscount);
+      setPromoCode(clean);
+      setPromoSuccess(`Loyalty voucher applied (-Rs. 100)`);
+      setPromoError(null);
+    } else if (clean === 'ATELIER500') {
+      const calculatedDiscount = Math.min(subtotal, 500);
+      setDiscount(calculatedDiscount);
+      setPromoCode(clean);
+      setPromoSuccess(`VIP Atelier voucher applied (-Rs. 500)`);
+      setPromoError(null);
+    } else if (clean === 'FREEGIFT') {
+      setGiftPackaging(true);
+      setDiscount(GIFT_PACKAGING_COST);
+      setPromoCode(clean);
+      setPromoSuccess(`Complimentary Luxury Gift Wrap voucher applied! (Saved Rs. 150)`);
+      setPromoError(null);
+    } else if (clean === 'WELCOME50') {
+      const calculatedDiscount = Math.min(subtotal, 50);
+      setDiscount(calculatedDiscount);
+      setPromoCode(clean);
+      setPromoSuccess(`Welcome Patron voucher applied (-Rs. 50)`);
+      setPromoError(null);
+    } else if (clean === 'REFER250' || clean.startsWith('REFER')) {
+      const calculatedDiscount = Math.min(subtotal, 250);
+      setDiscount(calculatedDiscount);
+      setPromoCode(clean);
+      setPromoSuccess(`🎁 Referral Reward voucher applied (-Rs. 250)`);
+      setPromoError(null);
+    } else if (clean === 'FRIEND10' || clean.startsWith('ART-')) {
+      const calculatedDiscount = Math.round(subtotal * 0.1);
+      setDiscount(calculatedDiscount);
+      setPromoCode(clean);
+      setPromoSuccess(`🎉 Friend Invitation voucher applied (10% OFF: -Rs. ${calculatedDiscount.toLocaleString()})`);
       setPromoError(null);
     } else {
-      setPromoError('Invalid promo code. Try "TIKTOK10" or "NEPALFIRST"');
+      setPromoError('Invalid promo code. Try "TIKTOK10", "PEARL100", or redeem points in Rewards');
       setPromoSuccess(null);
     }
   };
@@ -1716,6 +2206,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         cart,
         addToCart,
+        quickBuy,
+        lastAddedItem,
+        clearLastAddedItem,
+        cartAnimationKey,
         removeFromCart,
         updateQuantity,
         clearCart,
@@ -1747,6 +2241,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         wishlist,
         toggleWishlist,
         isWishlisted,
+        // Multi-Device Customer Authentication & Cloud Wishlist Sync
+        currentUser,
+        isUserLoggedIn: !!currentUser,
+        loginWithGoogle,
+        logoutUser,
+        isWishlistCloudSynced,
         quickViewProduct,
         setQuickViewProduct,
         activeReel,
@@ -1765,6 +2265,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isOrderManagerOpen,
         setIsOrderManagerOpen,
         openOrderManager,
+        // Customer Account & Loyalty Points Dashboard
+        isAccountModalOpen,
+        setIsAccountModalOpen,
+        openAccountModal,
+        accountModalTab,
+        setAccountModalTab,
+        loyaltyPointsBalance,
+        loyaltyAccount,
         // Seller Mode & Products
         products,
         updateProduct,
@@ -1786,6 +2294,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleProductStock,
         toggleProductNewArrival,
         batchSetNewArrival,
+        // Restock Waitlist Notifications & In-App Alerts
+        restockAlerts,
+        dismissRestockAlert,
+        lastRestockNotice,
+        setLastRestockNotice,
         // TikTok Reels
         reels,
         isTikTokManagerOpen,
@@ -1855,6 +2368,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Product Navigation & Filtered Products Collection
         filteredProducts,
         navigateProduct,
+        // Refer a Friend Community Rewards
+        isReferralOpen,
+        setIsReferralOpen,
+        openReferralModal,
+        // Size Guide Modal
+        isSizeGuideOpen,
+        setIsSizeGuideOpen,
+        openSizeGuideModal,
+        sizeGuideDefaultTab,
+        // Order FAQs Modal
+        isOrderFAQsOpen,
+        setIsOrderFAQsOpen,
+        openOrderFAQsModal,
+        // Meet the Artisan Modal
+        isMeetArtisanOpen,
+        setIsMeetArtisanOpen,
+        openMeetArtisanModal,
+        // Product Comparison Feature
+        compareProducts,
+        isCompareOpen,
+        setIsCompareOpen,
+        toggleCompareProduct,
+        isProductCompared,
+        clearCompare,
+        openCompareModal,
       }}
     >
       {children}

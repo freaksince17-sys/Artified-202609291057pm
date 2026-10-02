@@ -18,6 +18,7 @@ import {
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { compressImage } from '../utils/imageCompressor';
+import { CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 export const SellerProductModal: React.FC = () => {
   const { 
@@ -420,10 +421,10 @@ export const SellerProductModal: React.FC = () => {
                   className="relative group aspect-[4/5] rounded-lg overflow-hidden border border-[#E8DFD8] bg-[#FAF8F5] shadow-2xs"
                 >
                   <img 
-                    src={img?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=80'} 
+                    src={img?.trim() || CAVIAR_PEARL_BAG_IMAGE} 
                     alt={`Product shot ${idx + 1}`} 
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=80';
+                      (e.currentTarget as HTMLImageElement).src = CAVIAR_PEARL_BAG_IMAGE;
                     }}
                     className="w-full h-full object-cover" 
                   />

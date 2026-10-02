@@ -27,7 +27,18 @@ import { GoogleDriveSyncModal } from './components/GoogleDriveSyncModal';
 import { GitHubImportModal } from './components/GitHubImportModal';
 import { WebsiteExportModal } from './components/WebsiteExportModal';
 import { OrderProgressManagerModal } from './components/OrderProgressManagerModal';
+import { CustomerAccountModal } from './components/CustomerAccountModal';
+import { NewsletterSignupModal } from './components/NewsletterSignupModal';
+import { RestockNotificationToast } from './components/RestockNotificationToast';
+import { AddToCartToast } from './components/AddToCartToast';
+import { ProductCompareModal } from './components/ProductCompareModal';
+import { CompareFloatingDock } from './components/CompareFloatingDock';
+import { ReferAFriendModal } from './components/ReferAFriendModal';
+import { SizeGuideModal } from './components/SizeGuideModal';
+import { OrderFAQsModal } from './components/OrderFAQsModal';
+import { MeetArtisanModal } from './components/MeetArtisanModal';
 import { useCart } from './context/CartContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -88,7 +99,19 @@ function AppContent() {
     isWebsiteExportOpen, 
     setIsWebsiteExportOpen,
     isOrderManagerOpen,
-    setIsOrderManagerOpen
+    setIsOrderManagerOpen,
+    isAccountModalOpen,
+    setIsAccountModalOpen,
+    accountModalTab,
+    isReferralOpen,
+    setIsReferralOpen,
+    isSizeGuideOpen,
+    setIsSizeGuideOpen,
+    sizeGuideDefaultTab,
+    isOrderFAQsOpen,
+    setIsOrderFAQsOpen,
+    isMeetArtisanOpen,
+    setIsMeetArtisanOpen
   } = useCart();
 
   return (
@@ -113,6 +136,33 @@ function AppContent() {
       <CheckoutModal />
       <WishlistDrawer />
       <OrderTrackerModal />
+      <CustomerAccountModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+        defaultTab={accountModalTab} 
+      />
+      <NewsletterSignupModal />
+      <RestockNotificationToast />
+      <AddToCartToast />
+      <ProductCompareModal />
+      <CompareFloatingDock />
+      <ReferAFriendModal 
+        isOpen={isReferralOpen} 
+        onClose={() => setIsReferralOpen(false)} 
+      />
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+        defaultTab={sizeGuideDefaultTab}
+      />
+      <OrderFAQsModal
+        isOpen={isOrderFAQsOpen}
+        onClose={() => setIsOrderFAQsOpen(false)}
+      />
+      <MeetArtisanModal
+        isOpen={isMeetArtisanOpen}
+        onClose={() => setIsMeetArtisanOpen(false)}
+      />
 
       {/* Seller Mode Modals & Floating Atelier Toolbar */}
       <SellerAuthModal />
@@ -137,9 +187,11 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
+      <LanguageProvider>
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 }

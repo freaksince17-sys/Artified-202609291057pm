@@ -8,9 +8,11 @@ import {
   Sparkles, 
   ShieldCheck, 
   Tag, 
-  Percent 
+  Percent,
+  Crown
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -33,6 +35,8 @@ export const CartDrawer: React.FC = () => {
     promoSuccess,
     discount,
     setIsCheckoutOpen,
+    openAccountModal,
+    openReferralModal
   } = useCart();
 
   const [promoInput, setPromoInput] = React.useState('');
@@ -110,10 +114,10 @@ export const CartDrawer: React.FC = () => {
                   >
                     <div className="w-20 h-24 rounded-lg overflow-hidden bg-[#FAF8F5] shrink-0 border border-[#F0EBE5]">
                       <img
-                        src={item.product.images[0]?.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=80'}
+                        src={getRealProductImage(item.product.title, item.product.images[0])}
                         alt={item.product.title}
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=80';
+                          (e.currentTarget as HTMLImageElement).src = CAVIAR_PEARL_BAG_IMAGE;
                         }}
                         className="w-full h-full object-cover object-center"
                       />
@@ -266,6 +270,22 @@ export const CartDrawer: React.FC = () => {
                 {promoError && <p className="text-[10px] text-rose-600 mt-1">{promoError}</p>}
                 {promoSuccess && <p className="text-[10px] text-emerald-700 mt-1">{promoSuccess}</p>}
               </div>
+
+              {/* Refer a Friend prompt */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  openReferralModal();
+                }}
+                className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-50/80 to-[#FAF8F5] border border-[#D4AF37]/40 text-left text-xs text-[#1C1B1A] flex items-center justify-between hover:border-[#D4AF37] transition-all cursor-pointer shadow-2xs"
+              >
+                <div className="flex items-center gap-2">
+                  <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span className="font-semibold text-[11px]">Invite friends & earn Rs. 250 credit</span>
+                </div>
+                <span className="text-[10px] text-[#C5A880] font-bold">Refer & Earn &rarr;</span>
+              </button>
 
               {/* Security reassurance */}
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#736C65] pt-1">
