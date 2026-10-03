@@ -187,6 +187,15 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleMouseEnter = () => {
     setIsHovered(true);
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+      videoRef.current.play().catch(() => {
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          videoRef.current.play().catch(() => {});
+        }
+      });
+    }
     play().catch(() => {});
   };
 
@@ -243,11 +252,11 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           (e.currentTarget as HTMLImageElement).src = itemCover;
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
-          isHovered && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
+          isHovered ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
         }`}
       />
 
-      {/* 2. Video Preview: Plays ONLY on hover */}
+      {/* 2. Video Preview: Plays instantly on hover */}
       {videoSrc && (
         <video
           ref={videoRef}
@@ -261,35 +270,35 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           onPause={() => setIsVideoPlaying(false)}
           onError={() => setIsVideoPlaying(false)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
-            isHovered && isVideoPlaying ? 'opacity-100' : 'opacity-0'
+            isHovered ? 'opacity-100' : 'opacity-0'
           }`}
         />
       )}
 
       {/* 3. Dark Vignette Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/35 pointer-events-none z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/40 pointer-events-none z-10" />
 
       {/* 4. Top Badges: Instagram Badge & Hover Indicator */}
       <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 flex-wrap pointer-events-none">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium shadow-xs">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/30 text-white text-[11px] font-bold shadow-md">
           <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
           <span>Instagram</span>
         </div>
 
-        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full backdrop-blur-md text-[10px] font-medium transition-all shadow-xs border ${
-          isHovered && isVideoPlaying
-            ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 animate-pulse'
-            : 'bg-black/60 text-[#D4AF37] border-white/20'
+        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full backdrop-blur-md text-[11px] font-bold transition-all shadow-md border ${
+          isHovered
+            ? 'bg-emerald-950/90 text-emerald-300 border-emerald-400 animate-pulse'
+            : 'bg-black/80 text-[#FFD700] border-white/30'
         }`}>
-          <Play className={`w-2.5 h-2.5 ${(isHovered && isVideoPlaying) ? 'fill-emerald-300 text-emerald-300' : 'fill-[#D4AF37] text-[#D4AF37]'}`} />
-          <span>{(isHovered && isVideoPlaying) ? 'Playing' : 'Hover to Play'}</span>
+          <Play className={`w-2.5 h-2.5 ${isHovered ? 'fill-emerald-300 text-emerald-300' : 'fill-[#FFD700] text-[#FFD700]'}`} />
+          <span>{isHovered ? 'Playing' : 'Hover to Play'}</span>
         </div>
       </div>
 
       {/* Center Play Button Overlay */}
-      {!(isHovered && isVideoPlaying) && (
+      {!isHovered && (
         <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
-          <div className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+          <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/40 text-white flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
             <Play className="w-5 h-5 fill-white text-white ml-0.5" />
           </div>
         </div>
@@ -302,7 +311,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
             <button
               type="button"
               onClick={() => onEdit(item)}
-              className="p-1.5 rounded-full bg-black/60 hover:bg-[#D4AF37] text-white hover:text-[#1C1B1A] transition-colors cursor-pointer shadow-xs"
+              className="p-1.5 rounded-full bg-black/80 hover:bg-[#D4AF37] text-white hover:text-[#1C1B1A] transition-colors cursor-pointer shadow-md border border-white/20"
               title="Edit this post"
             >
               <Edit3 className="w-3.5 h-3.5" />
@@ -311,7 +320,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
               <button
                 type="button"
                 onClick={(e) => onDeleteConfirm(item.id, e)}
-                className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold hover:bg-rose-700 transition-colors shadow-xs cursor-pointer"
+                className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold hover:bg-rose-700 transition-colors shadow-md cursor-pointer"
               >
                 Delete
               </button>
@@ -319,7 +328,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
               <button
                 type="button"
                 onClick={() => onDeleteRequest(item.id)}
-                className="p-1.5 rounded-full bg-black/60 hover:bg-rose-900 text-rose-300 transition-colors cursor-pointer shadow-xs"
+                className="p-1.5 rounded-full bg-black/80 hover:bg-rose-900 text-rose-300 transition-colors cursor-pointer shadow-md border border-white/20"
                 title="Delete post"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -327,31 +336,33 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
             )}
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20">
-            <Instagram className="w-3.5 h-3.5 text-white" />
+          <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-md">
+            <Instagram className="w-4 h-4 text-white" />
           </div>
         )}
       </div>
 
-      {/* 6. Card Footer Information & Double Click Direct Link */}
+      {/* 6. Card Footer Information & High-Contrast Open Post Link */}
       <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4 z-20 flex flex-col justify-end">
-        <h3 className="text-white text-xs sm:text-sm font-semibold line-clamp-2 leading-snug drop-shadow-md">
+        <h3 className="text-white text-xs sm:text-sm font-bold line-clamp-2 leading-snug drop-shadow-lg">
           {item.title}
         </h3>
 
         {/* Double-Click direct hint & Instagram link */}
-        <div className="mt-2 pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-white/80">
-          <span className="text-[10px] text-[#A69E96] truncate max-w-[90px]">{item.handle || instagramHandle}</span>
+        <div className="mt-2 pt-2 border-t border-white/20 flex items-center justify-between gap-2 text-xs">
+          <span className="text-xs font-bold text-white drop-shadow-md truncate max-w-[100px]">
+            {item.handle || instagramHandle}
+          </span>
           <span 
             onClick={handleDoubleClick}
-            className="text-[10px] font-semibold text-[#D4AF37] hover:underline flex items-center gap-0.5 cursor-pointer ml-auto"
+            className="text-xs font-extrabold text-[#FFD700] hover:text-white bg-black/80 hover:bg-[#E1306C] border border-[#FFD700]/70 px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-all shadow-md ml-auto shrink-0"
             title="Double click card to open Instagram post directly"
           >
             <span>Open Post</span>
-            <ArrowUpRight className="w-3 h-3" />
+            <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
           </span>
         </div>
-        <div className="text-[9px] text-[#A69E96]/80 text-right mt-0.5">
+        <div className="text-[10px] font-semibold text-white/90 text-right mt-1 drop-shadow-md">
           Double click to open ↗
         </div>
       </div>
@@ -730,16 +741,16 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
             <div className="md:w-1/2 p-6 flex flex-col justify-between bg-[#1C1B1A]">
               <div>
                 {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5] p-[1.5px]">
+                <div className="flex items-center justify-between pb-4 border-b border-white/15">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5] p-[1.5px] shadow-md">
                       <div className="w-full h-full rounded-full bg-[#1C1B1A] flex items-center justify-center">
                         <Instagram className="w-4 h-4 text-white" />
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white">{activeItem.handle || instagramHandle}</h4>
-                      <span className="text-[10px] text-[#A69E96]">Store: Chikamugal, Kathmandu</span>
+                      <h4 className="text-xs sm:text-sm font-extrabold text-white tracking-wide">{activeItem.handle || instagramHandle}</h4>
+                      <span className="text-[11px] font-semibold text-amber-200">Store: Chikamugal, Kathmandu</span>
                     </div>
                   </div>
 
@@ -752,9 +763,9 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                           setActiveItem(null);
                           openInstagramEditor(toEdit);
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[#D4AF37] text-[11px] font-semibold flex items-center gap-1 transition-colors"
+                        className="px-3 py-1 rounded-lg bg-[#FFD700] hover:bg-white text-[#1C1B1A] text-xs font-bold flex items-center gap-1 transition-colors shadow-sm"
                       >
-                        <Edit3 className="w-3 h-3" />
+                        <Edit3 className="w-3.5 h-3.5" />
                         <span>Edit Post</span>
                       </button>
                     )}
@@ -762,7 +773,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                     <button
                       type="button"
                       onClick={() => setActiveItem(null)}
-                      className="p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-full text-white/90 hover:text-white hover:bg-white/20 transition-colors cursor-pointer"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -771,28 +782,28 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
 
                 {/* Title & Caption */}
                 <div className="py-4 space-y-3">
-                  <h3 className="font-serif text-lg font-semibold text-white leading-snug">
+                  <h3 className="font-serif text-lg sm:text-xl font-bold text-white leading-snug">
                     {activeItem.title}
                   </h3>
-                  <p className="text-xs text-[#D5C7BC] leading-relaxed whitespace-pre-line">
+                  <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed whitespace-pre-line">
                     {activeItem.caption}
                   </p>
                 </div>
               </div>
 
               {/* Bottom Actions */}
-              <div className="pt-4 border-t border-white/10 space-y-3">
+              <div className="pt-4 border-t border-white/15 space-y-3">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
                     onClick={handleShare}
-                    className="text-xs text-[#A69E96] hover:text-white flex items-center gap-1.5 cursor-pointer"
+                    className="text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Share2 className="w-4 h-4" />
+                    <Share2 className="w-4 h-4 text-[#FFD700]" />
                     <span>{copiedLink ? 'Link Copied!' : 'Share Profile'}</span>
                   </button>
 
-                  <span className="text-[11px] text-[#A69E96]">
+                  <span className="text-xs font-medium text-slate-300">
                     Chikamugal Store, Kathmandu
                   </span>
                 </div>
@@ -801,11 +812,11 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                 <button
                   type="button"
                   onClick={() => openInstagramDirect(activeItem.postUrl || instagramProfileUrl)}
-                  className="w-full py-3 bg-[#D4AF37] hover:bg-[#c29f2e] text-[#1C1B1A] text-xs font-bold uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] hover:brightness-110 text-[#1C1B1A] text-xs font-extrabold uppercase tracking-wider rounded-full flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
                 >
-                  <Instagram className="w-4 h-4 text-[#1C1B1A]" />
+                  <Instagram className="w-4.5 h-4.5 text-[#1C1B1A]" />
                   <span>Open on Instagram ({activeItem.handle || instagramHandle})</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#1C1B1A]" />
+                  <ExternalLink className="w-4 h-4 text-[#1C1B1A] stroke-[2.5]" />
                 </button>
               </div>
 

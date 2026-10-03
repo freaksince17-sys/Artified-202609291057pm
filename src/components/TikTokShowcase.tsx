@@ -250,20 +250,20 @@ const TikTokReelCard: React.FC<TikTokReelCardProps> = ({
 
       {/* 6. Bottom Details */}
       <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none">
-        <p className="text-[11px] font-bold text-[#D4AF37] tracking-wider mb-0.5">
+        <p className="text-xs font-extrabold text-[#FFD700] tracking-wider mb-0.5 drop-shadow-md">
           {reel.handle || '@artified_np'}
         </p>
-        <p className="text-xs font-medium leading-tight line-clamp-2 text-white/90">
+        <p className="text-xs sm:text-sm font-bold leading-snug line-clamp-2 text-white drop-shadow-md">
           {reel.title}
         </p>
         
         {/* Featured Product Pill - Only if a product is linked */}
         {reel.featuredProductId && reel.featuredProductName && (
-          <div className="mt-2 pt-2 border-t border-white/20 flex items-center justify-between pointer-events-auto">
-            <span className="text-[10px] text-white/80 truncate pr-2">
+          <div className="mt-2 pt-2 border-t border-white/20 flex items-center justify-between gap-2 pointer-events-auto">
+            <span className="text-xs font-bold text-white/90 truncate pr-1 drop-shadow-sm">
               🛍️ {reel.featuredProductName}
             </span>
-            <span className="text-[10px] font-semibold text-[#D4AF37] uppercase tracking-wider shrink-0 underline">
+            <span className="text-xs font-extrabold text-[#FFD700] hover:text-white bg-black/80 px-2.5 py-1 rounded-full border border-[#FFD700]/60 uppercase tracking-wider shrink-0 transition-colors shadow-md">
               View
             </span>
           </div>
