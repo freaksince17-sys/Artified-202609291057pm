@@ -32,12 +32,7 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
       ? '#D4AF37' 
       : '#0D0C0B';
 
-  const taglineColor = 
-    resolvedVariant === 'light' 
-      ? '#FCD34D' // Bright luminous gold with AAA contrast on dark backgrounds
-      : resolvedVariant === 'gold' 
-      ? '#E2C792' 
-      : '#1A1918';
+  const taglineColor = '#D4AF37';
 
   const goldAccentColor =
     resolvedVariant === 'light'

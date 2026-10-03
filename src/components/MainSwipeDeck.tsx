@@ -6,11 +6,13 @@ import {
   Truck,
   ClipboardCheck,
   Feather,
-  Sparkles
+  Sparkles,
+  Camera
 } from 'lucide-react';
 import { useCart, AppNavTab } from '../context/CartContext';
 import { ProductGrid } from './ProductGrid';
 import { MeetArtisanSection } from './MeetArtisanSection';
+import { LookbookSection } from './LookbookSection';
 import { TikTokShowcase } from './TikTokShowcase';
 import { InstagramShowcase } from './InstagramShowcase';
 import { CraftStoryAndJournal } from './CraftStoryAndJournal';
@@ -29,10 +31,10 @@ const TikTokIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
   </svg>
 );
 
-// Unified sequence: Shop -> Meet the Artisan -> Follow on TikTok -> Follow on Instagram -> Our Story & Journal (Merged) -> Track Order -> Order Progress
 export const TABS_SEQUENCE: TabMeta[] = [
   { id: 'home', label: 'Shop', icon: Home },
   { id: 'artisan', label: 'Meet the Artisan', icon: Sparkles },
+  { id: 'lookbook', label: 'Lookbook', icon: Camera },
   { id: 'tiktok', label: 'Follow on TikTok', icon: TikTokIcon },
   { id: 'journal', label: 'Follow on Instagram', icon: Instagram },
   { id: 'craft', label: 'Our Story & Journal', icon: Feather },
@@ -52,9 +54,6 @@ export const MainSwipeDeck: React.FC = () => {
     isTrackerOpen
   } = useCart();
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
   const deckRef = useRef<HTMLDivElement>(null);
 
   // Strictly restrict orders tab to active seller mode
@@ -115,160 +114,22 @@ export const MainSwipeDeck: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [safeIndex, quickViewProduct, isCartOpen, isWishlistOpen, isCheckoutOpen, isTrackerOpen]);
 
-  // Touch Swipe Handlers (Mobile / Tablets)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].clientX);
-    setDragOffset(0);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - startX;
-    setDragOffset(diff);
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-
-    // If dragged right-to-left by > 50px -> advance to next tab (swipes right)
-    if (dragOffset < -50 && safeIndex < TABS_SEQUENCE.length - 1) {
-      setActiveNavTab(TABS_SEQUENCE[safeIndex + 1].id);
-    }
-    // If dragged left-to-right by > 50px -> retreat to previous tab (swipes left)
-    else if (dragOffset > 50 && safeIndex > 0) {
-      setActiveNavTab(TABS_SEQUENCE[safeIndex - 1].id);
-    }
-    setDragOffset(0);
-  };
-
-  // Mouse Drag Handlers (Desktop click & drag)
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    // Don't drag when interacting with forms, buttons, inputs, links, or select
-    if (
-      target.closest('button') || 
-      target.closest('a') || 
-      target.closest('input') || 
-      target.closest('select') || 
-      target.closest('textarea') ||
-      target.closest('.no-drag')
-    ) {
-      return;
-    }
-    setIsDragging(true);
-    setStartX(e.clientX);
-    setDragOffset(0);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const diff = e.clientX - startX;
-    setDragOffset(diff);
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-
-    if (dragOffset < -60 && safeIndex < currentTabs.length - 1) {
-      setActiveNavTab(currentTabs[safeIndex + 1].id);
-    } else if (dragOffset > 60 && safeIndex > 0) {
-      setActiveNavTab(currentTabs[safeIndex - 1].id);
-    }
-    setDragOffset(0);
-  };
-
-  const handleMouseLeave = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      setDragOffset(0);
-    }
-  };
-
-  // Base translation percentage for visible screens
-  const screenPercent = 100 / currentTabs.length;
-  const baseTranslate = -(safeIndex * screenPercent);
-
   return (
     <div 
       ref={deckRef}
-      className="relative w-full overflow-hidden min-h-screen bg-[#FAF8F5] dark:bg-[#0F0E0E] transition-colors duration-200"
+      className="relative w-full flex-grow flex flex-col bg-[#FAF8F5] dark:bg-[#0F0E0E] transition-colors duration-200"
     >
-      {/* SWIPEABLE SCREEN TRACK */}
-      <div
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="w-full overflow-hidden relative cursor-default"
-      >
-        <div
-          className={`flex will-change-transform ${
-            isDragging ? 'transition-none' : 'transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]'
-          }`}
-          style={{
-            width: `${currentTabs.length * 100}%`,
-            transform: `translateX(calc(${baseTranslate}% + ${dragOffset}px))`
-          }}
-        >
-          {/* TAB 0: HOME (Product Grid with category & sort dropdowns + Testimonials + Care Guide) */}
-          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-            <div className="w-full">
-              <ProductGrid />
-            </div>
-          </div>
-
-          {/* TAB 1: MEET THE ARTISAN */}
-          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-            <div className="w-full">
-              <MeetArtisanSection />
-            </div>
-          </div>
-
-          {/* TAB 2: AS SEEN ON TIKTOK */}
-          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-            <div className="w-full">
-              <TikTokShowcase />
-            </div>
-          </div>
-
-          {/* TAB 2: INSTAGRAM JOURNAL */}
-          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-            <div className="w-full">
-              <InstagramShowcase />
-            </div>
-          </div>
-
-          {/* TAB 3: OUR STORY & CRAFT JOURNAL (MERGED) */}
-          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-            <div className="w-full">
-              <CraftStoryAndJournal />
-            </div>
-          </div>
-
-          {/* TAB 4: TRACK ORDER */}
-          <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-            <div className="w-full">
-              <OrderTrackerSection />
-            </div>
-          </div>
-
-          {/* TAB 5: ORDER PROGRESS & TRACKING MANAGER (SELLER ONLY) */}
-          {isSellerMode && (
-            <div style={{ width: `${screenPercent}%` }} className="shrink-0">
-              <div className="w-full">
-                <OrderProgressManagerSection />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* DIRECT ACTIVE SCREEN - Height dynamically matches content, eliminating all gaps above footer */}
+      <main className="w-full flex-grow flex flex-col">
+        {activeNavTab === 'home' && <ProductGrid />}
+        {activeNavTab === 'artisan' && <MeetArtisanSection />}
+        {activeNavTab === 'lookbook' && <LookbookSection />}
+        {activeNavTab === 'tiktok' && <TikTokShowcase />}
+        {activeNavTab === 'journal' && <InstagramShowcase />}
+        {(activeNavTab === 'craft' || activeNavTab === 'craft-journal') && <CraftStoryAndJournal />}
+        {activeNavTab === 'track' && <OrderTrackerSection />}
+        {isSellerMode && activeNavTab === 'orders' && <OrderProgressManagerSection />}
+      </main>
     </div>
   );
 };

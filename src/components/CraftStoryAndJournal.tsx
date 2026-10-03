@@ -37,7 +37,11 @@ type CategoryFilter = 'All' | 'Craft Techniques' | 'Nepali Heritage' | 'Care Gui
 
 const resolveVideoSrc = (url?: string): string => {
   if (!url) return '/tiktok_videos/7625655459537603860.mp4';
-  if (url.endsWith('.mp4') || url.startsWith('/tiktok_videos/')) return url;
+  if (url.endsWith('.mp4') || url.startsWith('/tiktok_videos/') || url.startsWith('/instagram_videos/')) return url;
+  const igMatch = url.match(/(?:instagram\.com\/(?:p|reel|tv)\/|instagram_videos\/)([A-Za-z0-9_-]{11})/);
+  if (igMatch && igMatch[1]) {
+    return `/instagram_videos/${igMatch[1]}.mp4`;
+  }
   const match = url.match(/(\d{15,22})/);
   if (match && match[1]) {
     return `/tiktok_videos/${match[1]}.mp4`;
@@ -92,34 +96,61 @@ export const CraftStoryAndJournal: React.FC = () => {
     return () => window.removeEventListener('artified_articles_updated', handleUpdate);
   }, []);
 
-  // Autoplay starts ONLY when mouse is hovered, and pauses when mouse leaves
+  // ESC key handler to close modal
   useEffect(() => {
-    const video = mainVideoRef.current;
-    if (!video) return;
+    if (!activeArticle) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveArticle(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeArticle]);
 
-    if (isCraftHovered) {
+  // Safe hover autoplay handlers: starts playing on mouse hover, pauses on leave
+  const playVideoOnHover = () => {
+    setIsCraftHovered(true);
+    const video = mainVideoRef.current;
+    if (video) {
       video.muted = isSectionMuted;
+      // Default to muted if needed for browser policy
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => setIsPlayingVideo(true))
-          .catch((err) => {
-            console.warn('Playback notice:', err);
+          .catch(() => {
+            // If sound was blocked, mute and retry playing immediately
+            video.muted = true;
+            setIsSectionMuted(true);
+            video.play()
+              .then(() => setIsPlayingVideo(true))
+              .catch((err) => console.warn('Hover play notice:', err));
           });
       }
-    } else {
+    }
+  };
+
+  const pauseVideoOnLeave = () => {
+    setIsCraftHovered(false);
+    const video = mainVideoRef.current;
+    if (video) {
       video.pause();
       setIsPlayingVideo(false);
     }
-  }, [isCraftHovered, isSectionMuted]);
+  };
 
-  const togglePlay = () => {
+  const togglePlay = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const video = mainVideoRef.current;
     if (!video) return;
     if (video.paused) {
+      video.muted = isSectionMuted;
       const p = video.play();
       if (p !== undefined) {
-        p.then(() => setIsPlayingVideo(true)).catch(() => {});
+        p.then(() => setIsPlayingVideo(true)).catch(() => {
+          video.muted = true;
+          setIsSectionMuted(true);
+          video.play().then(() => setIsPlayingVideo(true)).catch(() => {});
+        });
       }
     } else {
       video.pause();
@@ -201,7 +232,7 @@ export const CraftStoryAndJournal: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF8F5] dark:bg-[#0F0E0E] min-h-screen pt-0.5 pb-6 sm:pt-1 sm:pb-8 px-3 sm:px-6 lg:px-8 transition-colors duration-200">
+    <div className="bg-[#FAF8F5] dark:bg-[#0F0E0E] pt-0.5 pb-4 sm:pb-6 px-3 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
 
         {/* SECTION 1: THE ATELIER STORY & LIVING CRAFT */}
@@ -252,11 +283,11 @@ export const CraftStoryAndJournal: React.FC = () => {
           {/* Story Showcase: Video & Philosophy Columns */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 items-center">
             
-            {/* Left: Making Video Player */}
+            {/* Left: Making Video Player with Instant Mouse Hover Autoplay */}
             <div 
               className="lg:col-span-6 relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3] max-h-[260px] sm:max-h-[290px] rounded-2xl overflow-hidden bg-[#1C1B1A] shadow-sm border border-[#E8DFD8] dark:border-[#2D2B28] group cursor-pointer"
-              onMouseEnter={() => setIsCraftHovered(true)}
-              onMouseLeave={() => setIsCraftHovered(false)}
+              onMouseEnter={playVideoOnHover}
+              onMouseLeave={pauseVideoOnLeave}
               onClick={togglePlay}
             >
               <video
@@ -267,19 +298,30 @@ export const CraftStoryAndJournal: React.FC = () => {
                 muted={isSectionMuted}
                 loop
                 playsInline
-                preload="metadata"
+                preload="auto"
                 onPlay={() => setIsPlayingVideo(true)}
                 onPause={() => setIsPlayingVideo(false)}
-                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.endsWith('/tiktok_videos/7625655459537603860.mp4')) {
+                    target.src = '/tiktok_videos/7625655459537603860.mp4';
+                    target.load();
+                    if (isCraftHovered) {
+                      target.play().catch(() => {});
+                    }
+                  }
+                }}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               />
 
               {/* Video Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
 
-              {/* Play / Pause indicator button */}
+              {/* Play / Pause / Hover preview indicator button */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className={`w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/50 flex items-center justify-center text-white transition-all transform ${isPlayingVideo ? 'opacity-0 scale-75' : 'opacity-100 scale-100 shadow-xl'}`}>
-                  <Play className="w-4 h-4 fill-white ml-0.5" />
+                <div className={`rounded-full bg-white/20 backdrop-blur-md border border-white/50 flex items-center justify-center text-white transition-all transform ${isPlayingVideo || isCraftHovered ? 'opacity-0 scale-75' : 'opacity-100 scale-100 shadow-xl px-3 py-1.5 gap-1.5'}`}>
+                  <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                  <span className="text-[10px] font-bold tracking-wider uppercase">Hover to Play</span>
                 </div>
               </div>
 
@@ -503,11 +545,23 @@ export const CraftStoryAndJournal: React.FC = () => {
 
       {/* ARTICLE READER MODAL */}
       {activeArticle && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs">
-          <div className="bg-[#FAF8F5] dark:bg-[#141312] rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border border-[#E8DFD8] dark:border-[#2D2B28] animate-in fade-in zoom-in-95 duration-200">
-            
+        <div 
+          className="fixed inset-0 z-[9999] overflow-y-auto flex items-center justify-center p-3 sm:p-5 md:p-6 animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Backdrop Click Dismiss */}
+          <div 
+            className="fixed inset-0 bg-black/80 backdrop-blur-xs transition-opacity -z-10 cursor-pointer"
+            onClick={() => setActiveArticle(null)}
+          />
+
+          <div 
+            className="relative bg-[#FAF8F5] dark:bg-[#141312] rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-[#E8DFD8] dark:border-[#2D2B28] z-10 text-[#1C1B1A] dark:text-[#F5F2EB] animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
-            <div className="px-5 py-3 bg-white dark:bg-[#1A1918] border-b border-[#E8DFD8] dark:border-[#2D2B28] flex items-center justify-between shrink-0">
+            <div className="px-5 py-3.5 bg-white dark:bg-[#1A1918] border-b border-[#E8DFD8] dark:border-[#2D2B28] flex items-center justify-between shrink-0">
               <span className="text-xs font-bold uppercase tracking-wider text-[#C5A880]">
                 {activeArticle.category}
               </span>
@@ -525,16 +579,18 @@ export const CraftStoryAndJournal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveArticle(null)}
-                  className="p-1.5 rounded-full hover:bg-[#FAF8F5] dark:hover:bg-[#252422] text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] cursor-pointer"
+                  className="p-1.5 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#1C1B1A] dark:text-white transition-colors cursor-pointer"
+                  title="Close article"
+                  aria-label="Close"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
             {/* Reader Content */}
             <div className="overflow-y-auto p-5 sm:p-6 space-y-4">
-              <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-xs">
+              <div className="aspect-[16/9] rounded-2xl overflow-hidden shadow-xs bg-[#E8DFD8] dark:bg-[#222]">
                 <img
                   src={activeArticle.coverImage}
                   alt={activeArticle.title}
@@ -588,7 +644,7 @@ export const CraftStoryAndJournal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveArticle(null)}
-                className="py-1.5 px-4 bg-[#1C1B1A] dark:bg-[#FAF8F5] text-white dark:text-[#1C1B1A] rounded-xl text-xs font-bold cursor-pointer"
+                className="py-1.5 px-4 bg-[#1C1B1A] dark:bg-[#FAF8F5] text-white dark:text-[#1C1B1A] rounded-xl text-xs font-bold cursor-pointer hover:opacity-90 transition-opacity"
               >
                 Close
               </button>

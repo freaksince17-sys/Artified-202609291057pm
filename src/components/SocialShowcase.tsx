@@ -254,24 +254,15 @@ export const SocialShowcase: React.FC = () => {
 
       </div>
 
-      {/* SWIPEABLE SCREEN CAROUSEL TRACK (Slide Left / Right seamlessly) */}
+      {/* CAROUSEL TRACK (Tab switching via buttons, touch swipe disabled for mobile stability) */}
       <div 
         ref={sliderRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="w-full overflow-hidden relative cursor-grab active:cursor-grabbing"
+        className="w-full overflow-hidden relative cursor-default"
       >
         <div 
-          className={`flex w-[200%] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
-            isDragging ? 'transition-none' : ''
-          }`}
+          className="flex w-[200%] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform"
           style={{ 
-            transform: `translateX(calc(${baseTranslate}% + ${dragOffset}px))` 
+            transform: `translateX(${baseTranslate}%)` 
           }}
         >
           {/* Screen 1: As Seen on TikTok */}

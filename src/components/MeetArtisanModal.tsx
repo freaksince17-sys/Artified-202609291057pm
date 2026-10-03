@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   Sparkles, 
@@ -28,6 +29,7 @@ import {
   ArtisanProfileData, 
   DEFAULT_ARTISAN_PROFILE 
 } from '../data/artisanProfile';
+import { compressImage } from '../utils/imageCompressor';
 
 interface MeetArtisanModalProps {
   isOpen: boolean;
@@ -42,70 +44,49 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
 }) => {
   const { language } = useLanguage();
   const isNe = language === 'ne';
-  const { isSellerMode } = useCart();
+  const { isSellerMode, artisanProfile, updateArtisanProfile } = useCart();
 
-  const [profile, setProfile] = useState<ArtisanProfileData>(() => getArtisanProfile());
+  const profile = artisanProfile;
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<ArtisanProfileData>(() => getArtisanProfile());
+  const [editForm, setEditForm] = useState<ArtisanProfileData>(() => artisanProfile);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      const current = getArtisanProfile();
-      setProfile(current);
-      setEditForm(current);
+      setEditForm(artisanProfile);
       setSaveSuccess(false);
+      if (!isSellerMode) {
+        setIsEditing(false);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isSellerMode, artisanProfile]);
 
   useEffect(() => {
-    const handleUpdate = () => {
-      const updated = getArtisanProfile();
-      setProfile(updated);
-    };
-    window.addEventListener('artified_artisan_updated', handleUpdate);
-    return () => window.removeEventListener('artified_artisan_updated', handleUpdate);
-  }, []);
+    if (!isSellerMode) {
+      setIsEditing(false);
+    }
+  }, [isSellerMode]);
 
-  // Handle ESC key to close modal
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 15 * 1024 * 1024) {
-        alert('Please choose an image under 15MB.');
-        return;
+      try {
+        const compressedUrl = await compressImage(file, 800, 1000, 0.85);
+        setEditForm((prev) => ({ 
+          ...prev, 
+          avatarUrl: compressedUrl,
+          avatarPosition: prev.avatarPosition || 'center 20%'
+        }));
+      } catch (err) {
+        console.warn('Error processing photo upload:', err);
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (typeof event.target?.result === 'string') {
-          const newUrl = event.target!.result as string;
-          setEditForm((prev) => ({ 
-            ...prev, 
-            avatarUrl: newUrl,
-            avatarPosition: prev.avatarPosition || 'center 20%'
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
     }
   };
 
-  const handleSaveChanges = (e: React.FormEvent) => {
+  const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveArtisanProfile(editForm);
-    setProfile(editForm);
+    await updateArtisanProfile(editForm);
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);
@@ -113,11 +94,10 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
     }, 700);
   };
 
-  const handleResetDefaults = () => {
+  const handleResetDefaults = async () => {
     if (window.confirm('Reset all artisan biography and images to original atelier defaults?')) {
       setEditForm({ ...DEFAULT_ARTISAN_PROFILE });
-      saveArtisanProfile({ ...DEFAULT_ARTISAN_PROFILE });
-      setProfile({ ...DEFAULT_ARTISAN_PROFILE });
+      await updateArtisanProfile({ ...DEFAULT_ARTISAN_PROFILE });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 1200);
     }
@@ -143,16 +123,29 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 overflow-y-auto">
-      {/* Dark Luxury Backdrop */}
+  // Handle ESC key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-fade-in">
+      {/* Dark Luxury Backdrop Click Surface */}
       <div 
-        className="fixed inset-0 bg-[#0D0C0B]/80 dark:bg-black/85 backdrop-blur-xs transition-opacity duration-300"
+        className="fixed inset-0 bg-black/75 backdrop-blur-xs z-0 cursor-pointer"
         onClick={onClose}
+        aria-label="Close modal backdrop"
       />
 
       {/* Modal Dialog Card - Concise and High-Density */}
-      <div className="relative w-full max-w-lg bg-[#FAF8F5] dark:bg-[#141312] rounded-2xl shadow-2xl border border-[#D4AF37]/50 dark:border-[#2D2B28] overflow-hidden z-10 flex flex-col max-h-[94vh] text-[#1C1B1A] dark:text-[#F5F2EB] transition-colors animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-[#FAF8F5] dark:bg-[#141312] rounded-2xl sm:rounded-3xl shadow-2xl border border-[#D4AF37]/60 dark:border-[#2D2B28] overflow-hidden z-10 flex flex-col max-h-[90vh] text-[#1C1B1A] dark:text-[#F5F2EB] transition-colors animate-in fade-in zoom-in-95 duration-200">
         
         {/* Hidden File Input */}
         <input
@@ -164,17 +157,17 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
         />
 
         {/* Compact Header */}
-        <div className="relative bg-gradient-to-r from-[#1C1B1A] via-[#2A2623] to-[#1C1B1A] dark:from-[#1E1D1B] dark:to-[#121110] px-3.5 py-2.5 sm:px-4 sm:py-2.5 text-white overflow-hidden border-b border-[#D4AF37]/30 shrink-0">
+        <div className="relative bg-gradient-to-r from-[#1C1B1A] via-[#2A2623] to-[#1C1B1A] dark:from-[#1E1D1B] dark:to-[#121110] px-4 py-3 sm:px-5 sm:py-3.5 text-white overflow-hidden border-b border-[#D4AF37]/35 shrink-0">
           <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#D4AF37]/10 blur-xl pointer-events-none" />
 
-          {/* Close Button */}
+          {/* Prominent Close Button */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-2 right-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer focus:outline-none z-20"
+            className="absolute top-3 right-3 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer focus:outline-none z-30 shadow-md"
             aria-label="Close modal"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
 
           <div className="flex items-center justify-between gap-2 relative z-10 pr-6">
@@ -195,19 +188,21 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
               </div>
             </div>
 
-            {/* Toggle Edit Button */}
-            <button
-              type="button"
-              onClick={() => setIsEditing(!isEditing)}
-              className={`py-0.5 px-2 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all shadow-xs cursor-pointer shrink-0 ${
-                isEditing
-                  ? 'bg-white text-[#1C1B1A] hover:bg-gray-100'
-                  : 'bg-[#D4AF37] text-[#1C1B1A] hover:bg-[#C29F2E]'
-              }`}
-            >
-              <Edit3 className="w-2.5 h-2.5" />
-              <span>{isEditing ? 'Preview' : 'Edit Profile'}</span>
-            </button>
+            {/* Toggle Edit Button - Strictly for Seller Mode */}
+            {isSellerMode && (
+              <button
+                type="button"
+                onClick={() => setIsEditing(!isEditing)}
+                className={`py-0.5 px-2 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all shadow-xs cursor-pointer shrink-0 ${
+                  isEditing
+                    ? 'bg-white text-[#1C1B1A] hover:bg-gray-100'
+                    : 'bg-[#D4AF37] text-[#1C1B1A] hover:bg-[#C29F2E]'
+                }`}
+              >
+                <Edit3 className="w-2.5 h-2.5" />
+                <span>{isEditing ? 'Preview' : 'Edit Profile'}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -253,7 +248,7 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
                       }}
                       className="w-full h-full"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=80';
+                        (e.currentTarget as HTMLImageElement).src = '/artisan_avatar.png';
                       }}
                     />
                   </div>
@@ -446,13 +441,45 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
             /* ================= VIEW MODE - CONCISE & HIGH DENSITY ================= */
             <div className="space-y-2">
               
+              {/* Seller Mode Active Banner */}
+              {isSellerMode && (
+                <div className="p-2 rounded-xl bg-[#1C1B1A] dark:bg-[#1E1D1B] border border-[#D4AF37]/50 text-white flex items-center justify-between gap-2 shadow-xs">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Edit3 className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <span className="text-[10px] font-bold text-[#D4AF37] truncate">Seller Studio Active</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                    >
+                      <Upload className="w-2.5 h-2.5 text-[#D4AF37]" />
+                      <span>Upload Photo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="px-2.5 py-0.5 rounded-lg bg-[#D4AF37] hover:bg-[#c29f2e] text-[#1C1B1A] text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer shadow-xs"
+                    >
+                      <Edit3 className="w-2.5 h-2.5" />
+                      <span>Edit Bio & Pillars</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Top Hero: Sahina's Photo & Biography in Side-by-Side Unified Card */}
               <div className="p-2.5 rounded-xl bg-white dark:bg-[#181716] border border-[#E8DFD8] dark:border-[#2D2B28] shadow-2xs flex flex-row items-center gap-3">
                 
                 {/* Primary Photo of Sahina Shrestha (object-fit: cover, centered focus) */}
                 <div className="relative w-24 sm:w-28 aspect-[3/4] rounded-xl overflow-hidden bg-[#1C1B1A] shrink-0 border-2 border-[#D4AF37]/50 shadow-md group">
                   <img
-                    src={profile.avatarUrl}
+                    src={
+                      !profile.avatarUrl || profile.avatarUrl.includes('unsplash.com') || profile.avatarUrl.includes('photo-')
+                        ? '/artisan_avatar.png'
+                        : profile.avatarUrl
+                    }
                     alt={`${profile.artisanName} - ${profile.artisanRole}`}
                     style={{ 
                       objectFit: 'cover', 
@@ -460,7 +487,7 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
                     }}
                     className="w-full h-full group-hover:scale-104 transition-transform duration-500"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=80';
+                      (e.currentTarget as HTMLImageElement).src = '/artisan_avatar.png';
                     }}
                   />
                   
@@ -617,4 +644,6 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };

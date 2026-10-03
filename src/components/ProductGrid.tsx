@@ -127,7 +127,7 @@ export const ProductGrid: React.FC = () => {
     categories.find((cat) => cat.id === selectedCategory)?.label || 'All Creations';
 
   return (
-    <section id="shop-section" className="pt-0 sm:pt-1 pb-8 sm:pb-12 px-2 sm:px-3 lg:px-4 max-w-[1440px] mx-auto">
+    <section id="shop-section" className="pt-0 sm:pt-1 pb-4 sm:pb-6 px-2 sm:px-3 lg:px-4 max-w-[1440px] mx-auto">
       {/* Category Dropdown (All Creations), Centered Search Bar, & Custom Sort Bar */}
       <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 mb-2 sm:mb-3 relative z-50 w-full flex-wrap sm:flex-nowrap">
         {/* Left: Category Dropdown (All Creations, Pearl Bags, Pearl Necklaces, Macrame, Accessories, New Arrivals, Best Sellers) */}

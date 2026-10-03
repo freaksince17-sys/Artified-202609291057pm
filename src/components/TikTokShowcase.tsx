@@ -400,7 +400,7 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
   return (
     <section 
       id="tiktok-section" 
-      className={`${embedded ? 'pt-1 pb-4' : 'pt-1 pb-6 sm:pt-2 sm:pb-10 bg-[#0A0A0B] text-white border-t border-b border-[#222225]'}`}
+      className={`${embedded ? 'pt-1 pb-3' : 'pt-1 pb-4 sm:pt-1.5 sm:pb-6 bg-[#0A0A0B] text-white border-t border-b border-[#222225]'}`}
     >
       <div className={embedded ? 'w-full' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'}>
         
@@ -587,6 +587,16 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
           )}
 
           <div className="relative w-full max-w-sm sm:max-w-md aspect-[9/16] max-h-[90vh] bg-[#1C1B1A] rounded-2xl overflow-hidden shadow-2xl border border-white/20 flex flex-col justify-between">
+            {/* Top-right Floating Close Button */}
+            <button
+              type="button"
+              onClick={() => setActiveReel(null)}
+              className="absolute top-3 right-3 z-40 p-2 rounded-full bg-black/80 hover:bg-black text-white hover:text-[#D4AF37] border border-white/30 hover:border-[#D4AF37] backdrop-blur-md shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center"
+              title="Close (ESC)"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
             
             {/* Real Video or Embed or Thumbnail */}
             {(() => {

@@ -36,7 +36,6 @@ import { CompareFloatingDock } from './components/CompareFloatingDock';
 import { ReferAFriendModal } from './components/ReferAFriendModal';
 import { SizeGuideModal } from './components/SizeGuideModal';
 import { OrderFAQsModal } from './components/OrderFAQsModal';
-import { MeetArtisanModal } from './components/MeetArtisanModal';
 import { useCart } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -124,7 +123,7 @@ function AppContent() {
       <Navbar />
 
       {/* Main Swipeable 6-Screen Deck */}
-      <main className="flex-1">
+      <main className="w-full flex-grow flex flex-col">
         <MainSwipeDeck />
       </main>
 
@@ -159,10 +158,6 @@ function AppContent() {
       <OrderFAQsModal
         isOpen={isOrderFAQsOpen}
         onClose={() => setIsOrderFAQsOpen(false)}
-      />
-      <MeetArtisanModal
-        isOpen={isMeetArtisanOpen}
-        onClose={() => setIsMeetArtisanOpen(false)}
       />
 
       {/* Seller Mode Modals & Floating Atelier Toolbar */}

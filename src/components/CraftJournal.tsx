@@ -21,6 +21,7 @@ import {
 import { CraftArticle } from '../types';
 import { getCraftArticles, saveCraftArticle } from '../data/journalArticles';
 import { useCart } from '../context/CartContext';
+import { CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
 type CategoryFilter = 'All' | 'Craft Techniques' | 'Nepali Heritage' | 'Care Guides' | 'Bridal & Styling';
 
@@ -39,7 +40,7 @@ export const CraftJournal: React.FC = () => {
   const [newSubtitle, setNewSubtitle] = useState('');
   const [newExcerpt, setNewExcerpt] = useState('');
   const [newCategory, setNewCategory] = useState<'Craft Techniques' | 'Nepali Heritage' | 'Care Guides' | 'Bridal & Styling'>('Craft Techniques');
-  const [newCoverImage, setNewCoverImage] = useState('https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1200&q=85');
+  const [newCoverImage, setNewCoverImage] = useState(CAVIAR_PEARL_BAG_IMAGE);
   const [newContentText, setNewContentText] = useState('');
   const [newTagsText, setNewTagsText] = useState('Pearl Weaving, Kathmandu, Handmade');
   const [newKeywordsText, setNewKeywordsText] = useState('handmade pearl bags nepal, chikamugal craft');
@@ -105,7 +106,7 @@ export const CraftJournal: React.FC = () => {
       authorRole: 'Founder & Master Artisan',
       publishedDate: 'Just Published',
       readTime: `${Math.max(2, Math.ceil(paragraphs.join(' ').split(' ').length / 180))} min read`,
-      coverImage: newCoverImage.trim() || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1200&q=85',
+      coverImage: newCoverImage.trim() || CAVIAR_PEARL_BAG_IMAGE,
       tags: tags.length > 0 ? tags : ['Handmade', 'Nepal'],
       seoKeywords: keywords.length > 0 ? keywords : ['handmade pearl bags nepal'],
       viewsCount: 1,
@@ -304,7 +305,7 @@ export const CraftJournal: React.FC = () => {
                   name: 'Artified_np',
                   logo: {
                     '@type': 'ImageObject',
-                    url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80'
+                    url: '/og-image.jpg'
                   }
                 },
                 datePublished: '2026-09-01',

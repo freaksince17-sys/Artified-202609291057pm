@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   Sparkles, 
@@ -13,10 +14,11 @@ import {
   Layers, 
   Phone, 
   ShieldCheck, 
-  Instagram,
-  Check,
-  Upload,
-  Crosshair
+  Instagram, 
+  Check, 
+  Upload, 
+  Crosshair,
+  Loader2
 } from 'lucide-react';
 import { 
   ArtisanProfileData, 
@@ -24,6 +26,8 @@ import {
   getArtisanProfile, 
   saveArtisanProfile 
 } from '../data/artisanProfile';
+import { compressImage } from '../utils/imageCompressor';
+import { useCart } from '../context/CartContext';
 
 interface ArtisanProfileEditModalProps {
   isOpen: boolean;
@@ -36,67 +40,70 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
   onClose,
   onSaved
 }) => {
-  const [profile, setProfile] = useState<ArtisanProfileData>(() => getArtisanProfile());
+  const { artisanProfile, updateArtisanProfile, updateInstagramSettings } = useCart();
+  const [profile, setProfile] = useState<ArtisanProfileData>(() => artisanProfile);
   const [activeTab, setActiveTab] = useState<'general' | 'story' | 'pillars' | 'contact'>('general');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setProfile(getArtisanProfile());
+      setProfile(artisanProfile);
       setSaveSuccess(false);
     }
-  }, [isOpen]);
+  }, [isOpen, artisanProfile]);
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 12 * 1024 * 1024) {
-        alert('Please choose an image under 12MB.');
-        return;
+      setIsProcessingImage(true);
+      try {
+        const compressedUrl = await compressImage(file, 800, 1000, 0.85);
+        setProfile((prev) => ({ 
+          ...prev, 
+          avatarUrl: compressedUrl,
+          avatarPosition: prev.avatarPosition || 'center 20%'
+        }));
+      } catch (err) {
+        console.warn('Error processing uploaded image:', err);
+      } finally {
+        setIsProcessingImage(false);
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (typeof event.target?.result === 'string') {
-          setProfile((prev) => ({ 
-            ...prev, 
-            avatarUrl: event.target!.result as string,
-            avatarPosition: prev.avatarPosition || 'center 20%'
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveArtisanProfile(profile);
+    await updateArtisanProfile(profile);
+    if (profile.instagramHandle) {
+      updateInstagramSettings(profile.instagramHandle);
+    }
     setSaveSuccess(true);
     if (onSaved) onSaved();
     setTimeout(() => {
       setSaveSuccess(false);
       onClose();
-    }, 900);
+    }, 800);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (window.confirm('Reset all artisan details to original atelier defaults?')) {
       setProfile({ ...DEFAULT_ARTISAN_PROFILE });
-      saveArtisanProfile({ ...DEFAULT_ARTISAN_PROFILE });
+      await updateArtisanProfile({ ...DEFAULT_ARTISAN_PROFILE });
       setSaveSuccess(true);
       if (onSaved) onSaved();
       setTimeout(() => {
         setSaveSuccess(false);
-      }, 1500);
+      }, 1200);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs animate-fade-in">
-      <div className="fixed inset-0" onClick={onClose} />
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 animate-fade-in">
+      <div className="fixed inset-0 bg-black/75 backdrop-blur-xs z-0 cursor-pointer" onClick={onClose} />
 
       <div className="relative w-full max-w-3xl bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92vh] z-10 overflow-hidden text-[#1C1B1A] dark:text-[#F5F2EB] transition-colors">
         {/* Modal Header */}
@@ -264,7 +271,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                       style={{ objectPosition: profile.avatarPosition || 'center 20%' }}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85';
+                        (e.currentTarget as HTMLImageElement).src = '/artisan_avatar.png';
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
@@ -659,4 +666,6 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };

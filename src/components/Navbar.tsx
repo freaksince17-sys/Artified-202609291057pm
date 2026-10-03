@@ -19,7 +19,8 @@ import {
   Feather,
   Globe,
   Sun,
-  Moon
+  Moon,
+  ExternalLink
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -53,7 +54,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
     loyaltyPointsBalance,
     openReferralModal,
     openMeetArtisanModal,
-    cartAnimationKey
+    cartAnimationKey,
+    instagramHandle,
+    instagramProfileUrl
   } = useCart();
 
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
@@ -386,7 +389,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
+        <div className="fixed inset-0 z-[9999] flex flex-col lg:hidden">
           <div
             className="fixed inset-0 bg-[#1C1B1A]/40 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
@@ -518,23 +521,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 </button>
 
                 {/* 2. Follow on Instagram */}
-                <button
-                  onClick={() => {
-                    setActiveNavTab('journal');
-                    setMobileMenuOpen(false);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                <a
+                  href={instagramProfileUrl || 'https://www.instagram.com/artified_np/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
                   aria-label="Follow on Instagram"
-                  className={`flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
-                    activeNavTab === 'journal' ? 'text-[#C5A880] font-semibold' : 'text-[#1C1B1A] dark:text-[#F5F2EB]'
-                  }`}
+                  className="flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#E1306C]"
                 >
                   <span className="flex items-center gap-2">
                     <Instagram className="w-4 h-4 text-[#E1306C]" />
-                    <span>Follow on Instagram (@artified_np)</span>
+                    <span>Follow on Instagram ({instagramHandle || '@artified_np'})</span>
                   </span>
-                  <ChevronRight className="w-4 h-4 text-[#8C847E]" />
-                </button>
+                  <ExternalLink className="w-4 h-4 text-[#8C847E]" />
+                </a>
 
                 {/* 3. Our Craft & Story */}
                 <button
@@ -616,14 +616,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
             {/* Mobile Footer with Social & WhatsApp */}
             <div className="p-5 bg-white/70 dark:bg-[#1A1918] border-t border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
               <a
-                href="https://www.instagram.com/artified_np/"
+                href={instagramProfileUrl || 'https://www.instagram.com/artified_np/'}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow Artified Nepal on Instagram"
                 className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-lg text-xs font-semibold tracking-wider uppercase hover:opacity-95 transition-opacity shadow-sm"
               >
                 <Instagram className="w-4 h-4" />
-                <span>Follow @artified_np on Instagram</span>
+                <span>Follow {instagramHandle || '@artified_np'} on Instagram</span>
               </a>
 
               <button
@@ -647,12 +647,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 </a>
                 <span>•</span>
                 <a
-                  href="https://www.instagram.com/artified_np/"
+                  href={instagramProfileUrl || 'https://www.instagram.com/artified_np/'}
                   target="_blank"
                   rel="noreferrer"
                   className="hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] underline underline-offset-2"
                 >
-                  Instagram: @artified_np
+                  Instagram: {instagramHandle || '@artified_np'}
                 </a>
               </div>
             </div>

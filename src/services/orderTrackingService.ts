@@ -14,7 +14,8 @@ import {
   buildMilestonesForPhase, 
   getProgressPercentage, 
   normalizeOrderId,
-  sanitizeOrderItems
+  sanitizeOrderItems,
+  getTrackedOrder
 } from '../data/trackingData';
 import { CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 import { handleFirestoreError, OperationType } from '../utils/firestoreErrors';
@@ -56,6 +57,15 @@ export async function saveOrderToFirestore(order: TrackedOrderData): Promise<voi
     map[normalizeOrderId(order.orderId)] = order;
     localStorage.setItem('artified_tracked_orders', JSON.stringify(map));
   } catch {}
+
+  // Sync to server disk
+  try {
+    fetch('/api/tracked-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    }).catch(() => {});
+  } catch {}
 }
 
 /**
@@ -75,6 +85,24 @@ export function subscribeToTrackedOrder(
     return () => {};
   }
 
+  // 1. Immediately provide current local order so UI renders the updated phase with ZERO delay
+  let immediateOrder: TrackedOrderData | null = null;
+  try {
+    const raw = localStorage.getItem('artified_tracked_orders');
+    if (raw) {
+      const map = JSON.parse(raw);
+      if (map[normalizedId]) immediateOrder = sanitizeOrderItems(map[normalizedId]);
+    }
+  } catch {}
+
+  if (!immediateOrder) {
+    immediateOrder = getTrackedOrder(orderIdInput);
+  }
+
+  if (immediateOrder) {
+    onUpdate(sanitizeOrderItems(immediateOrder));
+  }
+
   const docRef = doc(db, TRACKED_ORDERS_COLLECTION, docId);
 
   // Set up real-time listener on Firestore document
@@ -84,7 +112,37 @@ export function subscribeToTrackedOrder(
       if (snapshot.exists()) {
         const data = snapshot.data() as TrackedOrderData;
         const sanitized = sanitizeOrderItems(data);
-        onUpdate(sanitized);
+
+        // Check if local storage has a newer or more updated seller phase
+        let localCandidate: TrackedOrderData | null = null;
+        try {
+          const raw = localStorage.getItem('artified_tracked_orders');
+          if (raw) {
+            const map = JSON.parse(raw);
+            if (map[normalizedId]) localCandidate = map[normalizedId];
+          }
+        } catch {}
+
+        const phaseWeights: Record<string, number> = {
+          confirmed: 1,
+          handcrafting_and_packaging: 2,
+          beading_in_progress: 2,
+          quality_and_packaging: 2,
+          out_for_delivery: 3,
+          delivered: 4
+        };
+
+        const localWeight = localCandidate ? (phaseWeights[localCandidate.currentPhase] || 0) : 0;
+        const remoteWeight = phaseWeights[sanitized.currentPhase] || 0;
+
+        // If seller updated locally to e.g. dispatch (out_for_delivery) and remote is still confirmed, keep local
+        if (localCandidate && localWeight > remoteWeight) {
+          onUpdate(sanitizeOrderItems(localCandidate));
+          saveOrderToFirestore(localCandidate).catch(() => {});
+        } else {
+          onUpdate(sanitized);
+        }
+
         // If the Firestore document had an old unsplash or placeholder image, self-heal it
         const hadBadImage = (data.items || []).some(
           (it) => !it.image || it.image.includes('unsplash.com') || it.image.includes('photo-1584917865442')
@@ -93,18 +151,22 @@ export function subscribeToTrackedOrder(
           saveOrderToFirestore(sanitized).catch(() => {});
         }
       } else {
-        // Document not found in Firestore yet: check demo orders or local storage
+        // Document not found in Firestore yet: check local storage FIRST, then demo orders
         let initialOrder: TrackedOrderData | null = null;
-        if (DEMO_TRACKED_ORDERS[normalizedId]) {
+        try {
+          const raw = localStorage.getItem('artified_tracked_orders');
+          if (raw) {
+            const map = JSON.parse(raw);
+            if (map[normalizedId]) initialOrder = sanitizeOrderItems(map[normalizedId]);
+          }
+        } catch {}
+
+        if (!initialOrder) {
+          initialOrder = getTrackedOrder(orderIdInput);
+        }
+
+        if (!initialOrder && DEMO_TRACKED_ORDERS[normalizedId]) {
           initialOrder = sanitizeOrderItems(DEMO_TRACKED_ORDERS[normalizedId]);
-        } else {
-          try {
-            const raw = localStorage.getItem('artified_tracked_orders');
-            if (raw) {
-              const map = JSON.parse(raw);
-              if (map[normalizedId]) initialOrder = sanitizeOrderItems(map[normalizedId]);
-            }
-          } catch {}
         }
 
         if (initialOrder) {
@@ -121,8 +183,23 @@ export function subscribeToTrackedOrder(
       console.warn('Firestore onSnapshot notice for order tracking:', error);
       if (onError) onError(error);
       
-      // Graceful fallback to local demo / cache if Firestore offline or permission issue
-      if (DEMO_TRACKED_ORDERS[normalizedId]) {
+      // Graceful fallback: check local storage and getTrackedOrder FIRST!
+      let fallbackOrder: TrackedOrderData | null = null;
+      try {
+        const raw = localStorage.getItem('artified_tracked_orders');
+        if (raw) {
+          const map = JSON.parse(raw);
+          if (map[normalizedId]) fallbackOrder = sanitizeOrderItems(map[normalizedId]);
+        }
+      } catch {}
+
+      if (!fallbackOrder) {
+        fallbackOrder = getTrackedOrder(orderIdInput);
+      }
+
+      if (fallbackOrder) {
+        onUpdate(sanitizeOrderItems(fallbackOrder));
+      } else if (DEMO_TRACKED_ORDERS[normalizedId]) {
         onUpdate(sanitizeOrderItems(DEMO_TRACKED_ORDERS[normalizedId]));
       }
     }
@@ -219,13 +296,14 @@ export async function updateOrderStatusInFirestore(
  */
 export async function seedDemoOrdersToFirestore(): Promise<void> {
   try {
-    const batch = writeBatch(db);
-    Object.values(DEMO_TRACKED_ORDERS).forEach((order) => {
+    for (const order of Object.values(DEMO_TRACKED_ORDERS)) {
       const docId = getOrderDocId(order.orderId);
       const docRef = doc(db, TRACKED_ORDERS_COLLECTION, docId);
-      batch.set(docRef, { ...order, docId, updatedAt: new Date().toISOString() }, { merge: true });
-    });
-    await batch.commit();
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) {
+        await setDoc(docRef, { ...order, docId, updatedAt: new Date().toISOString() });
+      }
+    }
   } catch (e) {
     console.warn('Notice: Firestore demo orders seeding:', e);
   }

@@ -27,7 +27,7 @@ export const AddToCartToast: React.FC = () => {
   if (!lastAddedItem || !isVisible) return null;
 
   const { product, quantity, color } = lastAddedItem;
-  const image = (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=200&q=80';
+  const image = (product.images && product.images[0]) || '/og-image.jpg';
 
   return (
     <div 

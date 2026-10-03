@@ -12,11 +12,13 @@ import {
   Star, 
   RefreshCw,
   QrCode,
-  KeyRound 
+  KeyRound,
+  Check
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { SellerPaymentSettingsModal } from './SellerPaymentSettingsModal';
 import { SellerChangePasswordModal } from './SellerChangePasswordModal';
+import { ArtisanProfileEditModal } from './ArtisanProfileEditModal';
 
 export const SellerToolbar: React.FC = () => {
   const { 
@@ -39,17 +41,27 @@ export const SellerToolbar: React.FC = () => {
 
   const [isMinimized, setIsMinimized] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState(false);
   const [isPaymentSettingsOpen, setIsPaymentSettingsOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isArtisanProfileOpen, setIsArtisanProfileOpen] = useState(false);
 
   const handleManualSync = async () => {
     setIsManualSyncing(true);
-    if (triggerCloudSync) {
-      await triggerCloudSync();
-    }
-    setTimeout(() => {
+    setSyncSuccess(false);
+    try {
+      if (triggerCloudSync) {
+        await triggerCloudSync();
+      }
+      setSyncSuccess(true);
+      setTimeout(() => {
+        setSyncSuccess(false);
+      }, 2500);
+    } catch (e) {
+      console.warn('Manual sync error:', e);
+    } finally {
       setIsManualSyncing(false);
-    }, 1200);
+    }
   };
 
   if (!isSellerMode) return null;
@@ -57,7 +69,7 @@ export const SellerToolbar: React.FC = () => {
   return (
     <aside 
       aria-label="Seller Studio Mode Controls" 
-      className="fixed bottom-16 md:bottom-4 right-3 sm:right-5 z-40 flex flex-col items-end gap-1.5 animate-fade-in"
+      className="fixed bottom-16 md:bottom-4 right-3 sm:right-5 z-[999] flex flex-col items-end gap-1.5 animate-fade-in"
     >
       {/* Minimized Pill */}
       {isMinimized ? (
@@ -128,23 +140,7 @@ export const SellerToolbar: React.FC = () => {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openTikTokEditor(null)}
-              className="w-full py-1.5 px-2.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/10"
-            >
-              <Video className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Manage TikTok Reels ({reels.length})</span>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => openInstagramEditor(null)}
-              className="w-full py-1.5 px-2.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/10"
-            >
-              <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
-              <span>Manage Instagram Journal ({instagramItems.length})</span>
-            </button>
 
             <button
               type="button"
@@ -153,6 +149,16 @@ export const SellerToolbar: React.FC = () => {
             >
               <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               <span>Manage Product Reviews</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsArtisanProfileOpen(true)}
+              className="w-full py-1.5 px-2.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/10"
+              title="Edit Sahina Shrestha's biography, quotes, photos, and pillars"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Edit "Meet the Artisan" Profile</span>
             </button>
 
             <button
@@ -183,16 +189,30 @@ export const SellerToolbar: React.FC = () => {
               <span>Export Complete Website & Products</span>
             </button>
 
-            {/* Compact Refresh Cloud Sync Button */}
+            {/* On-Demand Manual Cloud Sync Button */}
             <button
               type="button"
               onClick={handleManualSync}
-              disabled={isManualSyncing || isDataSyncing}
-              className="w-full py-1.5 px-2.5 bg-[#D4AF37] text-[#1C1B1A] hover:bg-[#c29f2e] rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
-              title="Manually refresh Firestore and server cloud synchronization"
+              disabled={isManualSyncing}
+              className="w-full py-1.5 px-2.5 bg-[#D4AF37] text-[#1C1B1A] hover:bg-[#c29f2e] rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs disabled:opacity-75"
+              title="Click to manually sync all store data to live Cloud"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isManualSyncing || isDataSyncing ? 'animate-spin' : ''}`} />
-              <span>{isManualSyncing || isDataSyncing ? 'Synchronizing...' : 'Refresh Cloud Sync Now'}</span>
+              {isManualSyncing ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Syncing Store Data...</span>
+                </>
+              ) : syncSuccess ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-950 font-bold" />
+                  <span>Synced Successfully!</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Sync Store Data to Cloud</span>
+                </>
+              )}
             </button>
 
             <button
@@ -228,6 +248,12 @@ export const SellerToolbar: React.FC = () => {
       <SellerChangePasswordModal
         isOpen={isChangePasswordOpen}
         onClose={() => setIsChangePasswordOpen(false)}
+      />
+
+      {/* Seller Artisan Profile Edit Modal */}
+      <ArtisanProfileEditModal
+        isOpen={isArtisanProfileOpen}
+        onClose={() => setIsArtisanProfileOpen(false)}
       />
     </aside>
   );

@@ -1,96 +1,116 @@
 import React from 'react';
-import { ShoppingBag, Heart, Sparkles, Truck, Compass, Crown } from 'lucide-react';
+import { 
+  ShoppingBag, 
+  Sparkles, 
+  Truck, 
+  Video, 
+  Instagram, 
+  Hammer,
+  User
+} from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const MobileBottomBar: React.FC = () => {
   const { 
-    cartCount, 
-    setIsCartOpen, 
-    wishlist, 
-    setIsWishlistOpen, 
+    setActiveNavTab,
     setSelectedCategory,
-    openTracker,
-    openAccountModal,
-    loyaltyPointsBalance
+    openMeetArtisanModal,
+    openTracker
   } = useCart();
 
-  const scrollToShop = () => {
+  const handleCreations = () => {
+    setActiveNavTab('home');
     setSelectedCategory('all');
     const el = document.getElementById('shop-section');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleCreator = () => {
+    setActiveNavTab('artisan');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTikTok = () => {
+    setActiveNavTab('tiktok');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleInstagram = () => {
+    setActiveNavTab('journal');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleWorkshop = () => {
+    setActiveNavTab('craft');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTrack = () => {
+    openTracker();
+  };
+
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF8F5]/95 dark:bg-[#141312]/95 backdrop-blur-md border-t border-[#E8DFD8] dark:border-[#2D2B28] lg:hidden shadow-[0_-4px_20px_rgba(28,27,26,0.06)] px-2 py-1.5 transition-colors duration-200">
-      <div className="flex items-center justify-around max-w-md mx-auto">
+    <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF8F5]/95 dark:bg-[#141312]/95 backdrop-blur-md border-t border-[#E8DFD8] dark:border-[#2D2B28] lg:hidden shadow-[0_-4px_20px_rgba(28,27,26,0.06)] px-1 py-1.5 transition-colors duration-200">
+      <div className="flex items-center justify-around max-w-lg mx-auto">
         
-        {/* Explore Shop */}
+        {/* 1. Creations */}
         <button
           type="button"
-          onClick={scrollToShop}
-          className="flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#1C1B1A] dark:hover:text-white"
+          onClick={handleCreations}
+          className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#1C1B1A] dark:hover:text-white cursor-pointer"
         >
-          <Compass className="w-5 h-5 text-[#1C1B1A] dark:text-[#F5F2EB]" />
-          <span className="text-[10px] font-medium tracking-wider uppercase mt-0.5">Explore</span>
+          <ShoppingBag className="w-4 h-4 text-[#1C1B1A] dark:text-[#F5F2EB]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Creations</span>
         </button>
 
-        {/* Loyalty Rewards */}
+        {/* 2. Creator */}
         <button
           type="button"
-          onClick={() => openAccountModal('rewards')}
-          className="relative flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#D4AF37]"
+          onClick={handleCreator}
+          className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#D4AF37] cursor-pointer"
         >
-          <div className="relative">
-            <Crown className="w-5 h-5 text-[#D4AF37]" />
-            <span className="absolute -top-1 -right-2 bg-[#D4AF37] text-[#1C1B1A] text-[8px] font-black px-1 rounded-full">
-              {loyaltyPointsBalance}
-            </span>
-          </div>
-          <span className="text-[10px] font-bold tracking-wider uppercase mt-0.5 text-[#1C1B1A] dark:text-[#FAF8F5]">Rewards</span>
+          <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Creator</span>
         </button>
 
-        {/* Live Order Tracker */}
+        {/* 3. TikTok */}
         <button
           type="button"
-          onClick={() => openTracker()}
-          className="flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#C5A880] dark:hover:text-[#D4AF37]"
+          onClick={handleTikTok}
+          className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-black dark:hover:text-white cursor-pointer"
         >
-          <Truck className="w-5 h-5 text-[#C5A880] dark:text-[#D4AF37]" />
-          <span className="text-[10px] font-medium tracking-wider uppercase mt-0.5">Track</span>
+          <Video className="w-4 h-4 text-[#010101] dark:text-[#F5F2EB]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">TikTok</span>
         </button>
 
-        {/* Wishlist */}
+        {/* 4. Instagram */}
         <button
           type="button"
-          onClick={() => setIsWishlistOpen(true)}
-          className="relative flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#1C1B1A] dark:hover:text-white"
+          onClick={handleInstagram}
+          className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#E1306C] cursor-pointer"
         >
-          <div className="relative">
-            <Heart className={`w-5 h-5 ${wishlist.length > 0 ? 'fill-rose-500 text-rose-500' : 'text-[#1C1B1A] dark:text-[#F5F2EB]'}`} />
-            {wishlist.length > 0 && (
-              <span className="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                {wishlist.length}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-medium tracking-wider uppercase mt-0.5">Wishlist</span>
+          <Instagram className="w-4 h-4 text-[#E1306C]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Instagram</span>
         </button>
 
-        {/* Shopping Bag */}
+        {/* 5. Workshop (instead of Our Crafts) */}
         <button
           type="button"
-          onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center justify-center min-w-[50px] min-h-[44px] text-[#1C1B1A] dark:text-[#F5F2EB]"
+          onClick={handleWorkshop}
+          className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#C5A880] cursor-pointer"
         >
-          <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-[#1C1B1A] dark:text-[#F5F2EB]" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-[#C5A880] dark:bg-[#D4AF37] text-[#1C1B1A] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
-                {cartCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-bold tracking-wider uppercase mt-0.5">Bag ({cartCount})</span>
+          <Hammer className="w-4 h-4 text-[#C5A880]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Workshop</span>
+        </button>
+
+        {/* 6. Track */}
+        <button
+          type="button"
+          onClick={handleTrack}
+          className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#D4AF37] cursor-pointer"
+        >
+          <Truck className="w-4 h-4 text-[#D4AF37]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Track</span>
         </button>
 
       </div>

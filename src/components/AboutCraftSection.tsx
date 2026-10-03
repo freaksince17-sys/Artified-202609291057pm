@@ -37,16 +37,48 @@ export const AboutCraftSection: React.FC = () => {
   const modalVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Hover-only playback for the craft story video
+  const handleMouseEnter = () => {
+    setIsCraftHovered(true);
+    const video = mainVideoRef.current;
+    if (video) {
+      video.muted = isSectionMuted;
+      const p = video.play();
+      if (p !== undefined) {
+        p.then(() => setIsPlayingVideo(true)).catch(() => {
+          video.muted = true;
+          setIsSectionMuted(true);
+          video.play().then(() => setIsPlayingVideo(true)).catch(() => {});
+        });
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsCraftHovered(false);
+    const video = mainVideoRef.current;
+    if (video) {
+      video.pause();
+      setIsPlayingVideo(false);
+    }
+  };
+
   useEffect(() => {
     const video = mainVideoRef.current;
     if (!video) return;
     if (isCraftHovered) {
+      video.muted = isSectionMuted;
       const p = video.play();
-      if (p !== undefined) p.catch(() => {});
+      if (p !== undefined) {
+        p.then(() => setIsPlayingVideo(true)).catch(() => {
+          video.muted = true;
+          video.play().then(() => setIsPlayingVideo(true)).catch(() => {});
+        });
+      }
     } else {
       video.pause();
+      setIsPlayingVideo(false);
     }
-  }, [isCraftHovered]);
+  }, [isCraftHovered, isSectionMuted]);
 
   const KNOWN_LOCAL_VIDEOS: Record<string, string> = {
     '7363984155060817160': '/tiktok_videos/7363984155060817160.mp4',
@@ -220,8 +252,8 @@ export const AboutCraftSection: React.FC = () => {
                 <div className="space-y-4">
                   <div 
                     onClick={() => setIsPlayingVideo(true)}
-                    onMouseEnter={() => setIsCraftHovered(true)}
-                    onMouseLeave={() => setIsCraftHovered(false)}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
                     className="aspect-[4/3] sm:aspect-[16/10] rounded-2xl overflow-hidden bg-[#1C1B1A] border border-[#E8DFD8] shadow-sm relative group cursor-pointer"
                   >
                     <video

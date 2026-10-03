@@ -52,12 +52,17 @@ export const OrderTrackerModal: React.FC = () => {
   // Active Firestore unsubscribe reference
   const unsubscribeRef = React.useRef<(() => void) | null>(null);
 
-  // When trackingOrderId changes or modal opens, automatically perform lookup
+  // When trackingOrderId changes or modal opens, only perform lookup if an order ID is explicitly provided
   useEffect(() => {
     if (isTrackerOpen) {
-      const targetId = trackingOrderId || completedOrder?.orderId || 'ART-2026-8842';
-      setInputOrderId(targetId);
-      performLookup(targetId);
+      const targetId = trackingOrderId || completedOrder?.orderId || '';
+      if (targetId) {
+        setInputOrderId(targetId);
+        performLookup(targetId);
+      } else {
+        setInputOrderId('');
+        setTrackedOrder(null);
+      }
     }
 
     return () => {
@@ -72,8 +77,12 @@ export const OrderTrackerModal: React.FC = () => {
   useEffect(() => {
     const handleUpdate = (e: Event) => {
       const customEvent = e as CustomEvent<TrackedOrderData>;
-      if (customEvent.detail && trackedOrder && normalizeOrderId(customEvent.detail.orderId) === normalizeOrderId(trackedOrder.orderId)) {
-        setTrackedOrder(customEvent.detail);
+      if (customEvent.detail) {
+        const updatedNorm = normalizeOrderId(customEvent.detail.orderId);
+        const currentNorm = trackedOrder ? normalizeOrderId(trackedOrder.orderId) : (inputOrderId ? normalizeOrderId(inputOrderId) : '');
+        if (updatedNorm === currentNorm || (!trackedOrder && updatedNorm === 'ART-2026-5526')) {
+          setTrackedOrder(customEvent.detail);
+        }
       }
     };
 
@@ -91,7 +100,7 @@ export const OrderTrackerModal: React.FC = () => {
       window.removeEventListener('artified_order_updated', handleUpdate);
       window.removeEventListener('artified_order_status_alert', handleAlert);
     };
-  }, [trackedOrder]);
+  }, [trackedOrder, inputOrderId]);
 
   const performLookup = (idToLookup: string) => {
     if (!idToLookup.trim()) {
@@ -233,28 +242,29 @@ export const OrderTrackerModal: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Demo Previews */}
-          <div className="flex items-center gap-1.5 text-[11px] text-[#736C65] flex-wrap">
-            <span>Quick samples:</span>
-            <button
-              type="button"
-              onClick={() => handleSelectQuickId('ART-2026-8842')}
-              className="px-2 py-0.5 rounded-full bg-[#FAF8F5] border border-[#E8DFD8] hover:border-[#C5A880] text-[#1C1B1A] transition-colors font-mono"
-            >
-              #ART-2026-8842 (Handcrafting)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSelectQuickId('ART-2026-5521')}
-              className="px-2 py-0.5 rounded-full bg-[#FAF8F5] border border-[#E8DFD8] hover:border-[#C5A880] text-[#1C1B1A] transition-colors font-mono"
-            >
-              #ART-2026-5521 (Out for Delivery)
-            </button>
+          {/* Order lookup helper info */}
+          <div className="flex items-center gap-1.5 text-[11px] text-[#736C65]">
+            <span>🔒 Private tracking: paste your Order ID to view real-time atelier status.</span>
           </div>
         </div>
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
+
+          {/* Empty state when no order has been pasted yet */}
+          {!trackedOrder && !isSearching && !errorMsg && (
+            <div className="p-8 text-center bg-[#FAF8F5] rounded-2xl border border-[#E8DFD8] space-y-3">
+              <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] flex items-center justify-center mx-auto">
+                <Truck className="w-6 h-6" />
+              </div>
+              <h3 className="font-serif text-base font-bold text-[#1C1B1A]">
+                Lookup Your Order Status
+              </h3>
+              <p className="text-xs text-[#736C65] max-w-sm mx-auto leading-relaxed">
+                Enter your Order ID in the search box above to see real-time updates on your package's assembly, handcrafting, and express shipping.
+              </p>
+            </div>
+          )}
           
           {/* Active LocalStorage Status Change Notification Banner */}
           {activeAlert && (
@@ -382,7 +392,7 @@ export const OrderTrackerModal: React.FC = () => {
                         {(trackedOrder.currentPhase === 'handcrafting_and_packaging' || 
                           trackedOrder.currentPhase === 'beading_in_progress' || 
                           trackedOrder.currentPhase === 'quality_and_packaging') && '2. Handcrafting & Packaging'}
-                        {trackedOrder.currentPhase === 'out_for_delivery' && '3. Out for Delivery'}
+                        {trackedOrder.currentPhase === 'out_for_delivery' && '3. Dispatched & In-Transit (Out for Delivery)'}
                         {trackedOrder.currentPhase === 'delivered' && '4. Delivered to Doorstep'}
                       </span>
                     </span>

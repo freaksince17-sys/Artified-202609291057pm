@@ -34,7 +34,9 @@ export const Footer: React.FC = () => {
     openSizeGuideModal,
     openAccountModal,
     openReferralModal,
-    loyaltyPointsBalance
+    loyaltyPointsBalance,
+    instagramHandle,
+    instagramProfileUrl
   } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const isNe = language === 'ne';
@@ -63,7 +65,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-[#1C1B1A] text-[#FAF8F5] pt-10 pb-20 lg:pb-12 border-t border-[#2B2927]">
+    <footer className="bg-[#1C1B1A] text-[#FAF8F5] pt-6 sm:pt-8 pb-20 lg:pb-10 border-t border-[#2B2927]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Middle Footer Columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -84,14 +86,14 @@ export const Footer: React.FC = () => {
                 Official Channels:
               </span>
               <a
-                href="https://www.instagram.com/artified_np/"
+                href={instagramProfileUrl || 'https://www.instagram.com/artified_np/'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#833ab4]/20 via-[#fd1d1d]/20 to-[#fcb045]/20 bg-[#E1306C]/15 border border-[#E1306C]/40 hover:border-[#E1306C] hover:bg-[#E1306C]/25 text-white transition-all group shadow-xs"
               >
                 <Instagram className="w-4 h-4 text-[#E1306C] group-hover:scale-110 transition-transform" />
                 <div className="text-left flex-1 min-w-0">
-                  <span className="font-semibold text-xs block text-white group-hover:text-pink-200 transition-colors">@artified_np</span>
+                  <span className="font-semibold text-xs block text-white group-hover:text-pink-200 transition-colors">{instagramHandle || '@artified_np'}</span>
                   <span className="text-[10px] text-[#D8B4C8]">Instagram • Store & Journal</span>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-[#E1306C] group-hover:text-white" />
@@ -191,17 +193,15 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveNavTab('journal');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                <a
+                  href={instagramProfileUrl || 'https://www.instagram.com/artified_np/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-white transition-colors flex items-center gap-1.5 text-left cursor-pointer"
                 >
                   <Instagram className="w-3.5 h-3.5 text-[#E1306C] shrink-0" />
-                  <span>Follow on Instagram</span>
-                </button>
+                  <span>Follow on Instagram ({instagramHandle || '@artified_np'})</span>
+                </a>
               </li>
             </ul>
           </div>
@@ -267,13 +267,13 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://ig.me/m/artified_np"
+                  href={`https://ig.me/m/${(instagramHandle || 'artified_np').replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-[#fcb045] hover:text-[#fd1d1d] transition-colors font-semibold flex items-center gap-1.5"
                 >
                   <Instagram className="w-3.5 h-3.5 text-[#E1306C] shrink-0" />
-                  <span>Direct Instagram DM (@artified_np)</span>
+                  <span>Direct Instagram DM ({instagramHandle || '@artified_np'})</span>
                 </a>
               </li>
             </ul>

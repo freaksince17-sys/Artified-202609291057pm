@@ -27,47 +27,33 @@ import {
   saveArtisanProfile 
 } from '../data/artisanProfile';
 import { ArtisanProfileEditModal } from './ArtisanProfileEditModal';
+import { compressImage } from '../utils/imageCompressor';
 
 export const MeetArtisanSection: React.FC = () => {
-  const { setActiveNavTab, isSellerMode } = useCart();
+  const { setActiveNavTab, isSellerMode, artisanProfile, updateArtisanProfile } = useCart();
   const { language } = useLanguage();
   const isNe = language === 'ne';
 
-  const [profile, setProfile] = useState<ArtisanProfileData>(() => getArtisanProfile());
+  const profile = artisanProfile;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [photoUpdatedToast, setPhotoUpdatedToast] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const handleUpdate = () => {
-      setProfile(getArtisanProfile());
-    };
-    window.addEventListener('artified_artisan_updated', handleUpdate);
-    return () => window.removeEventListener('artified_artisan_updated', handleUpdate);
-  }, []);
-
-  const handlePhotoFile = (file: File) => {
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Please choose an image under 15MB.');
-      return;
+  const handlePhotoFile = async (file: File) => {
+    try {
+      const compressedUrl = await compressImage(file, 800, 1000, 0.85);
+      const updated = {
+        ...profile,
+        avatarUrl: compressedUrl,
+        avatarPosition: profile.avatarPosition || 'center 20%'
+      };
+      await updateArtisanProfile(updated);
+      setPhotoUpdatedToast(true);
+      setTimeout(() => setPhotoUpdatedToast(false), 3000);
+    } catch (err) {
+      console.warn('Notice: Error compressing artisan photo:', err);
     }
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (typeof event.target?.result === 'string') {
-        const newUrl = event.target!.result as string;
-        const updated = {
-          ...profile,
-          avatarUrl: newUrl,
-          avatarPosition: profile.avatarPosition || 'center 20%'
-        };
-        saveArtisanProfile(updated);
-        setProfile(updated);
-        setPhotoUpdatedToast(true);
-        setTimeout(() => setPhotoUpdatedToast(false), 3000);
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +88,7 @@ export const MeetArtisanSection: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAF8F5] dark:bg-[#0F0E0E] min-h-screen pt-0.5 sm:pt-1 pb-6 sm:pb-8 px-3 sm:px-6 lg:px-8 transition-colors duration-200">
+    <div className="bg-[#FAF8F5] dark:bg-[#0F0E0E] pt-0.5 sm:pt-1 pb-4 sm:pb-6 px-3 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-6xl mx-auto space-y-3 sm:space-y-4">
         
         {/* Photo Updated Toast */}
@@ -191,27 +177,30 @@ export const MeetArtisanSection: React.FC = () => {
                 {profile.establishedText}
               </span>
 
-              {/* Quick Photo Upload Button */}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#3A3835] hover:border-[#D4AF37] text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
-                title="Upload Sahina's photo from computer or phone"
-              >
-                <Camera className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span className="hidden sm:inline">Upload Photo</span>
-              </button>
+              {/* Direct Edit & Upload Buttons - Restricted exclusively to Seller Mode */}
+              {isSellerMode && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#3A3835] hover:border-[#D4AF37] text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                    title="Upload Sahina's photo from computer or phone"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span className="hidden sm:inline">Upload Photo</span>
+                  </button>
 
-              {/* Direct Edit Button */}
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF8F5] dark:bg-[#252422] border border-[#E8DFD8] dark:border-[#3A3835] hover:border-[#D4AF37] text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
-                title="Edit Sahina's profile, photos, stories, quotes & stats"
-              >
-                <Edit3 className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>Edit Profile</span>
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF8F5] dark:bg-[#252422] border border-[#E8DFD8] dark:border-[#3A3835] hover:border-[#D4AF37] text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                    title="Edit Sahina's profile, photos, stories, quotes & stats"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Edit Profile</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -229,36 +218,42 @@ export const MeetArtisanSection: React.FC = () => {
                 }`}
               >
                 <img
-                  src={profile.avatarUrl}
+                  src={
+                    !profile.avatarUrl || profile.avatarUrl.includes('unsplash.com') || profile.avatarUrl.includes('photo-')
+                      ? '/artisan_avatar.png'
+                      : profile.avatarUrl
+                  }
                   alt={`${profile.artisanName} - ${profile.artisanRole}`}
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85';
+                    (e.currentTarget as HTMLImageElement).src = '/artisan_avatar.png';
                   }}
                   style={{ objectPosition: profile.avatarPosition || 'center 20%' }}
                   className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
                 />
 
-                {/* Direct Action Buttons over photo */}
-                <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 flex-wrap justify-end">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="py-1 px-2.5 rounded-full bg-black/85 hover:bg-black text-[#D4AF37] border border-[#D4AF37]/60 text-[10px] font-bold flex items-center gap-1.5 shadow-md transition-all hover:scale-105 cursor-pointer backdrop-blur-xs"
-                    title="Upload Sahina's photo from computer or phone"
-                  >
-                    <Upload className="w-3 h-3 text-[#D4AF37]" />
-                    <span>Upload Photo</span>
-                  </button>
+                {/* Direct Action Buttons over photo - Strictly Seller Mode */}
+                {isSellerMode && (
+                  <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 flex-wrap justify-end">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="py-1 px-2.5 rounded-full bg-black/85 hover:bg-black text-[#D4AF37] border border-[#D4AF37]/60 text-[10px] font-bold flex items-center gap-1.5 shadow-md transition-all hover:scale-105 cursor-pointer backdrop-blur-xs"
+                      title="Upload Sahina's photo from computer or phone"
+                    >
+                      <Upload className="w-3 h-3 text-[#D4AF37]" />
+                      <span>Upload Photo</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="py-1 px-2 rounded-full bg-black/85 hover:bg-black text-white hover:text-[#D4AF37] border border-white/30 text-[10px] font-bold flex items-center gap-1 shadow-md transition-all hover:scale-105 cursor-pointer backdrop-blur-xs"
-                    title="Edit profile details"
-                  >
-                    <Edit3 className="w-2.5 h-2.5" />
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="py-1 px-2 rounded-full bg-black/85 hover:bg-black text-white hover:text-[#D4AF37] border border-white/30 text-[10px] font-bold flex items-center gap-1 shadow-md transition-all hover:scale-105 cursor-pointer backdrop-blur-xs"
+                      title="Edit profile details"
+                    >
+                      <Edit3 className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Drag over overlay hint */}
                 {isDraggingOver && (
@@ -280,14 +275,16 @@ export const MeetArtisanSection: React.FC = () => {
                   </div>
                   <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-white flex items-center justify-between">
                     <span>{profile.artisanName}</span>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditModalOpen(true)} 
-                      className="text-[10px] text-[#D4AF37] hover:text-white font-sans font-medium underline flex items-center gap-0.5 cursor-pointer"
-                    >
-                      <Edit3 className="w-2.5 h-2.5" />
-                      <span>Edit</span>
-                    </button>
+                    {isSellerMode && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditModalOpen(true)} 
+                        className="text-[10px] text-[#D4AF37] hover:text-white font-sans font-medium underline flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <Edit3 className="w-2.5 h-2.5" />
+                        <span>Edit</span>
+                      </button>
+                    )}
                   </h3>
                   <p className="text-[11px] text-white/80">
                     {profile.atelierLocation}
@@ -298,9 +295,9 @@ export const MeetArtisanSection: React.FC = () => {
               {/* Quick Trust Strip Below Avatar */}
               <div className="grid grid-cols-2 gap-2.5 w-full max-w-sm mt-3">
                 <div 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-center hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer transition-colors group"
-                  title="Click to edit stat"
+                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
+                  className={`p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-center transition-colors group ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
+                  title={isSellerMode ? "Click to edit stat" : undefined}
                 >
                   <Clock className="w-3.5 h-3.5 text-[#D4AF37] mx-auto mb-0.5 group-hover:scale-110 transition-transform" />
                   <p className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">{profile.stat1Value}</p>
@@ -308,9 +305,9 @@ export const MeetArtisanSection: React.FC = () => {
                 </div>
 
                 <div 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-center hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer transition-colors group"
-                  title="Click to edit stat"
+                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
+                  className={`p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-center transition-colors group ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
+                  title={isSellerMode ? "Click to edit stat" : undefined}
                 >
                   <Heart className="w-3.5 h-3.5 text-[#D4AF37] mx-auto mb-0.5 group-hover:scale-110 transition-transform" />
                   <p className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">{profile.stat2Value}</p>
@@ -326,14 +323,16 @@ export const MeetArtisanSection: React.FC = () => {
                   <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold tracking-tight">
                     {profile.headline}
                   </h1>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="p-1 rounded-lg text-[#8C7A6B] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors cursor-pointer shrink-0"
-                    title="Edit headline"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-[#C5A880]" />
-                  </button>
+                  {isSellerMode && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="p-1 rounded-lg text-[#8C7A6B] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors cursor-pointer shrink-0"
+                      title="Edit headline"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-[#C5A880]" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-[#8C5D36] dark:text-[#E6CA9E] font-medium tracking-wide uppercase">
                   {profile.subheadline}
@@ -346,14 +345,16 @@ export const MeetArtisanSection: React.FC = () => {
                   <span className="px-2 py-0.5 bg-[#1C1B1A] dark:bg-[#121110] text-[#D4AF37] text-[9px] font-bold uppercase tracking-widest rounded-full border border-[#D4AF37]/30">
                     {isNe ? 'कालिगढको भनाइ' : 'Artisan Philosophy'}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="text-[10px] font-semibold text-[#8C5D36] dark:text-[#E6CA9E] hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Edit3 className="w-2.5 h-2.5" />
-                    <span>Edit</span>
-                  </button>
+                  {isSellerMode && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="text-[10px] font-semibold text-[#8C5D36] dark:text-[#E6CA9E] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Edit3 className="w-2.5 h-2.5" />
+                      <span>Edit</span>
+                    </button>
+                  )}
                 </div>
                 <p className="font-serif italic text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB] leading-relaxed">
                   {profile.quote}
@@ -365,9 +366,9 @@ export const MeetArtisanSection: React.FC = () => {
                 
                 {/* Pillar 1 */}
                 <div 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer transition-colors"
-                  title="Click to edit craft pillars"
+                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
+                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
+                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
                 >
                   <div className="flex items-center justify-between text-[#D4AF37]">
                     <div className="flex items-center gap-1.5">
@@ -376,7 +377,7 @@ export const MeetArtisanSection: React.FC = () => {
                         {profile.pillar1?.title || '1. Chikamugal Heritage'}
                       </h4>
                     </div>
-                    <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />
+                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
                   </div>
                   <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
                     {profile.pillar1?.desc}
@@ -385,9 +386,9 @@ export const MeetArtisanSection: React.FC = () => {
 
                 {/* Pillar 2 */}
                 <div 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer transition-colors"
-                  title="Click to edit craft pillars"
+                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
+                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
+                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
                 >
                   <div className="flex items-center justify-between text-[#D4AF37]">
                     <div className="flex items-center gap-1.5">
@@ -396,7 +397,7 @@ export const MeetArtisanSection: React.FC = () => {
                         {profile.pillar2?.title || '2. 9–14h Hand-Knotting'}
                       </h4>
                     </div>
-                    <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />
+                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
                   </div>
                   <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
                     {profile.pillar2?.desc}
@@ -405,9 +406,9 @@ export const MeetArtisanSection: React.FC = () => {
 
                 {/* Pillar 3 */}
                 <div 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer transition-colors"
-                  title="Click to edit craft pillars"
+                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
+                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
+                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
                 >
                   <div className="flex items-center justify-between text-[#D4AF37]">
                     <div className="flex items-center gap-1.5">
@@ -416,7 +417,7 @@ export const MeetArtisanSection: React.FC = () => {
                         {profile.pillar3?.title || '3. Empowering Women'}
                       </h4>
                     </div>
-                    <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />
+                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
                   </div>
                   <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
                     {profile.pillar3?.desc}
@@ -425,9 +426,9 @@ export const MeetArtisanSection: React.FC = () => {
 
                 {/* Pillar 4 */}
                 <div 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer transition-colors"
-                  title="Click to edit craft pillars"
+                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
+                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
+                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
                 >
                   <div className="flex items-center justify-between text-[#D4AF37]">
                     <div className="flex items-center gap-1.5">
@@ -436,7 +437,7 @@ export const MeetArtisanSection: React.FC = () => {
                         {profile.pillar4?.title || '4. Bespoke Tailoring'}
                       </h4>
                     </div>
-                    <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />
+                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
                   </div>
                   <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
                     {profile.pillar4?.desc}
@@ -498,7 +499,7 @@ export const MeetArtisanSection: React.FC = () => {
       <ArtisanProfileEditModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSaved={() => setProfile(getArtisanProfile())}
+        onSaved={() => {}}
       />
     </div>
   );

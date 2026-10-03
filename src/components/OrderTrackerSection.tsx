@@ -22,7 +22,7 @@ import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productIma
 
 export const OrderTrackerSection: React.FC = () => {
   const { trackingOrderId, setTrackingOrderId, setActiveNavTab } = useCart();
-  const [inputOrderId, setInputOrderId] = useState<string>(trackingOrderId || 'ART-2026-5526');
+  const [inputOrderId, setInputOrderId] = useState<string>(trackingOrderId || '');
   const [trackedOrder, setTrackedOrder] = useState<TrackedOrderData | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -32,9 +32,9 @@ export const OrderTrackerSection: React.FC = () => {
 
   // Sync when trackingOrderId changes or on mount
   useEffect(() => {
-    const targetId = trackingOrderId || 'ART-2026-5526';
-    setInputOrderId(targetId);
-    performLookup(targetId);
+    const idToUse = trackingOrderId || 'ART-2026-5526';
+    setInputOrderId(idToUse);
+    performLookup(idToUse);
 
     return () => {
       if (unsubscribeRef.current) {
@@ -47,13 +47,17 @@ export const OrderTrackerSection: React.FC = () => {
   useEffect(() => {
     const handleUpdate = (e: Event) => {
       const customEvent = e as CustomEvent<TrackedOrderData>;
-      if (customEvent.detail && trackedOrder && normalizeOrderId(customEvent.detail.orderId) === normalizeOrderId(trackedOrder.orderId)) {
-        setTrackedOrder(sanitizeOrderItems(customEvent.detail));
+      if (customEvent.detail) {
+        const updatedNorm = normalizeOrderId(customEvent.detail.orderId);
+        const currentNorm = trackedOrder ? normalizeOrderId(trackedOrder.orderId) : (inputOrderId ? normalizeOrderId(inputOrderId) : '');
+        if (updatedNorm === currentNorm || (!trackedOrder && updatedNorm === 'ART-2026-5526')) {
+          setTrackedOrder(sanitizeOrderItems(customEvent.detail));
+        }
       }
     };
     window.addEventListener('artified_order_updated', handleUpdate);
     return () => window.removeEventListener('artified_order_updated', handleUpdate);
-  }, [trackedOrder]);
+  }, [trackedOrder, inputOrderId]);
 
   const performLookup = (idToLookup: string) => {
     if (!idToLookup.trim()) {
@@ -104,7 +108,7 @@ export const OrderTrackerSection: React.FC = () => {
   }> = [
     { key: 'confirmed', label: '1. Order Confirmed & Paid', sublabel: 'Materials reserved', icon: Package },
     { key: 'handcrafting_and_packaging', label: '2. Handcrafting & Packaging', sublabel: 'By Sahina Shrestha', icon: Sparkles },
-    { key: 'out_for_delivery', label: '3. Out for Delivery', sublabel: 'Express courier rider', icon: Truck },
+    { key: 'out_for_delivery', label: '3. Dispatch & In-Transit', sublabel: 'Courier handover on route', icon: Truck },
     { key: 'delivered', label: '4. Delivered', sublabel: 'Doorstep handover', icon: CheckCircle2 }
   ];
 
@@ -117,7 +121,7 @@ export const OrderTrackerSection: React.FC = () => {
         return 1;
       case 'out_for_delivery': return 2;
       case 'delivered': return 3;
-      default: return 1;
+      default: return 0;
     }
   };
 
@@ -126,11 +130,11 @@ export const OrderTrackerSection: React.FC = () => {
   const handleInlinePhaseChange = (phase: OrderProductionPhase) => {
     if (!trackedOrder) return;
     const updated = updateOrderPhase(trackedOrder.orderId, phase);
-    setTrackedOrder(updated);
+    setTrackedOrder(sanitizeOrderItems(updated));
   };
 
   return (
-    <section className="pt-0.5 pb-6 sm:pt-1 sm:pb-8 bg-[#FAF8F5] dark:bg-[#0F0E0E] transition-colors duration-200">
+    <section className="pt-0.5 pb-4 sm:pt-1 sm:pb-6 bg-[#FAF8F5] dark:bg-[#0F0E0E] transition-colors duration-200">
       <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8">
         
         {/* Header - Compact Single Header */}
@@ -169,21 +173,11 @@ export const OrderTrackerSection: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Demo ID Suggestion */}
+          {/* Order lookup helper info */}
           <div className="mt-2 flex items-center justify-between text-[11px] text-[#736C65] dark:text-[#A69E96] flex-wrap gap-2">
-            <div className="flex items-center gap-1.5">
-              <span>Sample:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setInputOrderId('ART-2026-5526');
-                  performLookup('ART-2026-5526');
-                }}
-                className="text-[#C5A880] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] underline font-medium cursor-pointer"
-              >
-                #ART-2026-5526 (Caviar Pearl Bag)
-              </button>
-            </div>
+            <span className="text-[10px]">
+              🔒 Private & secure: only buyers with a verified Order ID can view status details.
+            </span>
           </div>
         </div>
 
@@ -192,6 +186,21 @@ export const OrderTrackerSection: React.FC = () => {
           <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 p-3 rounded-xl text-xs flex items-center gap-2 max-w-lg mx-auto mb-4">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
+          </div>
+        )}
+
+        {/* Empty State Prompt - Displayed when no order has been pasted yet */}
+        {!trackedOrder && !isSearching && !errorMsg && (
+          <div className="bg-white dark:bg-[#181716] rounded-2xl border border-[#E8DFD8] dark:border-[#2D2B28] p-6 sm:p-8 text-center max-w-lg mx-auto shadow-2xs space-y-3 my-4">
+            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#D4AF37] flex items-center justify-center mx-auto shadow-2xs">
+              <Truck className="w-6 h-6" />
+            </div>
+            <h3 className="font-serif text-lg font-bold text-[#1C1B1A] dark:text-[#F5F2EB]">
+              Lookup Your Order Progress
+            </h3>
+            <p className="text-xs text-[#736C65] dark:text-[#A69E96] leading-relaxed">
+              Enter or paste your Order ID above (e.g. <span className="font-mono text-[#D4AF37] font-bold">ART-2026-5526</span>) to view real-time handcrafting, quality check, and express delivery updates.
+            </p>
           </div>
         )}
 

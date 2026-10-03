@@ -28,8 +28,8 @@ export const DataSyncIndicator: React.FC = () => {
 
   return (
     <>
-      {/* Top Thin Micro-Progress Line when actively syncing */}
-      {isDataSyncing && (
+      {/* Top Thin Micro-Progress Line when actively manual syncing */}
+      {isManualSyncing && (
         <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-[#E8DFD8] overflow-hidden">
           <div className="h-full bg-gradient-to-r from-[#D4AF37] via-[#C5A880] to-[#1C1B1A] animate-pulse w-full" />
         </div>

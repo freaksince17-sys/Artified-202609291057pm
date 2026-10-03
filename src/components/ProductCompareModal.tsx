@@ -295,7 +295,7 @@ const ComparisonColumn: React.FC<ComparisonColumnProps> = ({
   const reviewsCount = calculateReviewsCount(product);
   const totalSold = calculateTotalSold(product);
 
-  const fallback = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80';
+  const fallback = CAVIAR_PEARL_BAG_IMAGE;
 
   return (
     <div className="bg-white rounded-2xl border border-[#E8DFD8] p-4 sm:p-5 shadow-xs space-y-4 flex flex-col justify-between">

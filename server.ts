@@ -3,6 +3,7 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import { PRODUCTS, DEFAULT_INSTAGRAM_ITEMS, DEFAULT_INSTAGRAM_HANDLE, DEFAULT_INSTAGRAM_PROFILE_URL, TIKTOK_REELS, DEFAULT_CRAFT_STORY } from './src/data/products.ts';
+import { DEFAULT_ARTISAN_PROFILE } from './src/data/artisanProfile.ts';
 
 async function startServer() {
   const app = express();
@@ -19,6 +20,8 @@ async function startServer() {
   const instagramSettingsJsonPath = path.resolve(dataDir, 'instagram_settings.json');
   const tiktokReelsJsonPath = path.resolve(dataDir, 'tiktok_reels.json');
   const craftStoryJsonPath = path.resolve(dataDir, 'craft_story.json');
+  const artisanProfileJsonPath = path.resolve(dataDir, 'artisan_profile.json');
+  const trackedOrdersJsonPath = path.resolve(dataDir, 'tracked_orders.json');
 
   // GET /api/products
   app.get('/api/products', (_req, res) => {
@@ -138,6 +141,127 @@ async function startServer() {
       return res.json({ success: true, ...data });
     } catch (err: any) {
       return res.status(500).json({ error: err.message || 'Failed to save Instagram settings' });
+    }
+  });
+
+  // GET /api/artisan-profile - Retrieve permanently saved artisan profile
+  app.get('/api/artisan-profile', (_req, res) => {
+    try {
+      if (fs.existsSync(artisanProfileJsonPath)) {
+        const raw = fs.readFileSync(artisanProfileJsonPath, 'utf-8');
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          return res.json({ ...DEFAULT_ARTISAN_PROFILE, ...data });
+        }
+      }
+      return res.json(DEFAULT_ARTISAN_PROFILE);
+    } catch (err) {
+      console.error('Error reading artisan_profile.json:', err);
+      return res.json(DEFAULT_ARTISAN_PROFILE);
+    }
+  });
+
+  // POST /api/artisan-profile - Save artisan profile permanently to server disk
+  app.post('/api/artisan-profile', (req, res) => {
+    try {
+      const incoming = req.body;
+      if (!incoming || typeof incoming !== 'object') {
+        return res.status(400).json({ error: 'Expected artisan profile object' });
+      }
+
+      // If avatarUrl is a base64 data URL, persist to public/artisan_avatar.png
+      if (incoming.avatarUrl && typeof incoming.avatarUrl === 'string' && incoming.avatarUrl.startsWith('data:image/')) {
+        try {
+          const publicDir = path.resolve(process.cwd(), 'public');
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          const base64Data = incoming.avatarUrl.replace(/^data:image\/\w+;base64,/, '');
+          const imgBuffer = Buffer.from(base64Data, 'base64');
+          const extMatch = incoming.avatarUrl.match(/^data:image\/(\w+);/);
+          const ext = extMatch ? (extMatch[1] === 'jpeg' ? 'jpg' : extMatch[1]) : 'png';
+          const avatarFilename = `artisan_avatar_${Date.now()}.${ext}`;
+          const avatarFilePath = path.join(publicDir, avatarFilename);
+          fs.writeFileSync(avatarFilePath, imgBuffer);
+          
+          // Save backup buffer to public/artisan_avatar.png
+          fs.writeFileSync(path.join(publicDir, 'artisan_avatar.png'), imgBuffer);
+          // Keep incoming.avatarUrl as self-contained data URL so it renders reliably everywhere without 404s
+        } catch (imgErr) {
+          console.warn('Notice: Error saving avatar image buffer to disk:', imgErr);
+        }
+      }
+
+      const merged = {
+        ...DEFAULT_ARTISAN_PROFILE,
+        ...incoming,
+        avatarUpdatedAt: incoming.avatarUpdatedAt || new Date().toISOString(),
+        pillar1: { ...DEFAULT_ARTISAN_PROFILE.pillar1, ...(incoming.pillar1 || {}) },
+        pillar2: { ...DEFAULT_ARTISAN_PROFILE.pillar2, ...(incoming.pillar2 || {}) },
+        pillar3: { ...DEFAULT_ARTISAN_PROFILE.pillar3, ...(incoming.pillar3 || {}) },
+        pillar4: { ...DEFAULT_ARTISAN_PROFILE.pillar4, ...(incoming.pillar4 || {}) },
+      };
+      fs.writeFileSync(artisanProfileJsonPath, JSON.stringify(merged, null, 2), 'utf-8');
+      return res.json({ success: true, profile: merged });
+    } catch (err: any) {
+      console.error('Error saving artisan_profile.json:', err);
+      return res.status(500).json({ error: err.message || 'Failed to save artisan profile' });
+    }
+  });
+
+  // GET /api/tracked-orders - Retrieve permanently saved tracked orders map
+  app.get('/api/tracked-orders', (_req, res) => {
+    try {
+      if (fs.existsSync(trackedOrdersJsonPath)) {
+        const raw = fs.readFileSync(trackedOrdersJsonPath, 'utf-8');
+        return res.json(JSON.parse(raw));
+      }
+      return res.json({});
+    } catch (err) {
+      return res.json({});
+    }
+  });
+
+  // POST /api/tracked-order - Update single order phase and details permanently
+  app.post('/api/tracked-order', (req, res) => {
+    try {
+      const order = req.body;
+      if (!order || !order.orderId) {
+        return res.status(400).json({ error: 'Missing orderId' });
+      }
+
+      let map: Record<string, any> = {};
+      if (fs.existsSync(trackedOrdersJsonPath)) {
+        try {
+          map = JSON.parse(fs.readFileSync(trackedOrdersJsonPath, 'utf-8'));
+        } catch {}
+      }
+
+      const norm = order.orderId.replace(/[#\s]/g, '').toUpperCase();
+      map[norm] = {
+        ...map[norm],
+        ...order,
+        updatedAt: new Date().toISOString()
+      };
+
+      fs.writeFileSync(trackedOrdersJsonPath, JSON.stringify(map, null, 2), 'utf-8');
+      return res.json({ success: true, order: map[norm] });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || 'Failed to save order' });
+    }
+  });
+
+  // POST /api/tracked-orders - Bulk update tracked orders map
+  app.post('/api/tracked-orders', (req, res) => {
+    try {
+      const incoming = req.body;
+      if (!incoming || typeof incoming !== 'object') {
+        return res.status(400).json({ error: 'Expected an object map' });
+      }
+      fs.writeFileSync(trackedOrdersJsonPath, JSON.stringify(incoming, null, 2), 'utf-8');
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || 'Failed to save tracked orders' });
     }
   });
 
@@ -310,49 +434,35 @@ async function startServer() {
         id: 'vid-tourmaline-necklace',
         title: 'Tourmaline Gemstone & Baroque Pearl Knotting Reel',
         url: '/instagram_videos/DdjhhazvaRr.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
+        thumbnail: '/instagram_videos/DdjhhazvaRr_cover.jpg',
         source: 'Instagram'
       },
       {
         id: 'vid-bag-weaving',
         title: 'Hand-weaving 600 Pearls Maya Aurelia Bag',
         url: '/tiktok_videos/7363984155060817160.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+        thumbnail: '/tiktok_videos/7363984155060817160_cover.jpg',
         source: 'TikTok'
-      },
-      {
-        id: 'vid-pearl-shine',
-        title: 'Freshwater Baroque Pearl Shine & Luster Test',
-        url: '/instagram_videos/DdIUMC4BqFr.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80',
-        source: 'Instagram'
       },
       {
         id: 'vid-bridal-unboxing',
         title: 'Custom Bridal Keepsake Gift Set Unboxing',
         url: '/tiktok_videos/7625655459537603860.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80',
+        thumbnail: '/tiktok_videos/7625655459537603860_cover.jpg',
         source: 'TikTok'
-      },
-      {
-        id: 'vid-chikamugal-atelier',
-        title: 'Artisan Handcrafting at Chikamugal Store',
-        url: '/instagram_videos/DdMRgKdP4HK.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1611591475152-478311399767?auto=format&fit=crop&w=600&q=80',
-        source: 'Instagram'
       },
       {
         id: 'vid-three-tier-collar',
         title: 'Three-Layered Pearl Collar Wedding Styling',
         url: '/tiktok_videos/7453859527411125512.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80',
+        thumbnail: '/tiktok_videos/7453859527411125512_cover.jpg',
         source: 'TikTok'
       },
       {
         id: 'vid-durability-test',
         title: 'Pearl Bag 15kg Tensile Core Durability Showcase',
         url: '/tiktok_videos/7495598629625842952.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+        thumbnail: '/tiktok_videos/7495598629625842952_cover.jpg',
         source: 'TikTok'
       }
     ];
@@ -835,13 +945,47 @@ async function startServer() {
     }
   });
 
+  // OpenGraph social sharing middleware: injects absolute domain into og:image and twitter:image
+  app.use(async (req, res, next) => {
+    const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+    const isBot = /facebookexternalhit|facebot|twitterbot|whatsapp|telegrambot|linkedinbot|discordbot|slackbot|googlebot|bingbot|pinterest/i.test(userAgent);
+    const isHtml = req.accepts('html') && (req.path === '/' || req.path === '/index.html' || !req.path.includes('.'));
+
+    if (isBot || (isHtml && req.path === '/')) {
+      try {
+        const indexPath = path.resolve(process.cwd(), isProd ? 'dist/index.html' : 'index.html');
+        if (fs.existsSync(indexPath)) {
+          let html = fs.readFileSync(indexPath, 'utf-8');
+          const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+          const host = req.headers['x-forwarded-host'] || req.get('host') || 'localhost:3000';
+          const origin = `${proto}://${host}`;
+          const absoluteOgImage = `${origin}/og-image.jpg`;
+
+          html = html
+            .replace(/content="\/og-image\.jpg"/g, `content="${absoluteOgImage}"`)
+            .replace(/content="og-image\.jpg"/g, `content="${absoluteOgImage}"`);
+
+          if (!isProd && viteInstance) {
+            html = await viteInstance.transformIndexHtml(req.originalUrl, html);
+          }
+          return res.status(200).set({ 'Content-Type': 'text/html' }).send(html);
+        }
+      } catch (err) {
+        console.warn('Notice: Error serving dynamic OpenGraph html:', err);
+      }
+    }
+    next();
+  });
+
   // Setup Vite dev server middleware or serve production build
+  let viteInstance: any = null;
   const isProd = process.env.NODE_ENV === 'production';
   if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true, port: Number(port), host: '0.0.0.0' },
       appType: 'spa',
     });
+    viteInstance = vite;
     app.use(vite.middlewares);
   } else {
     app.use(express.static(path.resolve(process.cwd(), 'dist')));

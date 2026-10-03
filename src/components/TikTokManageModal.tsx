@@ -361,7 +361,7 @@ export const TikTokManageModal: React.FC = () => {
                               src={reel.thumbnail.trim()}
                               alt={reel.title}
                               onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80';
+                                (e.currentTarget as HTMLImageElement).src = '/og-image.jpg';
                               }}
                               className="w-full h-full object-cover"
                             />
@@ -695,7 +695,7 @@ export const TikTokManageModal: React.FC = () => {
                           alt="Cover preview" 
                           className="w-full h-full object-cover" 
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80';
+                            (e.currentTarget as HTMLImageElement).src = '/og-image.jpg';
                           }}
                         />
                         <button

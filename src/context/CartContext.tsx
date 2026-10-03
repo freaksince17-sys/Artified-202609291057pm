@@ -32,7 +32,7 @@ import { sanitizeForFirestore } from '../utils/firestoreSanitizer';
 import { sanitizeReviewItem, getProductReviews, isProductBestSeller } from '../utils/productStats';
 import { getLoyaltyAccount, earnPurchasePoints } from '../data/loyaltyData';
 import { LoyaltyAccount } from '../types';
-import { buildTrackedOrderFromOrderDetails } from '../data/trackingData';
+import { buildTrackedOrderFromOrderDetails, syncTrackedOrdersFromServer } from '../data/trackingData';
 import { saveOrderToFirestore, seedDemoOrdersToFirestore } from '../services/orderTrackingService';
 import { 
   triggerRestockNotifications, 
@@ -40,8 +40,9 @@ import {
   dismissCustomerRestockAlert, 
   RestockAlertItem 
 } from '../utils/waitlistService';
+import { ArtisanProfileData, getArtisanProfile, saveArtisanProfile, fetchArtisanProfileFromServer } from '../data/artisanProfile';
 
-export type AppNavTab = 'home' | 'artisan' | 'tiktok' | 'journal' | 'craft' | 'craft-journal' | 'track' | 'orders';
+export type AppNavTab = 'home' | 'artisan' | 'lookbook' | 'tiktok' | 'journal' | 'craft' | 'craft-journal' | 'track' | 'orders';
 
 interface CartContextType {
   cart: CartItem[];
@@ -85,10 +86,12 @@ interface CartContextType {
   isOrderFAQsOpen: boolean;
   setIsOrderFAQsOpen: (val: boolean) => void;
   openOrderFAQsModal: () => void;
-  // Meet the Artisan Modal
+  // Meet the Artisan Modal & Master Profile State
   isMeetArtisanOpen: boolean;
   setIsMeetArtisanOpen: (val: boolean) => void;
   openMeetArtisanModal: () => void;
+  artisanProfile: ArtisanProfileData;
+  updateArtisanProfile: (profile: ArtisanProfileData) => Promise<void>;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   isCheckoutOpen: boolean;
@@ -754,17 +757,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch(() => {});
 
-    // 4. Hydrate Instagram Settings
+    // 4. Hydrate Instagram Settings from server disk, localStorage, and Firestore
     fetch('/api/instagram-settings')
       .then((res) => res.json())
       .then((settings) => {
-        if (settings?.handle) {
+        let localHandle = '';
+        let localUrl = '';
+        try {
+          localHandle = localStorage.getItem('artified_instagram_handle') || '';
+          localUrl = localStorage.getItem('artified_instagram_profile_url') || '';
+        } catch {}
+
+        // If local storage has user-saved settings, PRESERVE THEM and sync to server
+        if (localHandle && localHandle.trim()) {
+          setInstagramHandle(localHandle);
+          if (localUrl) setInstagramProfileUrl(localUrl);
+          fetch('/api/instagram-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              handle: localHandle, 
+              profileUrl: localUrl || `https://www.instagram.com/${localHandle.replace('@', '')}/` 
+            })
+          }).catch(() => {});
+        } else if (settings?.handle && settings?.profileUrl) {
           setInstagramHandle(settings.handle);
-          try { localStorage.setItem('artified_instagram_handle', settings.handle); } catch {}
-        }
-        if (settings?.profileUrl) {
           setInstagramProfileUrl(settings.profileUrl);
-          try { localStorage.setItem('artified_instagram_profile_url', settings.profileUrl); } catch {}
+          try {
+            localStorage.setItem('artified_instagram_handle', settings.handle);
+            localStorage.setItem('artified_instagram_profile_url', settings.profileUrl);
+          } catch {}
         }
       })
       .catch(() => {});
@@ -782,8 +804,41 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch(() => {});
 
-    // 6. Ensure standard orders exist in Firestore for real-time tracking
+    // 6. Hydrate Artisan Profile from server disk & Firestore
+    fetchArtisanProfileFromServer().then((profile) => {
+      if (profile) setArtisanProfile(profile);
+    }).catch(() => {});
+
+    // 7. Hydrate Tracked Orders from server disk
+    fetch('/api/tracked-orders')
+      .then((res) => res.json())
+      .then((ordersMap) => {
+        if (ordersMap && typeof ordersMap === 'object') {
+          syncTrackedOrdersFromServer(ordersMap);
+        }
+      })
+      .catch(() => {});
+
+    // 8. Seed demo orders to Firestore for real-time tracking sync
     seedDemoOrdersToFirestore().catch(() => {});
+  }, []);
+
+  const [artisanProfile, setArtisanProfile] = useState<ArtisanProfileData>(() => getArtisanProfile());
+
+  const updateArtisanProfile = async (newProfile: ArtisanProfileData) => {
+    setArtisanProfile(newProfile);
+    await saveArtisanProfile(newProfile);
+  };
+
+  useEffect(() => {
+    const handleArtisanUpdate = (e: Event) => {
+      const ce = e as CustomEvent<ArtisanProfileData>;
+      if (ce.detail) {
+        setArtisanProfile(ce.detail);
+      }
+    };
+    window.addEventListener('artified_artisan_updated', handleArtisanUpdate);
+    return () => window.removeEventListener('artified_artisan_updated', handleArtisanUpdate);
   }, []);
 
   const [isInstagramManagerOpen, setIsInstagramManagerOpen] = useState<boolean>(false);
@@ -829,9 +884,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return PRODUCTS.map(sanitizeProduct);
   });
 
-  const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
-  const [syncStatusText, setSyncStatusText] = useState<string>('Connecting to live cloud...');
-  const [isDataSyncing, setIsDataSyncing] = useState<boolean>(true);
+  const [isCloudSynced, setIsCloudSynced] = useState<boolean>(true);
+  const [syncStatusText, setSyncStatusText] = useState<string>('Live Cloud Storage Ready');
+  const [isDataSyncing, setIsDataSyncing] = useState<boolean>(false);
 
   // Product Image Fit Mode (contain = whole piece visible, cover = fill box)
   const [productImageFit, setProductImageFitState] = useState<'contain' | 'cover'>(() => {
@@ -1446,14 +1501,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Seller / Atelier Mode State (default invisible to buyers)
+  // Seller / Atelier Mode State (persists reliably in localStorage & sessionStorage)
   const [isSellerMode, setIsSellerModeState] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('seller') === 'true' || urlParams.get('admin') === 'true' || urlParams.get('atelier') === 'admin') {
         return true;
       }
-      return sessionStorage.getItem('artified_seller_session') === 'active';
+      return (
+        localStorage.getItem('artified_seller_mode') === 'true' ||
+        sessionStorage.getItem('artified_seller_session') === 'active'
+      );
     }
     return false;
   });
@@ -1467,8 +1525,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsSellerModeState(val);
     if (typeof window !== 'undefined') {
       if (val) {
+        localStorage.setItem('artified_seller_mode', 'true');
         sessionStorage.setItem('artified_seller_session', 'active');
       } else {
+        localStorage.removeItem('artified_seller_mode');
         sessionStorage.removeItem('artified_seller_session');
       }
     }
@@ -1916,6 +1976,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const docRef = doc(db, 'store_settings', 'instagram');
       setDoc(docRef, { handle: cleanHandle, profileUrl: cleanUrl }, { merge: true }).catch(() => {});
     } catch {}
+
+    // Synchronize with artisanProfile if it differs
+    if (artisanProfile && artisanProfile.instagramHandle !== cleanHandle) {
+      const syncedProfile = { ...artisanProfile, instagramHandle: cleanHandle };
+      setArtisanProfile(syncedProfile);
+      saveArtisanProfile(syncedProfile).catch(() => {});
+    }
   };
 
   // Keyboard shortcut listener for Seller Mode (Alt + Shift + S or Ctrl + Shift + S)
@@ -2381,10 +2448,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isOrderFAQsOpen,
         setIsOrderFAQsOpen,
         openOrderFAQsModal,
-        // Meet the Artisan Modal
+        // Meet the Artisan Modal & Master Profile State
         isMeetArtisanOpen,
         setIsMeetArtisanOpen,
         openMeetArtisanModal,
+        artisanProfile,
+        updateArtisanProfile,
         // Product Comparison Feature
         compareProducts,
         isCompareOpen,

@@ -347,10 +347,20 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
     }
   };
 
+  // ESC key handler to close modal
+  useEffect(() => {
+    if (!activeItem) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveItem(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeItem]);
+
   return (
     <section 
       id="instagram-section" 
-      className={`pt-1 pb-6 sm:pt-2 sm:pb-10 bg-gradient-to-b from-[#FFF0F5] via-[#FFE4EC] to-[#FFF0F5] ${embedded ? '' : 'border-t border-[#FAD2E1]'}`}
+      className={`pt-1 pb-4 sm:pt-1.5 sm:pb-6 bg-gradient-to-b from-[#FFF0F5] via-[#FFE4EC] to-[#FFF0F5] ${embedded ? '' : 'border-t border-[#FAD2E1]'}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -505,6 +515,17 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
 
           <div className="relative bg-[#1C1B1A] text-white w-full max-w-3xl rounded-3xl overflow-hidden border border-[#34312F] shadow-2xl z-10 flex flex-col md:flex-row max-h-[92vh]">
             
+            {/* Prominent Floating Close Button (Always visible on mobile and desktop) */}
+            <button
+              type="button"
+              onClick={() => setActiveItem(null)}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 p-2 sm:p-2.5 rounded-full bg-black/80 hover:bg-black text-white hover:text-[#D4AF37] border border-white/30 hover:border-[#D4AF37] backdrop-blur-md shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center"
+              title="Close (ESC)"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+            </button>
+
             {/* Left Media (Portrait Video with Playback and Double-Click Direct to Instagram) */}
             <div 
               onDoubleClick={() => openInstagramDirect(activeItem.postUrl || instagramProfileUrl)}

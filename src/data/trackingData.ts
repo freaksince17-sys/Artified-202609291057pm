@@ -2,6 +2,7 @@ import { TrackedOrderData, OrderDetails, OrderProductionPhase, TrackingMilestone
 import { recordOrderStatusChange } from '../utils/orderNotificationManager';
 import { saveOrderToFirestore } from '../services/orderTrackingService';
 import { CAVIAR_PEARL_BAG_IMAGE, getRealProductImage } from '../utils/productImages';
+import SAVED_TRACKED_ORDERS from './tracked_orders.json';
 
 /**
  * Builds the 4 exact milestones requested:
@@ -61,25 +62,32 @@ export function buildMilestonesForPhase(
   ];
 }
 
-export function getProgressPercentage(phase: OrderProductionPhase): number {
+export function getProgressPercentage(phase?: OrderProductionPhase): number {
   switch (phase) {
     case 'confirmed': return 25;
-    case 'handcrafting_and_packaging': return 60;
+    case 'handcrafting_and_packaging':
+    case 'beading_in_progress':
+    case 'quality_and_packaging':
+      return 60;
     case 'out_for_delivery': return 85;
     case 'delivered': return 100;
-    default: return 50;
+    default: return 85;
   }
 }
+
+const savedOrders = (SAVED_TRACKED_ORDERS as Record<string, Partial<TrackedOrderData>>) || {};
+const initialOrder5526 = savedOrders['ART-2026-5526'] || {};
+const activePhase5526: OrderProductionPhase = (initialOrder5526.currentPhase as OrderProductionPhase) || 'out_for_delivery';
 
 export const DEMO_TRACKED_ORDERS: Record<string, TrackedOrderData> = {
   'ART-2026-5526': {
     orderId: 'ART-2026-5526',
-    customerName: 'Lamar Anzelov',
-    phone: '9703726980',
-    deliveryAddress: '175/25, Kathmandu Valley',
-    deliveryZoneName: 'Inside Ring Road (Kathmandu / Lalitpur)',
-    paymentMethodText: 'Direct Order / Cash on Delivery',
-    paymentStatus: 'Paid & Verified',
+    customerName: initialOrder5526.customerName || 'Lamar Anzelov',
+    phone: initialOrder5526.phone || '9703726980',
+    deliveryAddress: initialOrder5526.deliveryAddress || '175/25, Kathmandu Valley',
+    deliveryZoneName: initialOrder5526.deliveryZoneName || 'Inside Ring Road (Kathmandu / Lalitpur)',
+    paymentMethodText: initialOrder5526.paymentMethodText || 'Direct Order / Cash on Delivery',
+    paymentStatus: initialOrder5526.paymentStatus || 'Paid & Verified',
     items: [
       {
         title: 'Caviar Pearl Bag',
@@ -89,16 +97,18 @@ export const DEMO_TRACKED_ORDERS: Record<string, TrackedOrderData> = {
         customization: 'Handcrafted by Sahina Shrestha'
       }
     ],
-    total: 2499,
-    orderPlacedDate: 'Recent Order',
-    estimatedDeliveryDate: '1-2 business days',
-    currentPhase: 'confirmed',
-    progressPercentage: 25,
+    total: initialOrder5526.total || 2499,
+    orderPlacedDate: initialOrder5526.orderPlacedDate || 'Recent Order',
+    estimatedDeliveryDate: initialOrder5526.estimatedDeliveryDate || '1-2 business days',
+    currentPhase: activePhase5526,
+    progressPercentage: getProgressPercentage(activePhase5526),
     artisanName: 'Sahina Shrestha',
     artisanRole: 'Founder & Master Handcrafter',
     studioLocation: 'Artified Workshop, Chikamugal, Kathmandu',
-    liveCraftNotes: 'Your order was received and confirmed! Sahina Shrestha has reserved the required luster pearls and high-strength threads. Handcrafting is scheduled at our Chikamugal workshop.',
-    milestones: buildMilestonesForPhase('confirmed', 'Recent Order', '1-2 business days', '175/25, Inside Ring Road')
+    liveCraftNotes: initialOrder5526.liveCraftNotes || 'Your Caviar Pearl Bag was meticulously hand-woven and inspected at our Chikamugal workshop. It has been handed over to our express courier for delivery to your doorstep.',
+    courierPartner: initialOrder5526.courierPartner || 'Kathmandu Valley Express Courier',
+    consignmentCode: initialOrder5526.consignmentCode || 'KTM-EXP-5526',
+    milestones: buildMilestonesForPhase(activePhase5526, 'Recent Order', '1-2 business days', '175/25, Inside Ring Road')
   }
 };
 
@@ -133,6 +143,23 @@ export function saveTrackedOrder(order: TrackedOrderData): void {
     map[norm] = order;
     localStorage.setItem('artified_tracked_orders', JSON.stringify(map));
 
+    // Also update in-memory DEMO_TRACKED_ORDERS so it never reverts
+    if (DEMO_TRACKED_ORDERS[norm]) {
+      DEMO_TRACKED_ORDERS[norm] = {
+        ...DEMO_TRACKED_ORDERS[norm],
+        ...order
+      };
+    }
+
+    // Sync to server disk
+    try {
+      fetch('/api/tracked-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      }).catch(() => {});
+    } catch {}
+
     // Real-time Firestore sync
     saveOrderToFirestore(order).catch((err) => {
       console.warn('Notice: Firestore order tracking save:', err);
@@ -150,7 +177,7 @@ export function saveTrackedOrder(order: TrackedOrderData): void {
  */
 export function updateOrderPhase(
   orderIdInput: string,
-  phase: OrderProductionPhase,
+  phase?: OrderProductionPhase,
   updates?: {
     liveCraftNotes?: string;
     courierPartner?: string;
@@ -159,24 +186,77 @@ export function updateOrderPhase(
   }
 ): TrackedOrderData {
   const current = getTrackedOrder(orderIdInput) || generateDynamicTrackedOrder(orderIdInput);
+  const targetPhase: OrderProductionPhase = phase || current.currentPhase || 'out_for_delivery';
   const updated: TrackedOrderData = {
     ...current,
-    currentPhase: phase,
-    progressPercentage: getProgressPercentage(phase),
+    currentPhase: targetPhase,
+    progressPercentage: getProgressPercentage(targetPhase),
     liveCraftNotes: updates?.liveCraftNotes ?? current.liveCraftNotes,
     courierPartner: updates?.courierPartner ?? current.courierPartner,
     consignmentCode: updates?.consignmentCode ?? current.consignmentCode,
     estimatedDeliveryDate: updates?.estimatedDeliveryDate ?? current.estimatedDeliveryDate,
     milestones: buildMilestonesForPhase(
-      phase,
+      targetPhase,
       current.orderPlacedDate,
       updates?.estimatedDeliveryDate ?? current.estimatedDeliveryDate,
       current.deliveryAddress || current.deliveryZoneName
     )
   };
 
+  const norm = normalizeOrderId(orderIdInput);
+  if (DEMO_TRACKED_ORDERS[norm]) {
+    DEMO_TRACKED_ORDERS[norm] = {
+      ...DEMO_TRACKED_ORDERS[norm],
+      ...updated
+    };
+  }
+
   saveTrackedOrder(updated);
   return updated;
+}
+
+/**
+ * Synchronizes tracked orders from server disk into in-memory state and localStorage.
+ */
+export function syncTrackedOrdersFromServer(ordersMap: Record<string, TrackedOrderData>): void {
+  if (!ordersMap || typeof ordersMap !== 'object') return;
+
+  try {
+    const raw = localStorage.getItem('artified_tracked_orders');
+    const localMap: Record<string, TrackedOrderData> = raw ? JSON.parse(raw) : {};
+
+    Object.entries(ordersMap).forEach(([rawKey, serverOrder]) => {
+      const norm = normalizeOrderId(serverOrder.orderId || rawKey);
+      const enrichedOrder: TrackedOrderData = {
+        ...serverOrder,
+        orderId: norm,
+        progressPercentage: getProgressPercentage(serverOrder.currentPhase),
+        milestones: serverOrder.milestones && serverOrder.milestones.length > 0
+          ? serverOrder.milestones
+          : buildMilestonesForPhase(
+              serverOrder.currentPhase || 'out_for_delivery',
+              serverOrder.orderPlacedDate || 'Recent Order',
+              serverOrder.estimatedDeliveryDate || '1-2 business days',
+              serverOrder.deliveryAddress || 'Kathmandu Valley'
+            )
+      };
+
+      localMap[norm] = enrichedOrder;
+
+      if (DEMO_TRACKED_ORDERS[norm]) {
+        DEMO_TRACKED_ORDERS[norm] = {
+          ...DEMO_TRACKED_ORDERS[norm],
+          ...enrichedOrder
+        };
+      }
+
+      window.dispatchEvent(new CustomEvent('artified_order_updated', { detail: enrichedOrder }));
+    });
+
+    localStorage.setItem('artified_tracked_orders', JSON.stringify(localMap));
+  } catch (err) {
+    console.warn('Notice: Error syncing tracked orders from server:', err);
+  }
 }
 
 /**

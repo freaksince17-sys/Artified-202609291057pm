@@ -40,7 +40,7 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
     date: '2 days ago',
     verifiedPurchase: true,
     customerPhoto: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80',
-    itemImage: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80',
+    itemImage: '/og-image.jpg',
     likesCount: 38,
     tag: 'bag'
   },
@@ -115,7 +115,7 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
     date: '3 weeks ago',
     verifiedPurchase: true,
     customerPhoto: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=700&q=80',
-    itemImage: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80',
+    itemImage: '/og-image.jpg',
     likesCount: 63,
     tag: 'bag'
   },
@@ -160,7 +160,7 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
     date: '1 month ago',
     verifiedPurchase: true,
     customerPhoto: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80',
-    itemImage: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80',
+    itemImage: '/og-image.jpg',
     likesCount: 29,
     tag: 'accessories'
   }
@@ -290,7 +290,7 @@ export const CustomerReviews: React.FC = () => {
       date: 'Just now',
       verifiedPurchase: true,
       customerPhoto: photoPreview || undefined,
-      itemImage: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80',
+      itemImage: '/og-image.jpg',
       likesCount: 1,
       tag: productName.toLowerCase().includes('choker') ? 'choker' : 'bag'
     };
