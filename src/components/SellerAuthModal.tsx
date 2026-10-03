@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, KeyRound, Sparkles, X, Check, ShieldCheck, HelpCircle, Key } from 'lucide-react';
+import { Lock, KeyRound, Sparkles, X, Check, ShieldCheck, HelpCircle, Key, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { validateSellerPassword, isCustomPasswordSet } from '../utils/sellerAuthService';
+import { validateSellerPassword, validateSellerPasswordAsync, isCustomPasswordSet } from '../utils/sellerAuthService';
 import { SellerChangePasswordModal } from './SellerChangePasswordModal';
 
 export const SellerAuthModal: React.FC = () => {
@@ -9,25 +9,39 @@ export const SellerAuthModal: React.FC = () => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   if (!isSellerAuthModalOpen) return null;
 
   const hasCustom = isCustomPasswordSet();
 
-  const handleUnlock = (e: React.FormEvent) => {
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateSellerPassword(pin)) {
-      setError(false);
-      setSuccess(true);
-      setTimeout(() => {
-        setIsSellerMode(true);
-        setIsSellerAuthModalOpen(false);
-        setSuccess(false);
-        setPin('');
-      }, 500);
-    } else {
+    if (isVerifying) return;
+    setIsVerifying(true);
+    setError(false);
+
+    try {
+      // First quick sync check, then full async hash verification against Firebase
+      const isValid = validateSellerPassword(pin) || (await validateSellerPasswordAsync(pin));
+      if (isValid) {
+        setError(false);
+        setSuccess(true);
+        setTimeout(() => {
+          setIsSellerMode(true);
+          setIsSellerAuthModalOpen(false);
+          setSuccess(false);
+          setPin('');
+          setIsVerifying(false);
+        }, 400);
+      } else {
+        setError(true);
+        setIsVerifying(false);
+      }
+    } catch {
       setError(true);
+      setIsVerifying(false);
     }
   };
 

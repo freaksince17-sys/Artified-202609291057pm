@@ -429,7 +429,13 @@ async function startServer() {
 
   const sellerSettingsJsonPath = path.resolve(process.cwd(), 'src/data/seller_settings.json');
 
-  // GET /api/seller-password - Retrieve custom seller password from server disk
+  // Helper for server-side password hashing
+  const hashSellerPasscode = (pass: string, salt: string) => {
+    const crypto = require('crypto');
+    return crypto.createHash('sha256').update(`${salt}:${pass.trim()}`).digest('hex');
+  };
+
+  // GET /api/seller-password - Retrieve custom seller password and hash from server disk
   app.get('/api/seller-password', (_req, res) => {
     try {
       if (fs.existsSync(sellerSettingsJsonPath)) {
@@ -437,34 +443,50 @@ async function startServer() {
         const data = JSON.parse(raw);
         if (data && typeof data === 'object') {
           return res.json({
-            hasCustom: Boolean(data.customPassword && data.customPassword.trim()),
+            hasCustom: Boolean(data.passwordHash || (data.customPassword && data.customPassword.trim())),
             customPassword: data.customPassword || null,
+            passwordHash: data.passwordHash || (data.customPassword ? hashSellerPasscode(data.customPassword, data.salt || 'artified_salt_2026') : null),
+            salt: data.salt || 'artified_salt_2026',
+            updatedAt: data.updatedAt || null
           });
         }
       }
-      return res.json({ hasCustom: false, customPassword: null });
+      return res.json({ hasCustom: false, customPassword: null, passwordHash: null, salt: 'artified_salt_2026' });
     } catch (err) {
       console.error('Error reading seller_settings.json:', err);
-      return res.json({ hasCustom: false, customPassword: null });
+      return res.json({ hasCustom: false, customPassword: null, passwordHash: null, salt: 'artified_salt_2026' });
     }
   });
 
-  // POST /api/seller-password - Update seller studio password permanently
+  // POST /api/seller-password - Update seller studio password permanently with SHA-256 hashing
   app.post('/api/seller-password', (req, res) => {
     try {
-      const { password } = req.body;
+      const { password, passwordHash, salt } = req.body;
       const clean = (password || '').trim();
-      if (!clean || clean.length < 4) {
-        return res.status(400).json({ error: 'Password must be at least 4 characters long' });
+      const effectiveSalt = salt || `salt_${Date.now()}`;
+      
+      let computedHash = passwordHash;
+      if (!computedHash && clean) {
+        if (clean.length < 4) {
+          return res.status(400).json({ error: 'Password must be at least 4 characters long' });
+        }
+        computedHash = hashSellerPasscode(clean, effectiveSalt);
+      }
+
+      if (!computedHash) {
+        return res.status(400).json({ error: 'Missing password or password hash' });
       }
 
       const data = {
-        customPassword: clean,
+        customPassword: clean || null,
+        passwordHash: computedHash,
+        salt: effectiveSalt,
+        hasCustom: true,
         updatedAt: new Date().toISOString()
       };
 
       fs.writeFileSync(sellerSettingsJsonPath, JSON.stringify(data, null, 2), 'utf-8');
-      return res.json({ success: true, hasCustom: true, customPassword: clean });
+      return res.json({ success: true, hasCustom: true, passwordHash: computedHash, salt: effectiveSalt, customPassword: clean });
     } catch (err: any) {
       console.error('Error saving seller_settings.json:', err);
       return res.status(500).json({ error: err.message || 'Failed to save password' });
@@ -477,7 +499,7 @@ async function startServer() {
       if (fs.existsSync(sellerSettingsJsonPath)) {
         fs.unlinkSync(sellerSettingsJsonPath);
       }
-      return res.json({ success: true, hasCustom: false, customPassword: null });
+      return res.json({ success: true, hasCustom: false, customPassword: null, passwordHash: null });
     } catch (err: any) {
       console.error('Error resetting seller_settings.json:', err);
       return res.status(500).json({ error: err.message || 'Failed to reset password' });

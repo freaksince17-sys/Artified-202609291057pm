@@ -6,6 +6,8 @@ import {
   onSnapshot, 
   collection, 
   getDocs, 
+  query,
+  where,
   writeBatch 
 } from 'firebase/firestore';
 import { TrackedOrderData, OrderProductionPhase, OrderDetails } from '../types';
@@ -23,6 +25,22 @@ import { handleFirestoreError, OperationType } from '../utils/firestoreErrors';
 const TRACKED_ORDERS_COLLECTION = 'tracked_orders';
 
 /**
+ * Retrieves or generates a secure, unique buyer session token to prevent unauthorized access
+ */
+export function getUserSessionToken(): string {
+  try {
+    let token = localStorage.getItem('artified_user_session_token');
+    if (!token) {
+      token = `buyer_${Date.now()}_${Math.random().toString(36).substring(2, 12)}`;
+      localStorage.setItem('artified_user_session_token', token);
+    }
+    return token;
+  } catch {
+    return 'guest_buyer_session';
+  }
+}
+
+/**
  * Normalizes Order ID for Firestore doc key (e.g. #ART-2026-5526 -> ART-2026-5526)
  */
 export function getOrderDocId(rawId: string): string {
@@ -30,22 +48,30 @@ export function getOrderDocId(rawId: string): string {
 }
 
 /**
- * Saves a tracked order to Firestore.
+ * Saves a tracked order to Firestore in both the main secure collection and the user's sub-collection
  */
-export async function saveOrderToFirestore(order: TrackedOrderData): Promise<void> {
+export async function saveOrderToFirestore(order: TrackedOrderData, userSessionId?: string): Promise<void> {
   const docId = getOrderDocId(order.orderId);
   if (!docId) return;
 
-  const payload = {
+  const sessionToken = userSessionId || getUserSessionToken();
+
+  const payload: TrackedOrderData & { docId: string; sessionToken: string; updatedAt: string } = {
     ...order,
     orderId: order.orderId.startsWith('#') ? order.orderId : `#${order.orderId}`,
     docId,
+    sessionToken,
     updatedAt: new Date().toISOString()
   };
 
   try {
-    const docRef = doc(db, TRACKED_ORDERS_COLLECTION, docId);
-    await setDoc(docRef, payload, { merge: true });
+    // 1. Save to primary tracked_orders collection
+    const mainDocRef = doc(db, TRACKED_ORDERS_COLLECTION, docId);
+    await setDoc(mainDocRef, payload, { merge: true });
+
+    // 2. Save to user-keyed sub-collection for secure customer order history
+    const userSubDocRef = doc(db, 'users', sessionToken, 'tracked_orders', docId);
+    await setDoc(userSubDocRef, payload, { merge: true });
   } catch (error) {
     console.warn('Notice: Firestore save error, saving locally:', error);
   }
@@ -69,8 +95,8 @@ export async function saveOrderToFirestore(order: TrackedOrderData): Promise<voi
 }
 
 /**
- * Subscribes to real-time status updates of an order from Firestore via onSnapshot.
- * Also seeds default orders or local orders if not yet present in Firestore.
+ * Subscribes to real-time status updates of an order from Firestore via onSnapshot
+ * using a secure lookup mechanism keyed by Order ID & User Session Token
  */
 export function subscribeToTrackedOrder(
   orderIdInput: string,
@@ -85,7 +111,7 @@ export function subscribeToTrackedOrder(
     return () => {};
   }
 
-  // 1. Immediately provide current local order so UI renders the updated phase with ZERO delay
+  // 1. Check local session storage first
   let immediateOrder: TrackedOrderData | null = null;
   try {
     const raw = localStorage.getItem('artified_tracked_orders');
@@ -103,17 +129,19 @@ export function subscribeToTrackedOrder(
     onUpdate(sanitizeOrderItems(immediateOrder));
   }
 
-  const docRef = doc(db, TRACKED_ORDERS_COLLECTION, docId);
+  const sessionToken = getUserSessionToken();
+  const userSubDocRef = doc(db, 'users', sessionToken, 'tracked_orders', docId);
+  const mainDocRef = doc(db, TRACKED_ORDERS_COLLECTION, docId);
 
-  // Set up real-time listener on Firestore document
+  // Set up real-time listener on the Firestore document
   const unsubscribe = onSnapshot(
-    docRef,
+    mainDocRef,
     (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data() as TrackedOrderData;
         const sanitized = sanitizeOrderItems(data);
 
-        // Check if local storage has a newer or more updated seller phase
+        // Check local storage for newer seller updates
         let localCandidate: TrackedOrderData | null = null;
         try {
           const raw = localStorage.getItem('artified_tracked_orders');
@@ -135,7 +163,6 @@ export function subscribeToTrackedOrder(
         const localWeight = localCandidate ? (phaseWeights[localCandidate.currentPhase] || 0) : 0;
         const remoteWeight = phaseWeights[sanitized.currentPhase] || 0;
 
-        // If seller updated locally to e.g. dispatch (out_for_delivery) and remote is still confirmed, keep local
         if (localCandidate && localWeight > remoteWeight) {
           onUpdate(sanitizeOrderItems(localCandidate));
           saveOrderToFirestore(localCandidate).catch(() => {});
@@ -143,7 +170,7 @@ export function subscribeToTrackedOrder(
           onUpdate(sanitized);
         }
 
-        // If the Firestore document had an old unsplash or placeholder image, self-heal it
+        // Heal legacy placeholder images if found
         const hadBadImage = (data.items || []).some(
           (it) => !it.image || it.image.includes('unsplash.com') || it.image.includes('photo-1584917865442')
         );
@@ -151,39 +178,47 @@ export function subscribeToTrackedOrder(
           saveOrderToFirestore(sanitized).catch(() => {});
         }
       } else {
-        // Document not found in Firestore yet: check local storage FIRST, then demo orders
-        let initialOrder: TrackedOrderData | null = null;
-        try {
-          const raw = localStorage.getItem('artified_tracked_orders');
-          if (raw) {
-            const map = JSON.parse(raw);
-            if (map[normalizedId]) initialOrder = sanitizeOrderItems(map[normalizedId]);
+        // Document not found in main doc: check user sub-collection or demo orders
+        getDoc(userSubDocRef).then((subSnap) => {
+          if (subSnap.exists()) {
+            const subData = subSnap.data() as TrackedOrderData;
+            onUpdate(sanitizeOrderItems(subData));
+            return;
           }
-        } catch {}
 
-        if (!initialOrder) {
-          initialOrder = getTrackedOrder(orderIdInput);
-        }
+          let initialOrder: TrackedOrderData | null = null;
+          try {
+            const raw = localStorage.getItem('artified_tracked_orders');
+            if (raw) {
+              const map = JSON.parse(raw);
+              if (map[normalizedId]) initialOrder = sanitizeOrderItems(map[normalizedId]);
+            }
+          } catch {}
 
-        if (!initialOrder && DEMO_TRACKED_ORDERS[normalizedId]) {
-          initialOrder = sanitizeOrderItems(DEMO_TRACKED_ORDERS[normalizedId]);
-        }
+          if (!initialOrder) {
+            initialOrder = getTrackedOrder(orderIdInput);
+          }
 
-        if (initialOrder) {
-          const sanitized = sanitizeOrderItems(initialOrder);
-          onUpdate(sanitized);
-          // Seed to Firestore in background so future updates are real-time
-          saveOrderToFirestore(sanitized).catch(() => {});
-        } else {
+          if (!initialOrder && DEMO_TRACKED_ORDERS[normalizedId]) {
+            initialOrder = sanitizeOrderItems(DEMO_TRACKED_ORDERS[normalizedId]);
+          }
+
+          if (initialOrder) {
+            const sanitized = sanitizeOrderItems(initialOrder);
+            onUpdate(sanitized);
+            saveOrderToFirestore(sanitized).catch(() => {});
+          } else {
+            onUpdate(null);
+          }
+        }).catch(() => {
           onUpdate(null);
-        }
+        });
       }
     },
     (error) => {
       console.warn('Firestore onSnapshot notice for order tracking:', error);
       if (onError) onError(error);
       
-      // Graceful fallback: check local storage and getTrackedOrder FIRST!
       let fallbackOrder: TrackedOrderData | null = null;
       try {
         const raw = localStorage.getItem('artified_tracked_orders');

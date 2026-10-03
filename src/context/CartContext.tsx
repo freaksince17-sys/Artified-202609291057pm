@@ -20,6 +20,7 @@ import {
 import { 
   collection, 
   doc, 
+  getDoc,
   setDoc, 
   deleteDoc, 
   onSnapshot, 
@@ -757,7 +758,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch(() => {});
 
-    // 4. Hydrate Instagram Settings from server disk, localStorage, and Firestore
+    // 4. Hydrate Instagram Settings from Firestore and server disk
+    try {
+      const igDocRef = doc(db, 'store_settings', 'instagram');
+      getDoc(igDocRef).then((snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data?.handle) setInstagramHandle(data.handle);
+          if (data?.profileUrl) setInstagramProfileUrl(data.profileUrl);
+        }
+      }).catch(() => {});
+
+      onSnapshot(igDocRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data?.handle) setInstagramHandle(data.handle);
+          if (data?.profileUrl) setInstagramProfileUrl(data.profileUrl);
+        }
+      }, () => {});
+    } catch {}
+
     fetch('/api/instagram-settings')
       .then((res) => res.json())
       .then((settings) => {
@@ -768,30 +788,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localUrl = localStorage.getItem('artified_instagram_profile_url') || '';
         } catch {}
 
-        // If local storage has user-saved settings, PRESERVE THEM and sync to server
         if (localHandle && localHandle.trim()) {
           setInstagramHandle(localHandle);
           if (localUrl) setInstagramProfileUrl(localUrl);
-          fetch('/api/instagram-settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              handle: localHandle, 
-              profileUrl: localUrl || `https://www.instagram.com/${localHandle.replace('@', '')}/` 
-            })
-          }).catch(() => {});
         } else if (settings?.handle && settings?.profileUrl) {
           setInstagramHandle(settings.handle);
           setInstagramProfileUrl(settings.profileUrl);
-          try {
-            localStorage.setItem('artified_instagram_handle', settings.handle);
-            localStorage.setItem('artified_instagram_profile_url', settings.profileUrl);
-          } catch {}
         }
       })
       .catch(() => {});
 
-    // 5. Hydrate Craft Story from server disk
+    // 5. Hydrate Craft Story from Firestore and server disk
+    try {
+      const storyDocRef = doc(db, 'store_settings', 'craft_story');
+      getDoc(storyDocRef).then((snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data && data.title) {
+            setCraftStory((prev) => ({ ...prev, ...data }));
+          }
+        }
+      }).catch(() => {});
+    } catch {}
+
     fetch('/api/craft-story')
       .then((res) => res.json())
       .then((story) => {
@@ -804,7 +823,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch(() => {});
 
-    // 6. Hydrate Artisan Profile from server disk & Firestore
+    // 6. Hydrate Artisan Profile from Firestore & server disk
+    try {
+      const artisanDocRef = doc(db, 'activeProfile', 'sahina_shrestha');
+      onSnapshot(artisanDocRef, (snap) => {
+        if (snap.exists()) {
+          const remoteData = snap.data() as ArtisanProfileData;
+          if (remoteData && remoteData.artisanName) {
+            setArtisanProfile((prev) => ({
+              ...prev,
+              ...remoteData,
+              avatarUrl: remoteData.avatarUrl || prev.avatarUrl
+            }));
+          }
+        }
+      }, () => {});
+    } catch {}
+
     fetchArtisanProfileFromServer().then((profile) => {
       if (profile) setArtisanProfile(profile);
     }).catch(() => {});

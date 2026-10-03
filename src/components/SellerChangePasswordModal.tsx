@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Lock, KeyRound, Check, X, ShieldAlert, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Lock, KeyRound, Check, X, ShieldAlert, ShieldCheck, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { 
   validateSellerPassword, 
-  setCustomSellerPassword, 
+  validateSellerPasswordAsync,
+  setCustomSellerPasswordAsync, 
   isCustomPasswordSet,
-  resetSellerPasswordToDefault 
+  resetSellerPasswordToDefaultAsync 
 } from '../utils/sellerAuthService';
 
 interface SellerChangePasswordModalProps {
@@ -21,6 +22,7 @@ export const SellerChangePasswordModal: React.FC<SellerChangePasswordModalProps>
   const [confirmPass, setConfirmPass] = useState('');
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -28,49 +30,62 @@ export const SellerChangePasswordModal: React.FC<SellerChangePasswordModalProps>
 
   const hasCustom = isCustomPasswordSet();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     setErrorMsg('');
     setSuccessMsg('');
+    setIsSaving(true);
 
-    // 1. Verify current password
-    if (!validateSellerPassword(currentPass)) {
-      setErrorMsg('Current password is incorrect.');
-      return;
+    try {
+      // 1. Verify current password
+      const isCurrentValid = validateSellerPassword(currentPass) || (await validateSellerPasswordAsync(currentPass));
+      if (!isCurrentValid) {
+        setErrorMsg('Current password is incorrect.');
+        setIsSaving(false);
+        return;
+      }
+
+      // 2. Validate new password
+      if (newPass.trim().length < 4) {
+        setErrorMsg('New password must be at least 4 characters long.');
+        setIsSaving(false);
+        return;
+      }
+
+      // 3. Confirm matches
+      if (newPass !== confirmPass) {
+        setErrorMsg('New password and confirmation do not match.');
+        setIsSaving(false);
+        return;
+      }
+
+      // 4. Save new password with SHA-256 hash
+      const result = await setCustomSellerPasswordAsync(newPass);
+      if (!result.success) {
+        setErrorMsg(result.error || 'Failed to update password.');
+        setIsSaving(false);
+        return;
+      }
+
+      setSuccessMsg('Seller Studio password successfully updated & hashed to Firebase!');
+      setTimeout(() => {
+        onClose();
+        setCurrentPass('');
+        setNewPass('');
+        setConfirmPass('');
+        setSuccessMsg('');
+        setIsSaving(false);
+      }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Error updating password');
+      setIsSaving(false);
     }
-
-    // 2. Validate new password
-    if (newPass.trim().length < 4) {
-      setErrorMsg('New password must be at least 4 characters long.');
-      return;
-    }
-
-    // 3. Confirm matches
-    if (newPass !== confirmPass) {
-      setErrorMsg('New password and confirmation do not match.');
-      return;
-    }
-
-    // 4. Save new password
-    const result = setCustomSellerPassword(newPass);
-    if (!result.success) {
-      setErrorMsg(result.error || 'Failed to update password.');
-      return;
-    }
-
-    setSuccessMsg('Seller Studio password successfully updated!');
-    setTimeout(() => {
-      onClose();
-      setCurrentPass('');
-      setNewPass('');
-      setConfirmPass('');
-      setSuccessMsg('');
-    }, 1500);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (window.confirm('Reset Seller Studio password back to the default (1234)?')) {
-      resetSellerPasswordToDefault();
+      await resetSellerPasswordToDefaultAsync();
       setSuccessMsg('Password reset to default (1234).');
       setTimeout(() => {
         onClose();

@@ -41,6 +41,7 @@
         "handle": { "type": "string", "maxLength": 128 },
         "caption": { "type": "string", "maxLength": 4000 },
         "thumbnail": { "type": "string" },
+        "videoUrl": { "type": "string", "maxLength": 1000 },
         "postUrl": { "type": "string", "maxLength": 1000 },
         "likes": { "type": "string", "maxLength": 64 },
         "views": { "type": "string", "maxLength": 64 },
@@ -51,6 +52,85 @@
         "taggedProductPrice": { "type": "number" }
       },
       "required": ["id", "title", "postUrl"]
+    },
+    "ArtisanProfile": {
+      "title": "ArtisanProfile",
+      "description": "Master artisan profile data, bio, atelier location, avatar image URL, and craft pillars",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "maxLength": 128 },
+        "experience": { "type": "string", "maxLength": 128 },
+        "location": { "type": "string", "maxLength": 256 },
+        "avatarUrl": { "type": "string" },
+        "avatarUpdatedAt": { "type": "string" },
+        "heroQuote": { "type": "string", "maxLength": 1000 },
+        "bioParagraph1": { "type": "string", "maxLength": 3000 },
+        "bioParagraph2": { "type": "string", "maxLength": 3000 },
+        "bioParagraph3": { "type": "string", "maxLength": 3000 },
+        "instagramHandle": { "type": "string", "maxLength": 128 },
+        "instagramFollowers": { "type": "string", "maxLength": 64 },
+        "totalPiecesCrafted": { "type": "number" },
+        "materialsUsed": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "role", "avatarUrl"]
+    },
+    "InstagramSettings": {
+      "title": "InstagramSettings",
+      "description": "Official store Instagram handle and profile web URL",
+      "type": "object",
+      "properties": {
+        "handle": { "type": "string", "maxLength": 128 },
+        "profileUrl": { "type": "string", "maxLength": 1000 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["handle", "profileUrl"]
+    },
+    "SellerAuth": {
+      "title": "SellerAuth",
+      "description": "Hashed credentials and security salt for Seller Studio authentication",
+      "type": "object",
+      "properties": {
+        "passwordHash": { "type": "string", "maxLength": 256 },
+        "salt": { "type": "string", "maxLength": 128 },
+        "hasCustom": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["passwordHash", "hasCustom"]
+    },
+    "TrackedOrder": {
+      "title": "TrackedOrder",
+      "description": "Customer order with real-time handcrafting and delivery status updates, secured by user ID and session token",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string", "maxLength": 128 },
+        "docId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "sessionToken": { "type": "string", "maxLength": 256 },
+        "customerName": { "type": "string", "maxLength": 256 },
+        "phone": { "type": "string", "maxLength": 64 },
+        "deliveryAddress": { "type": "string", "maxLength": 1000 },
+        "deliveryZoneName": { "type": "string", "maxLength": 256 },
+        "paymentMethodText": { "type": "string", "maxLength": 128 },
+        "paymentStatus": { "type": "string", "maxLength": 128 },
+        "items": { "type": "array" },
+        "total": { "type": "number" },
+        "orderPlacedDate": { "type": "string", "maxLength": 128 },
+        "estimatedDeliveryDate": { "type": "string", "maxLength": 128 },
+        "currentPhase": { "type": "string", "maxLength": 128 },
+        "progressPercentage": { "type": "number" },
+        "artisanName": { "type": "string", "maxLength": 128 },
+        "artisanRole": { "type": "string", "maxLength": 128 },
+        "studioLocation": { "type": "string", "maxLength": 256 },
+        "liveCraftNotes": { "type": "string", "maxLength": 2000 },
+        "milestones": { "type": "array" },
+        "riderName": { "type": "string", "maxLength": 128 },
+        "riderPhone": { "type": "string", "maxLength": 64 },
+        "trackingNumber": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["orderId", "customerName", "currentPhase", "progressPercentage"]
     },
     "WaitlistSubscriber": {
       "title": "WaitlistSubscriber",
@@ -94,36 +174,6 @@
       },
       "required": ["userId", "productIds", "updatedAt"]
     },
-    "TrackedOrder": {
-      "title": "TrackedOrder",
-      "description": "Customer order with real-time handcrafting and delivery status updates",
-      "type": "object",
-      "properties": {
-        "orderId": { "type": "string", "maxLength": 128 },
-        "customerName": { "type": "string", "maxLength": 256 },
-        "phone": { "type": "string", "maxLength": 64 },
-        "deliveryAddress": { "type": "string", "maxLength": 1000 },
-        "deliveryZoneName": { "type": "string", "maxLength": 256 },
-        "paymentMethodText": { "type": "string", "maxLength": 128 },
-        "paymentStatus": { "type": "string", "maxLength": 128 },
-        "items": { "type": "array" },
-        "total": { "type": "number" },
-        "orderPlacedDate": { "type": "string", "maxLength": 128 },
-        "estimatedDeliveryDate": { "type": "string", "maxLength": 128 },
-        "currentPhase": { "type": "string", "maxLength": 128 },
-        "progressPercentage": { "type": "number" },
-        "artisanName": { "type": "string", "maxLength": 128 },
-        "artisanRole": { "type": "string", "maxLength": 128 },
-        "studioLocation": { "type": "string", "maxLength": 256 },
-        "liveCraftNotes": { "type": "string", "maxLength": 2000 },
-        "milestones": { "type": "array" },
-        "riderName": { "type": "string", "maxLength": 128 },
-        "riderPhone": { "type": "string", "maxLength": 64 },
-        "trackingNumber": { "type": "string", "maxLength": 128 },
-        "updatedAt": { "type": "string" }
-      },
-      "required": ["orderId", "customerName", "currentPhase", "progressPercentage"]
-    },
     "ProductReview": {
       "title": "ProductReview",
       "description": "Customer rating and text feedback submitted for a handcrafted product",
@@ -153,6 +203,22 @@
       "schema": "InstagramJournalItem",
       "description": "Instagram journal posts editable by admins"
     },
+    "/store_settings/{settingId}": {
+      "schema": "ArtisanProfile",
+      "description": "Store-wide configurations including artisan_profile, instagram settings, and seller_auth"
+    },
+    "/activeProfile/{profileId}": {
+      "schema": "ArtisanProfile",
+      "description": "Master artisan profile data and biography"
+    },
+    "/users/{userId}/tracked_orders/{orderId}": {
+      "schema": "TrackedOrder",
+      "description": "Secure customer sub-collection for order tracking keyed by user ID"
+    },
+    "/tracked_orders/{orderId}": {
+      "schema": "TrackedOrder",
+      "description": "Real-time orders with shipping and crafting milestone status secured by session token and order ID"
+    },
     "/waitlist_subscribers/{subscriberId}": {
       "schema": "WaitlistSubscriber",
       "description": "Waitlist subscriptions for restock alert notifications"
@@ -164,10 +230,6 @@
     "/user_wishlists/{userId}": {
       "schema": "UserWishlist",
       "description": "Customer wishlist synchronized to cloud"
-    },
-    "/tracked_orders/{orderId}": {
-      "schema": "TrackedOrder",
-      "description": "Real-time orders with shipping and crafting milestone status"
     },
     "/product_reviews/{reviewId}": {
       "schema": "ProductReview",
