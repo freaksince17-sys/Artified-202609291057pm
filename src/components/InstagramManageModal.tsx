@@ -36,7 +36,7 @@ import { useCart } from '../context/CartContext';
 import { InstagramJournalItem } from '../types';
 import { compressImage } from '../utils/imageCompressor';
 import { getFreshAssetUrl, getCacheBustedThumbnailUrl } from '../utils/storageAssetUtils';
-import { getPlayableInstagramCover } from './InstagramShowcase';
+import { getPlayableInstagramCover, getInstagramShortcode, KNOWN_LOCAL_VIDEOS } from './InstagramShowcase';
 
 // Helper to sanitize payload for Cloud Firestore storage
 const sanitizeItemForFirestore = (item: Partial<InstagramJournalItem>): Record<string, any> => {
@@ -510,6 +510,13 @@ export const InstagramManageModal: React.FC = () => {
       const uniqueSaveVersion = `${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const cacheBustedThumb = getCacheBustedThumbnailUrl(rawThumbnail, uniqueSaveVersion);
 
+      let finalVid = videoUrl.trim();
+      if (!finalVid || !finalVid.startsWith('/instagram_videos/')) {
+        const shortcode = getInstagramShortcode(postUrl) || getInstagramShortcode(finalVid);
+        const known = shortcode ? KNOWN_LOCAL_VIDEOS[shortcode] : null;
+        finalVid = known || '/instagram_videos/DdjhhazvaRr.mp4';
+      }
+
       const payload: InstagramJournalItem = {
         id: itemId || `ig-post-${Date.now()}`,
         title: title.trim(),
@@ -517,7 +524,7 @@ export const InstagramManageModal: React.FC = () => {
         postUrl: postUrl.trim() || instagramProfileUrl,
         caption: caption.trim() || 'Latest artisanal release from @artified_np on Instagram.',
         thumbnail: cacheBustedThumb,
-        videoUrl: videoUrl.trim() || (postUrl.trim() ? postUrl.trim() : undefined),
+        videoUrl: finalVid,
         isLocked: true,
         ...(taggedProductId && matchedProd ? {
           taggedProductId: taggedProductId.trim(),

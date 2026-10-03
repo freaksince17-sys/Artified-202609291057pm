@@ -115,20 +115,27 @@ export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0)
     return v;
   }
 
-  // 2. Signature items always map directly to their authentic local craft MP4 files
-  if (item.id === 'ig-item-1') return '/instagram_videos/DdjhhazvaRr.mp4';
-  if (item.id === 'ig-item-2') return '/instagram_videos/DdMRgKdP4HK.mp4';
-  if (item.id === 'ig-item-3') return '/instagram_videos/DdIUMC4BqFr.mp4';
-  if (item.id === 'ig-item-4') return '/instagram_videos/DY6OqqfPyJu.mp4';
-
-  // 3. Match shortcode against KNOWN_LOCAL_VIDEOS
+  // 2. Match shortcode against KNOWN_LOCAL_VIDEOS
   const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
   if (shortcode && KNOWN_LOCAL_VIDEOS[shortcode]) {
     return KNOWN_LOCAL_VIDEOS[shortcode];
   }
 
-  // 4. Fallback to guaranteed working local artisan craft video
-  return ATELIER_CRAFT_VIDEOS[index % ATELIER_CRAFT_VIDEOS.length];
+  // 3. Explicit ID matches
+  if (item.id === 'ig-item-1') return '/instagram_videos/DdjhhazvaRr.mp4';
+  if (item.id === 'ig-item-2') return '/instagram_videos/DdMRgKdP4HK.mp4';
+  if (item.id === 'ig-item-3') return '/instagram_videos/DdIUMC4BqFr.mp4';
+  if (item.id === 'ig-item-4') return '/instagram_videos/DY6OqqfPyJu.mp4';
+
+  // 4. Guaranteed local pre-buffered MP4 video files by index position
+  const signatureLocalVideos = [
+    '/instagram_videos/DdjhhazvaRr.mp4',
+    '/instagram_videos/DdMRgKdP4HK.mp4',
+    '/instagram_videos/DdIUMC4BqFr.mp4',
+    '/instagram_videos/DY6OqqfPyJu.mp4'
+  ];
+
+  return signatureLocalVideos[index % signatureLocalVideos.length];
 };
 
 interface InstagramJournalCardProps {
