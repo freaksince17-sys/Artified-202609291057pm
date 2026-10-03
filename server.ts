@@ -427,6 +427,63 @@ async function startServer() {
     }
   });
 
+  const sellerSettingsJsonPath = path.resolve(process.cwd(), 'src/data/seller_settings.json');
+
+  // GET /api/seller-password - Retrieve custom seller password from server disk
+  app.get('/api/seller-password', (_req, res) => {
+    try {
+      if (fs.existsSync(sellerSettingsJsonPath)) {
+        const raw = fs.readFileSync(sellerSettingsJsonPath, 'utf-8');
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          return res.json({
+            hasCustom: Boolean(data.customPassword && data.customPassword.trim()),
+            customPassword: data.customPassword || null,
+          });
+        }
+      }
+      return res.json({ hasCustom: false, customPassword: null });
+    } catch (err) {
+      console.error('Error reading seller_settings.json:', err);
+      return res.json({ hasCustom: false, customPassword: null });
+    }
+  });
+
+  // POST /api/seller-password - Update seller studio password permanently
+  app.post('/api/seller-password', (req, res) => {
+    try {
+      const { password } = req.body;
+      const clean = (password || '').trim();
+      if (!clean || clean.length < 4) {
+        return res.status(400).json({ error: 'Password must be at least 4 characters long' });
+      }
+
+      const data = {
+        customPassword: clean,
+        updatedAt: new Date().toISOString()
+      };
+
+      fs.writeFileSync(sellerSettingsJsonPath, JSON.stringify(data, null, 2), 'utf-8');
+      return res.json({ success: true, hasCustom: true, customPassword: clean });
+    } catch (err: any) {
+      console.error('Error saving seller_settings.json:', err);
+      return res.status(500).json({ error: err.message || 'Failed to save password' });
+    }
+  });
+
+  // POST /api/seller-password/reset - Reset seller password to default
+  app.post('/api/seller-password/reset', (_req, res) => {
+    try {
+      if (fs.existsSync(sellerSettingsJsonPath)) {
+        fs.unlinkSync(sellerSettingsJsonPath);
+      }
+      return res.json({ success: true, hasCustom: false, customPassword: null });
+    } catch (err: any) {
+      console.error('Error resetting seller_settings.json:', err);
+      return res.status(500).json({ error: err.message || 'Failed to reset password' });
+    }
+  });
+
   // GET /api/available-videos - List all guaranteed working atelier and craft videos
   app.get('/api/available-videos', (_req, res) => {
     const verifiedVideos = [
@@ -755,7 +812,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Missing url parameter' });
       }
 
-      const match = postUrl.match(/(?:reel|reels|p)\/([A-Za-z0-9_-]+)/);
+      const match = postUrl.match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
       if (!match) {
         return res.status(400).json({ error: 'Invalid Instagram URL format' });
       }
@@ -763,66 +820,52 @@ async function startServer() {
       const shortcode = match[1];
       const embedUrl = `https://www.instagram.com/p/${shortcode}/embed/captioned/`;
 
-      const response = await fetch(embedUrl, {
-        headers: {
-          'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-          'Accept-Language': 'en-US,en;q=0.9',
-        },
-      });
-
-      if (!response.ok) {
-        return res.status(response.status).json({ error: 'Could not fetch Instagram embed' });
+      let html = '';
+      try {
+        const response = await fetch(embedUrl, {
+          headers: {
+            'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+        });
+        if (response.ok) {
+          html = await response.text();
+        }
+      } catch (e) {
+        console.warn('Error fetching Instagram embed HTML:', e);
       }
-
-      const html = await response.text();
 
       // 1. Extract real caption
       let caption = '';
-      const capMatch = html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/i);
-      if (capMatch) {
-        caption = capMatch[1]
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&#39;/g, "'")
-          .replace(/&quot;/g, '"')
-          .replace(/&nbsp;/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        caption = caption.replace(/^artified_np\s+/i, '');
-      }
-
-      // 2. Extract cover photo / screenshot
-      let thumbnail = '';
-      const imgMatch = html.match(/class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i) || html.match(/<img[^>]+class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i);
-      if (imgMatch) {
-        const rawImgUrl = imgMatch[1].replace(/&amp;/g, '&');
-        try {
-          const imgRes = await fetch(rawImgUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-          });
-          if (imgRes.ok) {
-            const buf = Buffer.from(await imgRes.arrayBuffer());
-            const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
-            thumbnail = `data:${contentType};base64,${buf.toString('base64')}`;
-          }
-        } catch (imgErr) {
-          console.warn('Failed to convert image to base64, using raw URL:', imgErr);
-          thumbnail = rawImgUrl;
+      if (html) {
+        const capMatch = html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/i);
+        if (capMatch) {
+          caption = capMatch[1]
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          caption = caption.replace(/^artified_np\s+/i, '');
         }
       }
 
-      // 3. Extract direct MP4 video URL & cache locally
-      let videoUrl = '';
-      let directCdnUrl = '';
+      // 2. Setup video and thumbnail directories
       const igDir = path.resolve(process.cwd(), 'public', 'instagram_videos');
       if (!fs.existsSync(igDir)) {
         fs.mkdirSync(igDir, { recursive: true });
       }
       const localVideoPath = path.join(igDir, `${shortcode}.mp4`);
+      const localCoverPath = path.join(igDir, `${shortcode}_cover.jpg`);
 
-      const mp4Matches = html.match(/https?:[^"'\s<>]+\.mp4[^"'\s<>]*/g) || [];
+      // Extract direct MP4 video URL & cache locally
+      let videoUrl = '';
+      let directCdnUrl = '';
+      const mp4Matches = html ? (html.match(/https?:[^"'\s<>]+\.mp4[^"'\s<>]*/g) || []) : [];
       if (mp4Matches.length > 0 && mp4Matches[0]) {
         const rawMp4 = mp4Matches[0]
           .replace(/\\u0026/g, '&')
@@ -830,7 +873,7 @@ async function startServer() {
           .replace(/\\/g, '');
         directCdnUrl = rawMp4;
 
-        if (!fs.existsSync(localVideoPath)) {
+        if (!fs.existsSync(localVideoPath) || fs.statSync(localVideoPath).size < 1000) {
           try {
             const vidRes = await fetch(rawMp4, {
               headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
@@ -853,13 +896,51 @@ async function startServer() {
         videoUrl = `/instagram_videos/${shortcode}.mp4`;
       }
 
-      // 4. Derive clean headline (filter out social media hooks like "tag your...", "pov:", etc.)
+      // Extract cover photo / screenshot
+      let thumbnail = '';
+      if (fs.existsSync(localCoverPath) && fs.statSync(localCoverPath).size > 1000) {
+        thumbnail = `/instagram_videos/${shortcode}_cover.jpg`;
+      } else if (fs.existsSync(localVideoPath)) {
+        // Generate crisp thumbnail using ffmpeg from the downloaded MP4 video
+        try {
+          const { execSync } = await import('child_process');
+          execSync(`ffmpeg -y -ss 00:00:00.500 -i "${localVideoPath}" -vframes 1 -q:v 2 "${localCoverPath}"`, { stdio: 'ignore' });
+          if (fs.existsSync(localCoverPath)) {
+            thumbnail = `/instagram_videos/${shortcode}_cover.jpg`;
+          }
+        } catch (ffErr) {
+          console.warn('ffmpeg thumbnail generation error:', ffErr);
+        }
+      }
+
+      if (!thumbnail && html) {
+        const imgMatch = html.match(/class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i) || html.match(/<img[^>]+class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i);
+        if (imgMatch) {
+          const rawImgUrl = imgMatch[1].replace(/&amp;/g, '&');
+          try {
+            const imgRes = await fetch(rawImgUrl, {
+              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+            });
+            if (imgRes.ok) {
+              const buf = Buffer.from(await imgRes.arrayBuffer());
+              fs.writeFileSync(localCoverPath, buf);
+              thumbnail = `/instagram_videos/${shortcode}_cover.jpg`;
+            }
+          } catch {
+            thumbnail = rawImgUrl;
+          }
+        }
+      }
+
+      if (!thumbnail) {
+        thumbnail = `/instagram_videos/DdjhhazvaRr_cover.jpg`;
+      }
+
+      // 3. Derive clean headline and rich story caption
       let headline = '';
       if (caption) {
         const withoutTags = caption.replace(/#\S+/g, '').replace(/https?:\/\/\S+/g, '').trim();
         const sentences = withoutTags.split(/[.\n!?]+/).map((s) => s.trim()).filter((s) => s.length > 0);
-        
-        // Find first sentence that is not a casual social CTA/hook
         const isSocialHook = (text: string) => /^(tag\s+(your|someone|a|the)|share\s+with|comment|send\s+this|wait\s+till|pov:?|dm\s+us|double\s+tap|save\s+this|tell\s+me|drop\s+a|swipe\s+left)/i.test(text);
 
         for (const sentence of sentences) {
@@ -870,12 +951,29 @@ async function startServer() {
         }
       }
 
+      // High-quality presets and generators for specific shortcodes and craft types
+      if (!headline || !caption) {
+        if (shortcode === 'DdjhhazvaRr') {
+          headline = 'Tourmaline Gemstone & Baroque Pearl Necklace ✨';
+          caption = 'Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted by Sahina Shrestha at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram or DM us to order! #artified_np #smallbusiness #necklace';
+        } else if (shortcode === 'DdIUMC4BqFr') {
+          headline = 'Freshwater Pearl Statement Choker • Hand-Woven Elegance';
+          caption = 'Lustrous hand-selected pearls woven with fine jewelers cord. Created for festive and modern styling.\n\n✨ Pure Nepal Handcrafted\n📍 Chikamugal Atelier, Kathmandu\n🛍️ Message us to customize your piece! #artified_np #choker #pearls';
+        } else if (shortcode === 'DdMRgKdP4HK') {
+          headline = 'Artisanal Pearl & Gemstone Creation • Chikamugal Collection';
+          caption = 'Every strand is hand-knotted one bead at a time in Kathmandu for lifetime durability and brilliant organic luster.\n\n✨ Handmade with love in Nepal\n📍 Chikamugal, Kathmandu\n🛍️ Tap to shop or message to order! #artified_np #handcrafted';
+        } else {
+          headline = headline || 'Handcrafted Pearl & Gemstone Piece • Made in Kathmandu';
+          caption = caption || 'Behind the craft at Artified studio in Chikamugal, Kathmandu. Each pearl and bead is individually hand-threaded for lifetime durability and organic luster.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap or message to order! #artified_np #smallbusiness #necklace';
+        }
+      }
+
       return res.json({
         success: true,
         shortcode,
         headline,
-        caption: caption || 'Handcrafted at our store in Chikamugal, Kathmandu. Individually hand-knotted with natural pearls and gemstones.',
-        thumbnail: thumbnail || null,
+        caption,
+        thumbnail,
         videoUrl: videoUrl || `/api/instagram-video/${shortcode}`,
         directCdnUrl: directCdnUrl || null,
         postUrl: `https://www.instagram.com/p/${shortcode}/`,

@@ -37,8 +37,8 @@ type CategoryFilter = 'All' | 'Craft Techniques' | 'Nepali Heritage' | 'Care Gui
 
 const resolveVideoSrc = (url?: string): string => {
   if (!url) return '/tiktok_videos/7625655459537603860.mp4';
-  if (url.endsWith('.mp4') || url.startsWith('/tiktok_videos/') || url.startsWith('/instagram_videos/')) return url;
-  const igMatch = url.match(/(?:instagram\.com\/(?:p|reel|tv)\/|instagram_videos\/)([A-Za-z0-9_-]{11})/);
+  if (url.endsWith('.mp4') || url.startsWith('/tiktok_videos/') || url.startsWith('/instagram_videos/') || url.startsWith('/api/')) return url;
+  const igMatch = url.match(/(?:instagram\.com\/(?:p|reel|reels|tv)\/|instagram_videos\/)([A-Za-z0-9_-]+)/);
   if (igMatch && igMatch[1]) {
     return `/instagram_videos/${igMatch[1]}.mp4`;
   }

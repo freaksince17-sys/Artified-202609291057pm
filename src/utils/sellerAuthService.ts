@@ -1,12 +1,54 @@
 // Service to manage Seller Studio authentication and custom secure password
+// Synchronized with server storage and browser local storage for domain-wide persistence
 
 const SELLER_PASSWORD_KEY = 'artified_seller_studio_password';
 const DEFAULT_PASSWORDS = ['1234', 'artified', 'admin'];
 
+// In-memory cache synced from server
+let cachedCustomPassword: string | null = null;
+let isInitialized = false;
+
+// Eagerly fetch and sync server-persisted seller password
+export async function syncSellerPasswordFromServer(): Promise<string | null> {
+  try {
+    const res = await fetch('/api/seller-password');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.hasCustom && typeof data.customPassword === 'string' && data.customPassword.trim()) {
+        const passVal: string = data.customPassword.trim();
+        cachedCustomPassword = passVal;
+        try {
+          localStorage.setItem(SELLER_PASSWORD_KEY, passVal);
+        } catch {}
+        return passVal;
+      } else if (data && !data.hasCustom) {
+        cachedCustomPassword = null;
+        try {
+          localStorage.removeItem(SELLER_PASSWORD_KEY);
+        } catch {}
+      }
+    }
+  } catch (err) {
+    console.warn('Could not sync seller password from server:', err);
+  }
+  return getCustomSellerPassword();
+}
+
+// Auto-trigger sync on module load
+if (typeof window !== 'undefined') {
+  syncSellerPasswordFromServer().then(() => {
+    isInitialized = true;
+  });
+}
+
 export function getCustomSellerPassword(): string | null {
+  if (cachedCustomPassword && cachedCustomPassword.trim()) {
+    return cachedCustomPassword.trim();
+  }
   try {
     const saved = localStorage.getItem(SELLER_PASSWORD_KEY);
     if (saved && saved.trim()) {
+      cachedCustomPassword = saved.trim();
       return saved.trim();
     }
   } catch {
@@ -26,7 +68,7 @@ export function validateSellerPassword(input: string): boolean {
   const customPassword = getCustomSellerPassword();
   if (customPassword) {
     // If user has set a custom password, that is the primary valid password.
-    // Also accept the custom password or default emergency master password
+    // Also accept the custom password or emergency master password
     return cleanInput === customPassword || cleanInput === 'artified2025!';
   }
 
@@ -41,7 +83,18 @@ export function setCustomSellerPassword(newPassword: string): { success: boolean
   }
 
   try {
+    cachedCustomPassword = clean;
     localStorage.setItem(SELLER_PASSWORD_KEY, clean);
+    
+    // Asynchronously persist to server backend
+    fetch('/api/seller-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: clean })
+    }).catch((err) => {
+      console.warn('Failed to persist seller password to server:', err);
+    });
+
     window.dispatchEvent(new CustomEvent('artified_seller_password_changed', { detail: { updated: true } }));
     return { success: true };
   } catch (e) {
@@ -51,7 +104,16 @@ export function setCustomSellerPassword(newPassword: string): { success: boolean
 
 export function resetSellerPasswordToDefault(): void {
   try {
+    cachedCustomPassword = null;
     localStorage.removeItem(SELLER_PASSWORD_KEY);
+
+    // Asynchronously reset on server backend
+    fetch('/api/seller-password/reset', {
+      method: 'POST'
+    }).catch((err) => {
+      console.warn('Failed to reset seller password on server:', err);
+    });
+
     window.dispatchEvent(new CustomEvent('artified_seller_password_changed', { detail: { reset: true } }));
   } catch {
     // ignore

@@ -132,12 +132,12 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
   onDeleteRequest,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const videoSrc = getPlayableInstagramVideo(item, index);
-  // Ensure all embedded Instagram video players initialize with muted autoplay enabled
   const { videoRef, play, pause } = useVideoController({
-    autoPlay: true,
+    autoPlay: false,
     muted: true,
     loop: true,
     playsInline: true
@@ -145,11 +145,13 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    play();
+    play().catch(() => {});
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+    setIsVideoPlaying(false);
+    pause();
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -175,30 +177,33 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
     onOpenInstagramDirect(item.postUrl || instagramProfileUrl);
   };
 
+  const fallbackCover = '/instagram_videos/DdjhhazvaRr_cover.jpg';
+  const cleanThumbnail = item.thumbnail?.trim() || fallbackCover;
+
   return (
     <div
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-black cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 select-none"
+      className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#1C1B1A] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 select-none"
       title="Hover to play video • Single click to view details • Double-click to open on Instagram"
     >
-      {/* 1. Underlying Cover Photo Thumbnail - Always crystal clear, never dimmed if video is unready */}
+      {/* 1. Underlying Cover Photo Thumbnail - Always crystal clear, never black while video is buffering */}
       <img
-        src={item.thumbnail?.trim() || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'}
+        src={cleanThumbnail}
         alt={item.title || 'Artified craft showcase'}
         loading="lazy"
         decoding="async"
         onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80';
+          (e.currentTarget as HTMLImageElement).src = fallbackCover;
         }}
-        className={`w-full h-full object-cover transition-transform duration-500 ${
-          isHovered && videoSrc ? 'opacity-0 scale-105' : 'opacity-100 group-hover:scale-105'
+        className={`w-full h-full object-cover transition-opacity duration-300 ${
+          isHovered && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
         }`}
       />
 
-      {/* 2. Hover-Only Video Preview: Smoothly plays ONLY when mouse hovers over this card */}
+      {/* 2. Hover-Only Video Preview: Smoothly plays and reveals ONLY when actively playing */}
       {videoSrc && (
         <video
           ref={videoRef}
@@ -206,9 +211,13 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
+          onPlay={() => setIsVideoPlaying(true)}
+          onPlaying={() => setIsVideoPlaying(true)}
+          onPause={() => setIsVideoPlaying(false)}
+          onError={() => setIsVideoPlaying(false)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
-            isHovered ? 'opacity-100' : 'opacity-0'
+            isHovered && isVideoPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         />
       )}

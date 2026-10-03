@@ -30,11 +30,15 @@ export const OrderTrackerSection: React.FC = () => {
 
   const unsubscribeRef = React.useRef<(() => void) | null>(null);
 
-  // Sync when trackingOrderId changes or on mount
+  // Sync when trackingOrderId changes or on mount (only look up if order ID is explicitly provided)
   useEffect(() => {
-    const idToUse = trackingOrderId || 'ART-2026-5526';
-    setInputOrderId(idToUse);
-    performLookup(idToUse);
+    if (trackingOrderId && trackingOrderId.trim()) {
+      setInputOrderId(trackingOrderId);
+      performLookup(trackingOrderId);
+    } else {
+      setInputOrderId('');
+      setTrackedOrder(null);
+    }
 
     return () => {
       if (unsubscribeRef.current) {
@@ -50,7 +54,7 @@ export const OrderTrackerSection: React.FC = () => {
       if (customEvent.detail) {
         const updatedNorm = normalizeOrderId(customEvent.detail.orderId);
         const currentNorm = trackedOrder ? normalizeOrderId(trackedOrder.orderId) : (inputOrderId ? normalizeOrderId(inputOrderId) : '');
-        if (updatedNorm === currentNorm || (!trackedOrder && updatedNorm === 'ART-2026-5526')) {
+        if (currentNorm && updatedNorm === currentNorm) {
           setTrackedOrder(sanitizeOrderItems(customEvent.detail));
         }
       }

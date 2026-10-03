@@ -80,7 +80,7 @@ export const OrderTrackerModal: React.FC = () => {
       if (customEvent.detail) {
         const updatedNorm = normalizeOrderId(customEvent.detail.orderId);
         const currentNorm = trackedOrder ? normalizeOrderId(trackedOrder.orderId) : (inputOrderId ? normalizeOrderId(inputOrderId) : '');
-        if (updatedNorm === currentNorm || (!trackedOrder && updatedNorm === 'ART-2026-5526')) {
+        if (currentNorm && updatedNorm === currentNorm) {
           setTrackedOrder(customEvent.detail);
         }
       }

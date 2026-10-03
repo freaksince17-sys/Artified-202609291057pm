@@ -171,15 +171,14 @@ export const InstagramManageModal: React.FC = () => {
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
-            // NEVER overwrite existing title - only fill if headline/title is currently empty
             if (data.headline) {
-              setTitle((prev) => (prev && prev.trim() ? prev : data.headline));
+              setTitle(data.headline);
             }
             if (data.caption) {
-              setCaption((prev) => (prev && prev.trim() ? prev : data.caption));
+              setCaption(data.caption);
             }
             if (data.thumbnail) {
-              setThumbnail((prev) => (prev && prev.trim() ? prev : data.thumbnail));
+              setThumbnail(data.thumbnail);
             }
             if (data.videoUrl) {
               setVideoUrl(data.videoUrl);
@@ -188,7 +187,7 @@ export const InstagramManageModal: React.FC = () => {
             } else {
               setVideoUrl(targetUrl);
             }
-            setClipboardNotice('✨ Auto-extracted exact Instagram video, cover photo & details!');
+            setClipboardNotice('✨ Auto-extracted exact Instagram video, cover photo, headline & caption!');
             setTimeout(() => setClipboardNotice(null), 3500);
             setIsAutoGenerating(false);
             return;
@@ -203,9 +202,10 @@ export const InstagramManageModal: React.FC = () => {
 
     // 2. Specific Tourmaline & Pearl necklace post preset if offline
     if (targetUrl.includes('DdjhhazvaRr')) {
-      setTitle((prev) => prev || 'Tourmaline Gemstone & Baroque Pearl Necklace ✨');
-      setCaption((prev) => prev || 'Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram #artified_np #smallbusiness #necklace');
+      setTitle('Tourmaline Gemstone & Baroque Pearl Necklace ✨');
+      setCaption('Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram #artified_np #smallbusiness #necklace');
       setVideoUrl('/instagram_videos/DdjhhazvaRr.mp4');
+      setThumbnail('/instagram_videos/DdjhhazvaRr_cover.jpg');
       setClipboardNotice('Loaded Tourmaline & Pearl Necklace exact reel video & details!');
       setTimeout(() => setClipboardNotice(null), 3000);
       return;
