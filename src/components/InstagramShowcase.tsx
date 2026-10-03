@@ -124,10 +124,13 @@ export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0)
     return v;
   }
 
-  // 2. Match shortcode against KNOWN_LOCAL_VIDEOS
+  // 2. Extract shortcode and match against KNOWN_LOCAL_VIDEOS or local directory
   const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
-  if (shortcode && KNOWN_LOCAL_VIDEOS[shortcode]) {
-    return KNOWN_LOCAL_VIDEOS[shortcode];
+  if (shortcode) {
+    if (KNOWN_LOCAL_VIDEOS[shortcode]) {
+      return KNOWN_LOCAL_VIDEOS[shortcode];
+    }
+    return `/instagram_videos/${shortcode}.mp4`;
   }
 
   // 3. Explicit ID matches
