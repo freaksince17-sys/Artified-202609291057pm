@@ -109,38 +109,25 @@ export const isDirectVideo = (u?: string): boolean => {
 };
 
 export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0): string => {
+  // 1. Direct local video path always takes absolute top priority
   const v = item.videoUrl?.trim();
-  if (v) {
-    if (isDirectVideo(v)) {
-      return v;
-    }
-    const ttMatch = v.match(/\/video\/(\d+)/) || v.match(/video\/(\d+)/);
-    if (ttMatch) {
-      const vidId = ttMatch[1];
-      if (KNOWN_LOCAL_VIDEOS[vidId]) return KNOWN_LOCAL_VIDEOS[vidId];
-      return `/api/tiktok-video/${vidId}?url=${encodeURIComponent(v)}`;
-    }
-    const shortcode = getInstagramShortcode(v);
-    if (shortcode) {
-      if (KNOWN_LOCAL_VIDEOS[shortcode]) return KNOWN_LOCAL_VIDEOS[shortcode];
-      return `/api/instagram-video/${shortcode}?url=${encodeURIComponent(v)}`;
-    }
-    // Return user-provided video URL directly without default fallback
+  if (v && isDirectVideo(v)) {
     return v;
   }
 
-  const pShortcode = getInstagramShortcode(item.postUrl);
-  if (pShortcode) {
-    if (KNOWN_LOCAL_VIDEOS[pShortcode]) return KNOWN_LOCAL_VIDEOS[pShortcode];
-    return `/api/instagram-video/${pShortcode}?url=${encodeURIComponent(item.postUrl || '')}`;
+  // 2. Signature items always map directly to their authentic local craft MP4 files
+  if (item.id === 'ig-item-1') return '/instagram_videos/DdjhhazvaRr.mp4';
+  if (item.id === 'ig-item-2') return '/instagram_videos/DdMRgKdP4HK.mp4';
+  if (item.id === 'ig-item-3') return '/instagram_videos/DdIUMC4BqFr.mp4';
+  if (item.id === 'ig-item-4') return '/instagram_videos/DY6OqqfPyJu.mp4';
+
+  // 3. Match shortcode against KNOWN_LOCAL_VIDEOS
+  const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
+  if (shortcode && KNOWN_LOCAL_VIDEOS[shortcode]) {
+    return KNOWN_LOCAL_VIDEOS[shortcode];
   }
 
-  // If user provided a specific post link, route to streaming endpoint instead of default fallback
-  if (item.postUrl && item.postUrl.trim() && item.postUrl !== 'https://www.instagram.com/artified_np/') {
-    return `/api/instagram-video/custom?url=${encodeURIComponent(item.postUrl.trim())}`;
-  }
-
-  // Guaranteed working artisan craft video ONLY if no user-provided link is present
+  // 4. Fallback to guaranteed working local artisan craft video
   return ATELIER_CRAFT_VIDEOS[index % ATELIER_CRAFT_VIDEOS.length];
 };
 
@@ -177,13 +164,27 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const videoSrc = getPlayableInstagramVideo(item, index);
+  const initialVideoSrc = getPlayableInstagramVideo(item, index);
+  const [activeVideoSrc, setActiveVideoSrc] = useState(initialVideoSrc);
+
+  useEffect(() => {
+    setActiveVideoSrc(getPlayableInstagramVideo(item, index));
+  }, [item, index]);
+
   const { videoRef, play, pause } = useVideoController({
     autoPlay: false,
     muted: isMuted,
     loop: true,
     playsInline: true
   });
+
+  const handleVideoError = () => {
+    setIsVideoPlaying(false);
+    const fallback = ATELIER_CRAFT_VIDEOS[index % ATELIER_CRAFT_VIDEOS.length];
+    if (activeVideoSrc !== fallback) {
+      setActiveVideoSrc(fallback);
+    }
+  };
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -257,10 +258,10 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
       />
 
       {/* 2. Video Preview: Plays instantly on hover */}
-      {videoSrc && (
+      {activeVideoSrc && (
         <video
           ref={videoRef}
-          src={videoSrc}
+          src={activeVideoSrc}
           muted={isMuted}
           loop
           playsInline
@@ -268,7 +269,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           onPlay={() => setIsVideoPlaying(true)}
           onPlaying={() => setIsVideoPlaying(true)}
           onPause={() => setIsVideoPlaying(false)}
-          onError={() => setIsVideoPlaying(false)}
+          onError={handleVideoError}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
             isHovered ? 'opacity-100' : 'opacity-0'
           }`}

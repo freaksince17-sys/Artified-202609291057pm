@@ -1042,7 +1042,7 @@ export const InstagramManageModal: React.FC = () => {
                       value={postUrl}
                       onChange={(e) => setPostUrl(e.target.value)}
                       placeholder="https://www.instagram.com/p/... or https://www.instagram.com/reel/..."
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                      className="w-full pl-9 pr-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
                     />
                   </div>
 
@@ -1095,7 +1095,7 @@ export const InstagramManageModal: React.FC = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Maya Aurelia Pearl Bag • Handcrafted in Nepal"
-                    className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A]"
+                    className="w-full px-3 py-2 text-xs font-bold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A]"
                   />
                 </div>
 
@@ -1108,7 +1108,7 @@ export const InstagramManageModal: React.FC = () => {
                     value={handle}
                     onChange={(e) => setHandle(e.target.value)}
                     placeholder="@artified_np"
-                    className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A]"
+                    className="w-full px-3 py-2 text-xs font-bold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A]"
                   />
                 </div>
               </div>
@@ -1137,7 +1137,7 @@ export const InstagramManageModal: React.FC = () => {
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
                   placeholder="Paste or write your artisanal story, styling tips, materials, or Instagram caption..."
-                  className="w-full px-3 py-2 text-xs font-medium text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A] resize-none"
+                  className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A] resize-none"
                 />
               </div>
 
@@ -1210,7 +1210,7 @@ export const InstagramManageModal: React.FC = () => {
                         value={thumbnail.startsWith('data:') ? '✅ Exact Screenshot loaded into memory' : thumbnail}
                         onChange={(e) => setThumbnail(e.target.value)}
                         placeholder="https://images.unsplash.com/... or image URL"
-                        className="w-full px-3 py-1.5 text-xs font-medium text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                        className="w-full px-3 py-1.5 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
                       />
                       {thumbnail && (
                         <div className="flex items-center justify-between mt-1">
@@ -1239,7 +1239,7 @@ export const InstagramManageModal: React.FC = () => {
                 <select
                   value={taggedProductId}
                   onChange={(e) => handleProductSelect(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                  className="w-full px-3 py-2 text-xs font-bold text-[#1C1B1A] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
                 >
                   <option value="">None (General Journal Entry)</option>
                   {products.map((p) => (
@@ -1342,7 +1342,7 @@ export const InstagramManageModal: React.FC = () => {
                         }
                       }}
                       placeholder="@artified_np"
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-[#FAF8F5] border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] font-mono"
+                      className="w-full pl-9 pr-3 py-2 text-xs font-bold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-[#FAF8F5] border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] font-mono"
                     />
                   </div>
                   <p className="text-[10px] text-[#736C65] mt-1">
@@ -1363,7 +1363,7 @@ export const InstagramManageModal: React.FC = () => {
                         value={globalUrlInput}
                         onChange={(e) => setGlobalUrlInput(e.target.value)}
                         placeholder="https://www.instagram.com/artified_np/"
-                        className="w-full pl-9 pr-3 py-2 text-xs bg-[#FAF8F5] border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                        className="w-full pl-9 pr-3 py-2 text-xs font-bold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-[#FAF8F5] border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
                       />
                     </div>
                     {globalUrlInput && (

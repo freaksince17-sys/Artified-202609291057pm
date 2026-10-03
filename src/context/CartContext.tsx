@@ -1403,11 +1403,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             });
 
-            const reconciledList = Array.from(reconciledMap.values()).map((it) => {
-              if (it.postUrl && it.postUrl.includes('DdMRgKdP4HK')) {
-                return { ...it, thumbnail: '/instagram_videos/DdMRgKdP4HK_cover.jpg' };
+            const reconciledList = Array.from(reconciledMap.values()).map((it, idx) => {
+              let localVid = it.videoUrl;
+              let localCover = it.thumbnail;
+
+              if (it.id === 'ig-item-1' || (it.postUrl && it.postUrl.includes('DdjhhazvaRr'))) {
+                localVid = '/instagram_videos/DdjhhazvaRr.mp4';
+                localCover = '/instagram_videos/DdjhhazvaRr_cover.jpg';
+              } else if (it.id === 'ig-item-2' || (it.postUrl && it.postUrl.includes('DdMRgKdP4HK'))) {
+                localVid = '/instagram_videos/DdMRgKdP4HK.mp4';
+                localCover = '/instagram_videos/DdMRgKdP4HK_cover.jpg';
+              } else if (it.id === 'ig-item-3' || (it.postUrl && it.postUrl.includes('DdIUMC4BqFr'))) {
+                localVid = '/instagram_videos/DdIUMC4BqFr.mp4';
+                localCover = '/instagram_videos/DdIUMC4BqFr_cover.jpg';
+              } else if (it.id === 'ig-item-4' || (it.postUrl && it.postUrl.includes('DY6OqqfPyJu'))) {
+                localVid = '/instagram_videos/DY6OqqfPyJu.mp4';
+                localCover = '/instagram_videos/DY6OqqfPyJu_cover.jpg';
+              } else if (!localVid || !localVid.includes('.mp4')) {
+                const craftFallback = [
+                  '/instagram_videos/DdjhhazvaRr.mp4',
+                  '/instagram_videos/DdMRgKdP4HK.mp4',
+                  '/instagram_videos/DdIUMC4BqFr.mp4',
+                  '/instagram_videos/DY6OqqfPyJu.mp4'
+                ];
+                localVid = craftFallback[idx % craftFallback.length];
               }
-              return it;
+
+              return { ...it, videoUrl: localVid, thumbnail: localCover || it.thumbnail };
             });
             if (reconciledList.length > 0) {
               setInstagramItems(reconciledList);
