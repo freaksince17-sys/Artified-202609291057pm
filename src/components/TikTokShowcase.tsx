@@ -163,21 +163,36 @@ const TikTokReelCard: React.FC<TikTokReelCardProps> = ({
       {/* 3. Dark Vignette Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30 pointer-events-none" />
 
-      {/* 4. Metric Badges (Views & Likes) */}
-      {(reel.showViews || reel.showLikes) && (
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 flex-wrap pointer-events-none">
-          {reel.showViews && reel.views && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/65 backdrop-blur-md text-[10px] font-medium text-white/90 border border-white/15 shadow-xs">
-              <Eye className="w-2.5 h-2.5 text-[#D4AF37]" />
-              <span>{reel.views}</span>
-            </span>
-          )}
-          {reel.showLikes && reel.likes && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/65 backdrop-blur-md text-[10px] font-medium text-white/90 border border-white/15 shadow-xs">
-              <Heart className="w-2.5 h-2.5 text-rose-400 fill-rose-400/40" />
-              <span>{reel.likes}</span>
-            </span>
-          )}
+      {/* 4. Metric Badges (Views, Likes & Hover to Play) */}
+      <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 flex-wrap pointer-events-none">
+        {reel.showViews && reel.views && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md text-[10px] font-medium text-white/90 border border-white/15 shadow-xs">
+            <Eye className="w-2.5 h-2.5 text-[#D4AF37]" />
+            <span>{reel.views}</span>
+          </span>
+        )}
+        {reel.showLikes && reel.likes && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md text-[10px] font-medium text-white/90 border border-white/15 shadow-xs">
+            <Heart className="w-2.5 h-2.5 text-rose-400 fill-rose-400/40" />
+            <span>{reel.likes}</span>
+          </span>
+        )}
+        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full backdrop-blur-md text-[10px] font-medium transition-all shadow-xs border ${
+          isHovered
+            ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 animate-pulse'
+            : 'bg-black/65 text-[#D4AF37] border-white/15'
+        }`}>
+          <Play className={`w-2.5 h-2.5 ${isHovered ? 'fill-emerald-300 text-emerald-300' : 'fill-[#D4AF37] text-[#D4AF37]'}`} />
+          <span>{isHovered ? 'Playing' : 'Hover to Play'}</span>
+        </div>
+      </div>
+
+      {/* Center Play Button Overlay */}
+      {!isHovered && (
+        <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
+          <div className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+          </div>
         </div>
       )}
 

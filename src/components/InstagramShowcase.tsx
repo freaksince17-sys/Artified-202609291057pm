@@ -150,6 +150,7 @@ interface InstagramJournalCardProps {
   instagramHandle: string;
   instagramProfileUrl: string;
   isSellerMode: boolean;
+  isMuted?: boolean;
   deleteConfirmId: string | null;
   onOpenModal: (item: InstagramJournalItem) => void;
   onOpenInstagramDirect: (url?: string) => void;
@@ -164,6 +165,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
   instagramHandle,
   instagramProfileUrl,
   isSellerMode,
+  isMuted = true,
   deleteConfirmId,
   onOpenModal,
   onOpenInstagramDirect,
@@ -172,41 +174,16 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
   onDeleteRequest,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const videoSrc = getPlayableInstagramVideo(item, index);
   const { videoRef, play, pause } = useVideoController({
     autoPlay: false,
-    muted: true,
+    muted: isMuted,
     loop: true,
     playsInline: true
   });
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-            setIsVisible(true);
-            play().catch(() => {});
-          } else {
-            setIsVisible(false);
-            if (!isHovered) {
-              pause();
-            }
-          }
-        });
-      },
-      { threshold: [0.1, 0.25, 0.5] }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [play, pause, isHovered]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -215,9 +192,10 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (!isVisible) {
-      setIsVideoPlaying(false);
-      pause();
+    setIsVideoPlaying(false);
+    pause();
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
     }
   };
 
@@ -248,13 +226,12 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   return (
     <div
-      ref={containerRef}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#1C1B1A] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 select-none"
-      title="Autoplays in viewport • Hover to preview • Single click to view details • Double-click to open on Instagram"
+      title="Hover to play video • Single click to view details • Double-click to open on Instagram"
     >
       {/* 1. Underlying Cover Photo Thumbnail - Always crystal clear, never black while video is buffering */}
       <img
@@ -266,25 +243,25 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           (e.currentTarget as HTMLImageElement).src = itemCover;
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
-          (isHovered || isVisible) && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
+          isHovered && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
         }`}
       />
 
-      {/* 2. Video Preview: Smoothly autoplays in viewport or on hover */}
+      {/* 2. Video Preview: Plays ONLY on hover */}
       {videoSrc && (
         <video
           ref={videoRef}
           src={videoSrc}
-          muted
+          muted={isMuted}
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           onPlay={() => setIsVideoPlaying(true)}
           onPlaying={() => setIsVideoPlaying(true)}
           onPause={() => setIsVideoPlaying(false)}
           onError={() => setIsVideoPlaying(false)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
-            (isHovered || isVisible) && isVideoPlaying ? 'opacity-100' : 'opacity-0'
+            isHovered && isVideoPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         />
       )}
@@ -292,11 +269,31 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
       {/* 3. Dark Vignette Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/35 pointer-events-none z-10" />
 
-      {/* 4. Clean Instagram Badge */}
-      <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium shadow-xs">
-        <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
-        <span>Instagram</span>
+      {/* 4. Top Badges: Instagram Badge & Hover Indicator */}
+      <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 flex-wrap pointer-events-none">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium shadow-xs">
+          <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
+          <span>Instagram</span>
+        </div>
+
+        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full backdrop-blur-md text-[10px] font-medium transition-all shadow-xs border ${
+          isHovered && isVideoPlaying
+            ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 animate-pulse'
+            : 'bg-black/60 text-[#D4AF37] border-white/20'
+        }`}>
+          <Play className={`w-2.5 h-2.5 ${(isHovered && isVideoPlaying) ? 'fill-emerald-300 text-emerald-300' : 'fill-[#D4AF37] text-[#D4AF37]'}`} />
+          <span>{(isHovered && isVideoPlaying) ? 'Playing' : 'Hover to Play'}</span>
+        </div>
       </div>
+
+      {/* Center Play Button Overlay */}
+      {!(isHovered && isVideoPlaying) && (
+        <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
+          <div className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+          </div>
+        </div>
+      )}
 
       {/* 5. Instagram Logo Badge & Seller Studio Controls */}
       <div className="absolute top-3 right-3 z-20" onClick={(e) => e.stopPropagation()}>
@@ -377,6 +374,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
   const [activeItem, setActiveItem] = useState<InstagramJournalItem | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
 
   // Modal video player state
   const modalVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -457,8 +455,39 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
               </p>
             </div>
 
-            {/* Direct Link to Instagram Button & Seller Controls */}
+            {/* Direct Link to Instagram Button, Hover to Play Control & Seller Controls */}
             <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
+              {/* Hover to Play Indicator & Mute Audio Browsing Control */}
+              <div className="inline-flex items-center bg-white/80 border border-[#FAD2E1] rounded-full p-1 shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#1C1B1A] font-medium">
+                  <Play className="w-3 h-3 text-[#E1306C] fill-[#E1306C]" />
+                  <span>Hover to Play</span>
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setIsMuted(!isMuted)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    !isMuted 
+                      ? 'bg-[#E1306C] text-white shadow-xs' 
+                      : 'text-[#736C65] hover:text-[#1C1B1A] hover:bg-white/60'
+                  }`}
+                  title={isMuted ? "Turn Sound On" : "Mute Sound"}
+                >
+                  {isMuted ? (
+                    <>
+                      <VolumeX className="w-3.5 h-3.5 text-[#736C65]" />
+                      <span>Muted</span>
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>Sound On</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               {isSellerMode && (
                 <button
                   type="button"
@@ -528,6 +557,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                 instagramHandle={instagramHandle}
                 instagramProfileUrl={instagramProfileUrl}
                 isSellerMode={isSellerMode}
+                isMuted={isMuted}
                 deleteConfirmId={deleteConfirmId}
                 onOpenModal={(selected) => setActiveItem(selected)}
                 onOpenInstagramDirect={openInstagramDirect}

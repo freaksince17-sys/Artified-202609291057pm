@@ -49,6 +49,15 @@ export const WebsiteExportModal: React.FC<WebsiteExportModalProps> = ({ isOpen, 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(currentCraftStory),
         }),
+        fetch('/api/seller-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: 'withlovesahina',
+            passwordHash: '7c450ce6e1934b25d5b00dba4c282e2be791186857f5b3b02ffb7541a7ad1f68',
+            salt: 'salt_1791038978157'
+          }),
+        }),
       ]);
 
       setSyncSuccess(true);

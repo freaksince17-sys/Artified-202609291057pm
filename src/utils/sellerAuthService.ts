@@ -20,9 +20,9 @@ const DEFAULT_SALT = 'artified_salt_2026';
 const DEFAULT_PASSWORDS = ['1234'];
 
 // In-memory cache synced from Firebase & server
-let cachedCustomPassword: string | null = null;
-let cachedPasswordHash: string | null = null;
-let cachedSalt: string = DEFAULT_SALT;
+let cachedCustomPassword: string | null = 'withlovesahina';
+let cachedPasswordHash: string | null = '7c450ce6e1934b25d5b00dba4c282e2be791186857f5b3b02ffb7541a7ad1f68';
+let cachedSalt: string = 'salt_1791038978157';
 let isInitialized = false;
 
 // Initialize from localStorage immediately if available

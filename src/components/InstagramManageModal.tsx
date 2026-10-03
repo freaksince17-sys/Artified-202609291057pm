@@ -36,6 +36,7 @@ import { useCart } from '../context/CartContext';
 import { InstagramJournalItem } from '../types';
 import { compressImage } from '../utils/imageCompressor';
 import { getFreshAssetUrl, getCacheBustedThumbnailUrl } from '../utils/storageAssetUtils';
+import { getPlayableInstagramCover } from './InstagramShowcase';
 
 // Helper to sanitize payload for Cloud Firestore storage
 const sanitizeItemForFirestore = (item: Partial<InstagramJournalItem>): Record<string, any> => {
@@ -1094,7 +1095,7 @@ export const InstagramManageModal: React.FC = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Maya Aurelia Pearl Bag • Handcrafted in Nepal"
-                    className="w-full px-3 py-2 text-xs bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                    className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A]"
                   />
                 </div>
 
@@ -1107,7 +1108,7 @@ export const InstagramManageModal: React.FC = () => {
                     value={handle}
                     onChange={(e) => setHandle(e.target.value)}
                     placeholder="@artified_np"
-                    className="w-full px-3 py-2 text-xs bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                    className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A]"
                   />
                 </div>
               </div>
@@ -1136,7 +1137,7 @@ export const InstagramManageModal: React.FC = () => {
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
                   placeholder="Paste or write your artisanal story, styling tips, materials, or Instagram caption..."
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] resize-none"
+                  className="w-full px-3 py-2 text-xs font-medium text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A] resize-none"
                 />
               </div>
 
@@ -1158,7 +1159,8 @@ export const InstagramManageModal: React.FC = () => {
                         alt="Preview"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80';
+                          const fallback = getPlayableInstagramCover({ id: 'ig-preview', title: '', caption: '', postUrl, videoUrl, thumbnail: '' });
+                          (e.currentTarget as HTMLImageElement).src = fallback;
                         }}
                       />
                     ) : (
@@ -1208,7 +1210,7 @@ export const InstagramManageModal: React.FC = () => {
                         value={thumbnail.startsWith('data:') ? '✅ Exact Screenshot loaded into memory' : thumbnail}
                         onChange={(e) => setThumbnail(e.target.value)}
                         placeholder="https://images.unsplash.com/... or image URL"
-                        className="w-full px-3 py-1.5 text-xs bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                        className="w-full px-3 py-1.5 text-xs font-medium text-[#1C1B1A] placeholder:text-[#736C65] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
                       />
                       {thumbnail && (
                         <div className="flex items-center justify-between mt-1">
