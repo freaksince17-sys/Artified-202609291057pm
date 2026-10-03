@@ -1248,9 +1248,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsDataSyncing(false);
           setSyncStatusText('🟢 Live Cloud Synced across all devices');
         } else {
-          // If Firestore is empty (first initialization), seed it with local or default products
-          setSyncStatusText('Initializing cloud catalog...');
-
+          // If Firestore is empty or quota-limited, use local/server catalog
+          setSyncStatusText('🟢 Catalog Ready (Server & Local Storage)');
           let seedList: Product[] = PRODUCTS;
           try {
             const localRaw = localStorage.getItem('artified_products_custom');
@@ -1261,18 +1260,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch {}
-
-          try {
-            const batch = writeBatch(db);
-            seedList.forEach((p) => {
-              const docRef = doc(db, 'products', p.id);
-              batch.set(docRef, p);
-            });
-            batch.commit().then(() => {
-              setIsCloudSynced(true);
-              setSyncStatusText('🟢 Live Cloud Synced across all devices');
-            }).catch(() => {});
-          } catch {}
+          setProducts(seedList);
+          setIsCloudSynced(false);
         }
       },
       (error) => {
@@ -1427,9 +1416,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const assignedVid = signatureVideos[idx % signatureVideos.length];
               const assignedCover = signatureCovers[idx % signatureCovers.length];
 
+              const extractSC = (url?: string) => {
+                if (!url) return null;
+                const match = url.match(/(?:reel|p)\/([A-Za-z0-9_-]+)/);
+                return match ? match[1] : null;
+              };
+              const shortcode = extractSC(it.videoUrl) || extractSC(it.postUrl);
+
               const localVid = (it.videoUrl && it.videoUrl.startsWith('/instagram_videos/'))
                 ? it.videoUrl
-                : assignedVid;
+                : (shortcode ? `/instagram_videos/${shortcode}.mp4` : assignedVid);
 
               const localCover = (it.thumbnail && it.thumbnail.startsWith('/instagram_videos/'))
                 ? it.thumbnail
@@ -1442,19 +1438,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               try {
                 localStorage.setItem('artified_instagram_journal_items', JSON.stringify(reconciledList));
                 localStorage.setItem('artified_instagram_locked', 'true');
-                
-                // Programmatically sanitize Firestore documents to persist direct local MP4 paths
-                const batch = writeBatch(db);
-                reconciledList.forEach((item) => {
-                  const docRef = doc(db, 'instagram_journal', item.id);
-                  batch.set(docRef, sanitizeForFirestore(cleanInstagramItemForFirestore(item)), { merge: true });
-                });
-                batch.commit().catch(() => {});
               } catch {}
             }
           }
         } else {
-          // If Firestore is empty, DO NOT wipe out user's custom saved items! Seed Firestore
+          // If Firestore is empty or quota-limited, use local/saved items
           let existingLocal: InstagramJournalItem[] = [];
           try {
             const saved = localStorage.getItem('artified_instagram_journal_items');
@@ -1468,14 +1456,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           const listToSeed = existingLocal.length > 0 ? existingLocal : DEFAULT_INSTAGRAM_ITEMS;
           setInstagramItems(listToSeed);
-          try {
-            const batch = writeBatch(db);
-            listToSeed.forEach((item) => {
-              const docRef = doc(db, 'instagram_journal', item.id);
-              batch.set(docRef, sanitizeForFirestore(cleanInstagramItemForFirestore(item)));
-            });
-            batch.commit().catch(() => {});
-          } catch {}
         }
       },
       (err) => {

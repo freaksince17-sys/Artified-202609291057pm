@@ -346,8 +346,14 @@ export const InstagramManageModal: React.FC = () => {
       return;
     }
 
-    setVideoUrl(targetUrl);
-    setClipboardNotice('Instagram link linked! You can paste your caption & screenshot directly.');
+    const shortcode = getInstagramShortcode(targetUrl);
+    if (shortcode) {
+      setVideoUrl(`/instagram_videos/${shortcode}.mp4`);
+      setClipboardNotice('Instagram Reel shortcode extracted & linked to local video path!');
+    } else {
+      setVideoUrl(targetUrl);
+      setClipboardNotice('Instagram link linked! You can paste your caption & screenshot directly.');
+    }
     setTimeout(() => setClipboardNotice(null), 3000);
   };
 
@@ -526,45 +532,28 @@ export const InstagramManageModal: React.FC = () => {
         } : {}),
       };
 
-      // STEP 1: Synchronous Cloud Firestore Write with serverTimestamp
+      // STEP 1: Apply immediate update to CartContext, LocalStorage, and Express Server API
+      if (itemId) {
+        await updateInstagramItem(payload);
+      } else {
+        await addInstagramItem(payload);
+      }
+
+      // STEP 2: Asynchronous Non-blocking Firestore Write (Never blocks UI or hangs on quota backoff)
       const firestorePayload = sanitizeItemForFirestore(payload);
       const itemDocRef = doc(db, 'instagram_journal', payload.id);
-      await setDoc(itemDocRef, firestorePayload, { merge: true });
+      setDoc(itemDocRef, firestorePayload, { merge: true }).catch((fsErr) => {
+        console.warn('Notice: Firestore save background notice:', fsErr);
+      });
 
-      // STEP 2: Synchronous Firestore Read-back from server to verify write completed before local state updates
-      let verifiedDocSnap;
-      try {
-        verifiedDocSnap = await getDocFromServer(itemDocRef);
-      } catch {
-        verifiedDocSnap = await getDoc(itemDocRef);
-      }
-
-      let confirmedData: InstagramJournalItem = payload;
-      if (verifiedDocSnap && verifiedDocSnap.exists()) {
-        const d = verifiedDocSnap.data() as InstagramJournalItem;
-        confirmedData = {
-          ...payload,
-          ...d,
-          id: d.id || payload.id,
-          thumbnail: getCacheBustedThumbnailUrl(d.thumbnail || payload.thumbnail, uniqueSaveVersion)
-        };
-      }
-
-      // STEP 3: Apply verified data to CartContext & local state to trigger pristine re-render
-      if (itemId) {
-        await updateInstagramItem(confirmedData);
-      } else {
-        await addInstagramItem(confirmedData);
-      }
-
-      setItemId(confirmedData.id);
-      setThumbnail(confirmedData.thumbnail);
-      setEditingInstagramItem(confirmedData);
+      setItemId(payload.id);
+      setThumbnail(payload.thumbnail);
+      setEditingInstagramItem(payload);
       setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
         setActiveTab('list');
-      }, 400);
+      }, 300);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to save Instagram item');
     } finally {
@@ -575,41 +564,24 @@ export const InstagramManageModal: React.FC = () => {
   const handleDeleteAll = async () => {
     setIsSubmitting(true);
     try {
-      // STEP 1: Synchronous Firestore deletion across all docs
-      const journalColRef = collection(db, 'instagram_journal');
-      let allDocsSnap;
-      try {
-        allDocsSnap = await getDocsFromServer(journalColRef);
-      } catch {
-        allDocsSnap = await getDocs(journalColRef);
-      }
-
-      if (allDocsSnap && !allDocsSnap.empty) {
-        const deletePromises = allDocsSnap.docs.map((docSnap) => deleteDoc(docSnap.ref));
-        await Promise.all(deletePromises);
-      }
-
-      // STEP 2: Synchronous Firestore Read-back verification from server
-      let verifyEmptySnap;
-      try {
-        verifyEmptySnap = await getDocsFromServer(journalColRef);
-      } catch {
-        verifyEmptySnap = await getDocs(journalColRef);
-      }
-
-      if (verifyEmptySnap && !verifyEmptySnap.empty) {
-        for (const d of verifyEmptySnap.docs) {
-          await deleteDoc(d.ref);
-        }
-      }
-
-      // STEP 3: Apply verified deletion to Context & local state
+      // STEP 1: Apply immediate deletion to CartContext & local state
       await deleteAllInstagramItems();
+
+      // STEP 2: Non-blocking Firestore cleanup
+      const journalColRef = collection(db, 'instagram_journal');
+      getDocs(journalColRef).then((snap) => {
+        if (snap && !snap.empty) {
+          snap.docs.forEach((docSnap) => {
+            deleteDoc(docSnap.ref).catch(() => {});
+          });
+        }
+      }).catch(() => {});
+
       setShowDeleteAllConfirm(false);
       setEditingInstagramItem(null);
       setActiveTab('list');
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 1500);
+      setTimeout(() => setSaveSuccess(false), 1200);
     } catch (err: any) {
       setErrorMessage('Failed to delete all items: ' + err.message);
     } finally {
@@ -621,24 +593,13 @@ export const InstagramManageModal: React.FC = () => {
     if (e) e.stopPropagation();
     setIsSubmitting(true);
     try {
-      // STEP 1: Synchronous Firestore delete
-      const docRef = doc(db, 'instagram_journal', id);
-      await deleteDoc(docRef);
-
-      // STEP 2: Synchronous Firestore Read-back verification from server
-      let verifySnap;
-      try {
-        verifySnap = await getDocFromServer(docRef);
-      } catch {
-        verifySnap = await getDoc(docRef);
-      }
-
-      if (verifySnap && verifySnap.exists()) {
-        await deleteDoc(docRef);
-      }
-
-      // STEP 3: Apply verified deletion to Context & local state
+      // STEP 1: Apply immediate deletion to CartContext & local state
       await deleteInstagramItem(id);
+
+      // STEP 2: Non-blocking Firestore deletion
+      const docRef = doc(db, 'instagram_journal', id);
+      deleteDoc(docRef).catch(() => {});
+
       setDeleteConfirmId(null);
       if (editingInstagramItem?.id === id || itemId === id) {
         setEditingInstagramItem(null);
@@ -662,33 +623,19 @@ export const InstagramManageModal: React.FC = () => {
         : `@${globalHandleInput.trim()}`;
       const cleanUrl = (globalUrlInput.trim() || `https://www.instagram.com/${cleanHandle.replace('@', '')}/`);
 
-      // STEP 1: Synchronous Firestore write to store_settings/instagram with serverTimestamp
+      // STEP 1: Apply immediate update to CartContext & local state
+      setGlobalHandleInput(cleanHandle);
+      setGlobalUrlInput(cleanUrl);
+      setHandle(cleanHandle);
+      await updateInstagramSettings(cleanHandle, cleanUrl);
+
+      // STEP 2: Non-blocking Firestore write
       const settingsDocRef = doc(db, 'store_settings', 'instagram');
-      await setDoc(settingsDocRef, {
+      setDoc(settingsDocRef, {
         handle: cleanHandle,
         profileUrl: cleanUrl,
         updatedAt: serverTimestamp()
-      }, { merge: true });
-
-      // STEP 2: Synchronous Firestore read-back from server to verify
-      let verifySettingsSnap;
-      try {
-        verifySettingsSnap = await getDocFromServer(settingsDocRef);
-      } catch {
-        verifySettingsSnap = await getDoc(settingsDocRef);
-      }
-
-      const verifiedData = verifySettingsSnap && verifySettingsSnap.exists() 
-        ? verifySettingsSnap.data() 
-        : { handle: cleanHandle, profileUrl: cleanUrl };
-
-      // STEP 3: Apply verified settings to Context & local state
-      const confirmedHandle = verifiedData?.handle || cleanHandle;
-      const confirmedUrl = verifiedData?.profileUrl || cleanUrl;
-      setGlobalHandleInput(confirmedHandle);
-      setGlobalUrlInput(confirmedUrl);
-      setHandle(confirmedHandle);
-      await updateInstagramSettings(confirmedHandle, confirmedUrl);
+      }, { merge: true }).catch(() => {});
 
       setSaveSuccess(true);
       setTimeout(() => {

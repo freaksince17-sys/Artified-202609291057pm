@@ -209,19 +209,10 @@ export async function syncSellerPasswordFromServer(): Promise<{ hasCustom: boole
         cachedPasswordHash = localHash ? localHash.trim() : null;
         cachedSalt = localSalt;
 
-        const payload = {
-          passwordHash: cachedPasswordHash || (localPass ? await hashPassword(localPass, localSalt) : null),
-          salt: localSalt,
-          customPassword: localPass || null,
-          hasCustom: true,
-          updatedAt: serverTimestamp()
-        };
-        setDoc(doc(db, 'store_settings', 'seller_auth'), payload, { merge: true }).catch(() => {});
-        setDoc(doc(db, 'activeProfile', 'seller_auth_backup'), payload, { merge: true }).catch(() => {});
         fetch('/api/seller-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: localPass, passwordHash: payload.passwordHash, salt: localSalt })
+          body: JSON.stringify({ password: localPass, passwordHash: cachedPasswordHash, salt: localSalt })
         }).catch(() => {});
 
         return { hasCustom: true, hash: cachedPasswordHash };

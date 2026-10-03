@@ -257,20 +257,13 @@ export async function fetchArtisanProfileFromServer(): Promise<ArtisanProfileDat
         } catch {}
         window.dispatchEvent(new CustomEvent('artified_artisan_updated', { detail: merged }));
       } else if (localUpdated > remoteUpdated && localUpdated > defaultTs) {
-        // Local is newer: sync local to server disk and Firestore so remote has the latest user edits!
+        // Local is newer: sync local to server disk API
         try {
           fetch('/api/artisan-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentLocal)
           }).catch(() => {});
-          
-          const fsPayload = {
-            ...currentLocal,
-            avatarUrl: currentLocal.avatarUrl || DEFAULT_ARTISAN_PROFILE.avatarUrl
-          };
-          setDoc(doc(db, 'activeProfile', 'sahina_shrestha'), fsPayload, { merge: true }).catch(() => {});
-          setDoc(doc(db, 'store_settings', 'artisan_profile'), fsPayload, { merge: true }).catch(() => {});
         } catch {}
       }
     } catch (e) {}

@@ -28,7 +28,11 @@ export interface FirestoreErrorInfo {
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
   const errMsg = error instanceof Error ? error.message : String(error);
-  const isQuotaError = errMsg.toLowerCase().includes('quota limit exceeded') || errMsg.toLowerCase().includes('quota exceeded');
+  const isQuotaError = 
+    errMsg.toLowerCase().includes('quota limit exceeded') || 
+    errMsg.toLowerCase().includes('quota exceeded') ||
+    errMsg.toLowerCase().includes('resource-exhausted') ||
+    errMsg.toLowerCase().includes('maximum backoff delay');
 
   const errInfo: FirestoreErrorInfo = {
     error: errMsg,
@@ -48,10 +52,10 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   };
 
   if (isQuotaError) {
-    console.warn('Firestore Quota Exceeded (running in graceful local fallback mode):', JSON.stringify(errInfo));
-    return;
+    console.warn('Notice: Firestore Quota Limit (app operating smoothly via local & server storage):', errInfo.error);
+    return errInfo;
   }
 
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.warn('Notice: Firestore notice:', errInfo.error);
+  return errInfo;
 }

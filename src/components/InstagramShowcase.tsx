@@ -199,9 +199,14 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleVideoError = () => {
     setIsVideoPlaying(false);
-    const fallback = ATELIER_CRAFT_VIDEOS[index % ATELIER_CRAFT_VIDEOS.length];
-    if (activeVideoSrc !== fallback) {
-      setActiveVideoSrc(fallback);
+    const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
+    if (shortcode && !activeVideoSrc.includes('/api/instagram-video/')) {
+      setActiveVideoSrc(`/api/instagram-video/${shortcode}`);
+      return;
+    }
+    const ultimateFallback = '/instagram_videos/DdjhhazvaRr.mp4';
+    if (activeVideoSrc !== ultimateFallback) {
+      setActiveVideoSrc(ultimateFallback);
     }
   };
 

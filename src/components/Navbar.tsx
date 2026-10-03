@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 items-center h-14 sm:h-16">
             
-            {/* Left: Mobile Menu Toggle & Search Bar */}
+            {/* Left: Mobile Menu Toggle */}
             <div className="flex items-center justify-start gap-2">
               <button
                 type="button"
@@ -127,31 +127,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 aria-label="Open navigation menu"
               >
                 <Menu className="w-5 h-5" />
-              </button>
-
-              {/* Search Trigger Button / Bar */}
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-white/90 dark:bg-[#1A1918] hover:bg-white dark:hover:bg-[#22211F] border border-[#E8DFD8] dark:border-[#2E2C29] hover:border-[#C5A880] rounded-full text-xs text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-all shadow-2xs cursor-pointer max-w-[210px] w-full"
-                aria-label="Search catalog for pearl bags, necklaces, and macrame"
-                title="Search products (Press / key)"
-              >
-                <Search className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
-                <span className="truncate text-[11px] font-normal">{searchQuery ? `"${searchQuery}"` : "Search creations..."}</span>
-                <kbd className="hidden md:inline-block ml-auto px-1.5 py-0.2 text-[9px] bg-[#FAF8F5] dark:bg-[#121110] border border-[#D8CFCA] dark:border-[#33302C] rounded text-[#8C7A6B] dark:text-[#A69E96] font-mono">
-                  /
-                </kbd>
-              </button>
-
-              {/* Mobile Search Icon Button */}
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                className="sm:hidden p-2 text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] hover:bg-[#E8DFD8]/40 dark:hover:bg-[#262422] rounded-full transition-colors cursor-pointer"
-                aria-label="Search catalog"
-              >
-                <Search className="w-4 h-4" />
               </button>
             </div>
 
@@ -199,21 +174,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 ) : (
                   <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-[#1C1B1A] transition-transform duration-300 hover:-rotate-12" />
                 )}
-              </button>
-
-              {/* Seller Studio Portal Access */}
-              <button
-                type="button"
-                onClick={() => setIsSellerAuthModalOpen(true)}
-                className={`p-2 rounded-full transition-colors cursor-pointer shrink-0 ${
-                  isSellerMode
-                    ? 'bg-[#1C1B1A] dark:bg-[#FAF8F5] text-[#D4AF37] dark:text-[#1C1B1A] shadow-xs'
-                    : 'text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#C5A880] hover:bg-white/80 dark:hover:bg-[#1E1D1B]'
-                }`}
-                title={isSellerMode ? "Seller Studio Active (Click to manage)" : "Seller Studio Login (Passcode required)"}
-                aria-label="Open Seller Studio Login"
-              >
-                <Lock className={`w-4 h-4 sm:w-5 sm:h-5 ${isSellerMode ? 'fill-[#D4AF37] text-[#D4AF37] dark:text-[#1C1B1A]' : ''}`} />
               </button>
 
               {/* Wishlist Button */}
@@ -652,18 +612,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 <span>Chat on WhatsApp (+977)</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsSellerAuthModalOpen(true);
-                }}
-                aria-label="Open Seller Studio Login"
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1C1B1A] dark:bg-[#34312F] text-[#D4AF37] rounded-lg text-xs font-semibold tracking-wider uppercase hover:bg-[#34312F] transition-colors shadow-sm cursor-pointer border border-[#D4AF37]/30"
-              >
-                <Lock className="w-4 h-4 text-[#D4AF37]" />
-                <span>Seller Studio Access</span>
-              </button>
+
 
               <div className="pt-1.5 flex items-center justify-center gap-4 text-xs text-[#736C65] dark:text-[#A69E96]">
                 <a
