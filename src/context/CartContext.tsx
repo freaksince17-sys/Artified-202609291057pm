@@ -1403,7 +1403,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             });
 
-            const reconciledList = Array.from(reconciledMap.values());
+            const reconciledList = Array.from(reconciledMap.values()).map((it) => {
+              if (it.postUrl && it.postUrl.includes('DdMRgKdP4HK')) {
+                return { ...it, thumbnail: '/instagram_videos/DdMRgKdP4HK_cover.jpg' };
+              }
+              return it;
+            });
             if (reconciledList.length > 0) {
               setInstagramItems(reconciledList);
               try {

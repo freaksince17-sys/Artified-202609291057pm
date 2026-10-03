@@ -377,6 +377,40 @@ export async function validateSellerPasswordAsync(input: string): Promise<boolea
     }
   } catch {}
 
+  // 5. Check Server API Disk (/api/seller-password)
+  try {
+    const res = await fetch('/api/seller-password');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.hasCustom) {
+        if (data.customPassword && cleanInput === data.customPassword.trim()) {
+          const validPass = data.customPassword.trim();
+          cachedCustomPassword = validPass;
+          try {
+            localStorage.setItem(SELLER_PASSWORD_KEY, validPass);
+            localStorage.setItem(SELLER_HAS_CUSTOM_KEY, 'true');
+          } catch {}
+          return true;
+        }
+        if (data.passwordHash) {
+          const sSalt = data.salt || DEFAULT_SALT;
+          const computed = await hashPassword(cleanInput, sSalt);
+          if (computed === data.passwordHash) {
+            cachedPasswordHash = data.passwordHash;
+            cachedSalt = sSalt;
+            try {
+              localStorage.setItem(SELLER_HASH_KEY, data.passwordHash);
+              localStorage.setItem(SELLER_SALT_KEY, sSalt);
+              localStorage.setItem(SELLER_HAS_CUSTOM_KEY, 'true');
+            } catch {}
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+  } catch {}
+
   // If ANY custom password is configured anywhere, block all default passwords
   if (isCustomPasswordSet() || customPass || storedHash) {
     return false;

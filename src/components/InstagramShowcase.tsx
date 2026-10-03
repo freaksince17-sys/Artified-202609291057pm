@@ -53,15 +53,19 @@ export const KNOWN_LOCAL_COVERS: Record<string, string> = {
 };
 
 export const getPlayableInstagramCover = (item: InstagramJournalItem, index = 0): string => {
-  // 1. If the item explicitly has its own thumbnail, always honor it first
-  if (item.thumbnail && item.thumbnail.trim()) {
+  const shortcode = getInstagramShortcode(item.postUrl) || getInstagramShortcode(item.videoUrl);
+  // 1. Known local covers for signature atelier reels always take priority over default fallback thumbnails
+  if (shortcode && KNOWN_LOCAL_COVERS[shortcode]) {
+    return getFreshAssetUrl(KNOWN_LOCAL_COVERS[shortcode]);
+  }
+
+  // 2. If the item explicitly has its own non-default thumbnail, honor it
+  if (item.thumbnail && item.thumbnail.trim() && !item.thumbnail.includes('DdjhhazvaRr_cover.jpg')) {
     return getFreshAssetUrl(item.thumbnail.trim());
   }
 
-  // 2. Known local covers for signature atelier reels
-  const shortcode = getInstagramShortcode(item.postUrl) || getInstagramShortcode(item.videoUrl);
-  if (shortcode && KNOWN_LOCAL_COVERS[shortcode]) {
-    return getFreshAssetUrl(KNOWN_LOCAL_COVERS[shortcode]);
+  if (item.thumbnail && item.thumbnail.trim()) {
+    return getFreshAssetUrl(item.thumbnail.trim());
   }
 
   // 3. Fallback signature covers
@@ -168,8 +172,10 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
   onDeleteRequest,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const videoSrc = getPlayableInstagramVideo(item, index);
   const { videoRef, play, pause } = useVideoController({
@@ -179,6 +185,29 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
     playsInline: true
   });
 
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+            setIsVisible(true);
+            play().catch(() => {});
+          } else {
+            setIsVisible(false);
+            if (!isHovered) {
+              pause();
+            }
+          }
+        });
+      },
+      { threshold: [0.1, 0.25, 0.5] }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [play, pause, isHovered]);
+
   const handleMouseEnter = () => {
     setIsHovered(true);
     play().catch(() => {});
@@ -186,8 +215,10 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    setIsVideoPlaying(false);
-    pause();
+    if (!isVisible) {
+      setIsVideoPlaying(false);
+      pause();
+    }
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -217,12 +248,13 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   return (
     <div
+      ref={containerRef}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#1C1B1A] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 select-none"
-      title="Hover to play video • Single click to view details • Double-click to open on Instagram"
+      title="Autoplays in viewport • Hover to preview • Single click to view details • Double-click to open on Instagram"
     >
       {/* 1. Underlying Cover Photo Thumbnail - Always crystal clear, never black while video is buffering */}
       <img
@@ -234,11 +266,11 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           (e.currentTarget as HTMLImageElement).src = itemCover;
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
-          isHovered && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
+          (isHovered || isVisible) && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
         }`}
       />
 
-      {/* 2. Hover-Only Video Preview: Smoothly plays and reveals ONLY when actively playing */}
+      {/* 2. Video Preview: Smoothly autoplays in viewport or on hover */}
       {videoSrc && (
         <video
           ref={videoRef}
@@ -252,7 +284,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           onPause={() => setIsVideoPlaying(false)}
           onError={() => setIsVideoPlaying(false)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
-            isHovered && isVideoPlaying ? 'opacity-100' : 'opacity-0'
+            (isHovered || isVisible) && isVideoPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         />
       )}

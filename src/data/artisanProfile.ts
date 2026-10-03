@@ -42,7 +42,7 @@ export interface ArtisanProfileData {
 }
 
 const savedProfile = (SAVED_ARTISAN_PROFILE as unknown as Partial<ArtisanProfileData>) || {};
-const authenticAvatar = '/artisan_avatar.png';
+const authenticAvatar = (savedProfile.avatarUrl && savedProfile.avatarUrl.length > 50) ? savedProfile.avatarUrl : '/artisan_avatar.png';
 
 export const DEFAULT_ARTISAN_PROFILE: ArtisanProfileData = {
   artisanName: savedProfile.artisanName || 'Sahina Shrestha',
@@ -161,12 +161,9 @@ export async function saveArtisanProfile(data: ArtisanProfileData): Promise<void
 
     // Step 3: Explicitly persist to Firestore
     try {
-      // If avatarUrl is a large base64 data URI, store /artisan_avatar.png for Firestore to avoid 1MB doc limit
       const firestorePayload: ArtisanProfileData = {
         ...enrichedData,
-        avatarUrl: enrichedData.avatarUrl && enrichedData.avatarUrl.length > 50000 
-          ? '/artisan_avatar.png' 
-          : enrichedData.avatarUrl
+        avatarUrl: enrichedData.avatarUrl || DEFAULT_ARTISAN_PROFILE.avatarUrl
       };
       const activeProfileRef = doc(db, 'activeProfile', 'sahina_shrestha');
       const mirrorRef = doc(db, 'store_settings', 'artisan_profile');
@@ -270,9 +267,7 @@ export async function fetchArtisanProfileFromServer(): Promise<ArtisanProfileDat
           
           const fsPayload = {
             ...currentLocal,
-            avatarUrl: currentLocal.avatarUrl && currentLocal.avatarUrl.length > 50000 
-              ? '/artisan_avatar.png' 
-              : currentLocal.avatarUrl
+            avatarUrl: currentLocal.avatarUrl || DEFAULT_ARTISAN_PROFILE.avatarUrl
           };
           setDoc(doc(db, 'activeProfile', 'sahina_shrestha'), fsPayload, { merge: true }).catch(() => {});
           setDoc(doc(db, 'store_settings', 'artisan_profile'), fsPayload, { merge: true }).catch(() => {});
