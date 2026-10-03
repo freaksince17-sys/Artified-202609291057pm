@@ -64,11 +64,15 @@ export const SellerToolbar: React.FC = () => {
         } else {
           // Check local seller session token validity
           const sessionToken = localStorage.getItem('artified_seller_session_token');
-          const isSessionActive = localStorage.getItem('artified_seller_session') === 'true';
+          const isSessionActive = localStorage.getItem('artified_seller_session') === 'true' || sessionStorage.getItem('artified_seller_session') === 'active';
           const isSellerModeSaved = localStorage.getItem('artified_seller_mode') === 'true';
 
-          // If no session or valid token exists, lock access to seller-only features immediately
-          if (!sessionToken && !isSessionActive && !isSellerModeSaved) {
+          // If session is active or seller mode is enabled, keep session alive
+          if (isSessionActive || isSellerModeSaved || sessionToken) {
+            if (isSubscribed && !isSellerMode) {
+              setIsSellerMode(true);
+            }
+          } else if (!isSellerMode && !sessionToken && !isSessionActive && !isSellerModeSaved) {
             if (isSubscribed) {
               setIsSellerMode(false);
               localStorage.setItem('artified_seller_mode', 'false');

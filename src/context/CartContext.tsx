@@ -1591,10 +1591,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof window !== 'undefined') {
       try {
         if (val) {
+          const token = `seller_token_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+          localStorage.setItem('artified_seller_mode', 'true');
+          localStorage.setItem('artified_seller_session', 'true');
+          localStorage.setItem('artified_seller_session_token', token);
           sessionStorage.setItem('artified_seller_session', 'active');
         } else {
+          localStorage.setItem('artified_seller_mode', 'false');
+          localStorage.removeItem('artified_seller_session');
+          localStorage.removeItem('artified_seller_session_token');
           sessionStorage.removeItem('artified_seller_session');
-          localStorage.removeItem('artified_seller_mode');
         }
       } catch {}
     }
