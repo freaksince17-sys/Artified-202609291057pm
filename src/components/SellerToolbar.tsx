@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { 
+  onAuthStateChanged, 
+  onIdTokenChanged 
+} from 'firebase/auth';
+import { auth } from '../firebase';
 import { 
   Sparkles, 
   Lock, 
@@ -45,6 +50,65 @@ export const SellerToolbar: React.FC = () => {
   const [isPaymentSettingsOpen, setIsPaymentSettingsOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isArtisanProfileOpen, setIsArtisanProfileOpen] = useState(false);
+
+  // Session persistence check on app mount: Validate active session token against Firebase Auth
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const validateSellerSessionToken = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          // Force active session token validation against Firebase Auth
+          await currentUser.getIdToken(false);
+        } else {
+          // Check local seller session token validity
+          const sessionToken = localStorage.getItem('artified_seller_session_token');
+          const isSessionActive = localStorage.getItem('artified_seller_session') === 'true';
+          const isSellerModeSaved = localStorage.getItem('artified_seller_mode') === 'true';
+
+          // If no session or valid token exists, lock access to seller-only features immediately
+          if (!sessionToken && !isSessionActive && !isSellerModeSaved) {
+            if (isSubscribed) {
+              setIsSellerMode(false);
+              localStorage.setItem('artified_seller_mode', 'false');
+              localStorage.removeItem('artified_seller_session');
+              localStorage.removeItem('artified_seller_session_token');
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Seller session token validation failed, locking access:', err);
+        if (isSubscribed) {
+          setIsSellerMode(false);
+          try {
+            localStorage.setItem('artified_seller_mode', 'false');
+            localStorage.removeItem('artified_seller_session');
+            localStorage.removeItem('artified_seller_session_token');
+          } catch {}
+        }
+      }
+    };
+
+    validateSellerSessionToken();
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        try {
+          await authUser.getIdToken(false);
+        } catch {
+          if (isSubscribed) {
+            setIsSellerMode(false);
+          }
+        }
+      }
+    });
+
+    return () => {
+      isSubscribed = false;
+      unsubscribeAuth();
+    };
+  }, [setIsSellerMode]);
 
   const handleManualSync = async () => {
     setIsManualSyncing(true);

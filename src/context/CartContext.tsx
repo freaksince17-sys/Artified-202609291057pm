@@ -252,7 +252,7 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
   'custom-beaded': 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=80',
 };
 
-// Helper to sanitize product images so they never point to broken ephemeral /uploads/
+// Helper to sanitize product images and stock counts
 const sanitizeProduct = (prod: Product): Product => {
   const fallback = CATEGORY_FALLBACKS[prod.category] || CATEGORY_FALLBACKS['pearl-bags'];
   
@@ -265,8 +265,15 @@ const sanitizeProduct = (prod: Product): Product => {
     })
     .filter((img) => typeof img === 'string' && img.trim() !== '');
 
+  // Preserve explicit out-of-stock if explicitly set by seller, otherwise default to in-stock
+  const explicitOutOfStock = prod.inStock === false && prod.stockCount === 0;
+  const inStock = explicitOutOfStock ? false : (prod.inStock !== false);
+  const stockCount = inStock ? (typeof prod.stockCount === 'number' && prod.stockCount > 0 ? prod.stockCount : 8) : 0;
+
   return {
     ...prod,
+    inStock,
+    stockCount,
     images: cleanImages.length > 0 ? cleanImages : [fallback]
   };
 };

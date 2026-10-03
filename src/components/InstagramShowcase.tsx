@@ -92,20 +92,29 @@ export const ATELIER_CRAFT_VIDEOS = [
 export const isDirectVideo = (u?: string): boolean => {
   if (!u || typeof u !== 'string') return false;
   const lower = u.trim().toLowerCase();
-  return (
-    lower.includes('.mp4') ||
-    lower.includes('.webm') ||
-    lower.includes('.mov') ||
-    lower.startsWith('data:video') ||
+
+  // Local files, blob, data URLs, and API endpoints are 100% direct and reliable
+  if (
+    lower.startsWith('/instagram_videos/') ||
+    lower.startsWith('/tiktok_videos/') ||
+    lower.startsWith('/api/') ||
     lower.startsWith('blob:') ||
-    lower.includes('/instagram_videos/') ||
-    lower.includes('/api/instagram-video') ||
-    lower.includes('/tiktok_videos/') ||
-    lower.includes('cdninstagram.com') ||
-    lower.includes('fbcdn.net') ||
-    lower.includes('googlevideo.com') ||
-    lower.includes('firebasestorage.googleapis.com')
-  );
+    lower.startsWith('data:video')
+  ) {
+    return true;
+  }
+
+  // External direct video files (excluding expiring CDN links from Instagram/Facebook)
+  if (
+    (lower.includes('.mp4') || lower.includes('.webm') || lower.includes('.mov')) &&
+    !lower.includes('cdninstagram.com') &&
+    !lower.includes('fbcdn.net') &&
+    !lower.includes('instagram.com')
+  ) {
+    return true;
+  }
+
+  return false;
 };
 
 export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0): string => {

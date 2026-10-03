@@ -30,6 +30,7 @@ import {
   collection, 
   getDocs,
   getDocsFromServer,
+  onSnapshot,
   serverTimestamp
 } from 'firebase/firestore';
 import { useCart } from '../context/CartContext';
@@ -357,45 +358,40 @@ export const InstagramManageModal: React.FC = () => {
     }
   };
 
-  // Robust Firestore Persistence Layer: Explicitly fetch current data from Firestore server on mount & modal open
+  // Listener-based real-time onSnapshot sync with Firestore to prevent stale or default content from overwriting the view
   useEffect(() => {
-    let isMounted = true;
+    if (!isInstagramManagerOpen) return;
 
-    const fetchLiveFirestoreData = async () => {
-      try {
-        // 1. Fetch live Instagram settings directly from Firestore server
-        const settingsDocRef = doc(db, 'store_settings', 'instagram');
-        let settingsSnap;
-        try {
-          settingsSnap = await getDocFromServer(settingsDocRef);
-        } catch {
-          settingsSnap = await getDoc(settingsDocRef);
-        }
-
-        if (settingsSnap && settingsSnap.exists() && isMounted) {
-          const sData = settingsSnap.data();
+    // 1. Real-time listener for Instagram handle and profile URL settings
+    const settingsDocRef = doc(db, 'store_settings', 'instagram');
+    const unsubscribeSettings = onSnapshot(
+      settingsDocRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const sData = snapshot.data();
           if (sData?.handle) {
             setGlobalHandleInput(sData.handle);
-            setHandle(sData.handle);
+            setHandle((prev) => prev || sData.handle);
           }
           if (sData?.profileUrl) {
             setGlobalUrlInput(sData.profileUrl);
           }
         }
+      },
+      (error) => {
+        console.warn('Instagram settings onSnapshot listener notice:', error);
+      }
+    );
 
-        // 2. Fetch live Instagram journal collection directly from Firestore server with unique cache-busted thumbnails
-        const journalColRef = collection(db, 'instagram_journal');
-        let journalSnap;
-        try {
-          journalSnap = await getDocsFromServer(journalColRef);
-        } catch {
-          journalSnap = await getDocs(journalColRef);
-        }
-
-        if (journalSnap && !journalSnap.empty && isMounted) {
+    // 2. Real-time listener for Instagram journal entries collection
+    const journalColRef = collection(db, 'instagram_journal');
+    const unsubscribeJournal = onSnapshot(
+      journalColRef,
+      (snapshot) => {
+        if (!snapshot.empty) {
           const items: InstagramJournalItem[] = [];
           const nowTs = Date.now();
-          journalSnap.forEach((d) => {
+          snapshot.forEach((d) => {
             const data = d.data() as InstagramJournalItem;
             if (data && (data.id || d.id)) {
               const uniqueVersion = `${nowTs}_${d.id}`;
@@ -408,24 +404,21 @@ export const InstagramManageModal: React.FC = () => {
             }
           });
           if (items.length > 0) {
-            // Synchronize with CartContext & local storage mirror
-            for (const item of items) {
-              await updateInstagramItem(item).catch(() => {});
-            }
+            // Synchronize real-time updates to local storage mirror
             try {
               localStorage.setItem('artified_instagram_journal_items', JSON.stringify(items));
             } catch {}
           }
         }
-      } catch (err) {
-        console.warn('Notice: Firestore live Instagram server sync notice:', err);
+      },
+      (error) => {
+        console.warn('Instagram journal onSnapshot listener notice:', error);
       }
-    };
-
-    fetchLiveFirestoreData();
+    );
 
     return () => {
-      isMounted = false;
+      unsubscribeSettings();
+      unsubscribeJournal();
     };
   }, [isInstagramManagerOpen]);
 
