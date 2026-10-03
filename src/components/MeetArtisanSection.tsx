@@ -28,6 +28,7 @@ import {
 } from '../data/artisanProfile';
 import { ArtisanProfileEditModal } from './ArtisanProfileEditModal';
 import { compressImage } from '../utils/imageCompressor';
+import { getFreshArtisanAvatarUrl } from '../utils/storageAssetUtils';
 
 export const MeetArtisanSection: React.FC = () => {
   const { setActiveNavTab, isSellerMode, artisanProfile, updateArtisanProfile } = useCart();
@@ -218,11 +219,7 @@ export const MeetArtisanSection: React.FC = () => {
                 }`}
               >
                 <img
-                  src={
-                    !profile.avatarUrl || profile.avatarUrl.includes('unsplash.com') || profile.avatarUrl.includes('photo-')
-                      ? '/artisan_avatar.png'
-                      : profile.avatarUrl
-                  }
+                  src={getFreshArtisanAvatarUrl(profile.avatarUrl, profile.avatarUpdatedAt)}
                   alt={`${profile.artisanName} - ${profile.artisanRole}`}
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = '/artisan_avatar.png';

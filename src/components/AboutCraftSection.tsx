@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { DEFAULT_CRAFT_STORY } from '../data/products';
+import { getFreshAssetUrl, getOptimizedBackgroundUrl } from '../utils/storageAssetUtils';
 
 export const AboutCraftSection: React.FC = () => {
   const { 
@@ -133,12 +134,12 @@ export const AboutCraftSection: React.FC = () => {
   const hasImage2 = Boolean(story.image2 && story.image2.trim());
 
   const getSafeImageUrl = (url?: string): string => {
-    if (!url || !url.trim()) return 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=600&q=80';
+    if (!url || !url.trim()) return getOptimizedBackgroundUrl('/tiktok_videos/7625655459537603860_cover.jpg');
     const clean = url.trim();
     if (clean.includes('tiktokcdn.com') || clean.includes('cdninstagram.com') || clean.includes('fbcdn.net')) {
       return `/api/proxy-thumbnail?url=${encodeURIComponent(clean)}`;
     }
-    return clean;
+    return getOptimizedBackgroundUrl(clean);
   };
 
   useEffect(() => {

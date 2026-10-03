@@ -17,6 +17,7 @@ import {
 import { useCart } from '../context/CartContext';
 import { InstagramJournalItem } from '../types';
 import { useVideoController } from '../hooks/useVideoController';
+import { getFreshAssetUrl } from '../utils/storageAssetUtils';
 
 export interface InstagramShowcaseProps {
   embedded?: boolean;
@@ -31,20 +32,55 @@ export const getInstagramShortcode = (url?: string): string | null => {
 
 export const KNOWN_LOCAL_VIDEOS: Record<string, string> = {
   'DdjhhazvaRr': '/instagram_videos/DdjhhazvaRr.mp4',
-  'DdIUMC4BqFr': '/instagram_videos/DdIUMC4BqFr.mp4',
   'DdMRgKdP4HK': '/instagram_videos/DdMRgKdP4HK.mp4',
+  'DdIUMC4BqFr': '/instagram_videos/DdIUMC4BqFr.mp4',
+  'DY6OqqfPyJu': '/instagram_videos/DY6OqqfPyJu.mp4',
   '7363984155060817160': '/tiktok_videos/7363984155060817160.mp4',
   '7453859527411125512': '/tiktok_videos/7453859527411125512.mp4',
   '7495598629625842952': '/tiktok_videos/7495598629625842952.mp4',
   '7625655459537603860': '/tiktok_videos/7625655459537603860.mp4',
 };
 
+export const KNOWN_LOCAL_COVERS: Record<string, string> = {
+  'DdjhhazvaRr': '/instagram_videos/DdjhhazvaRr_cover.jpg',
+  'DdMRgKdP4HK': '/instagram_videos/DdMRgKdP4HK_cover.jpg',
+  'DdIUMC4BqFr': '/instagram_videos/DdIUMC4BqFr_cover.jpg',
+  'DY6OqqfPyJu': '/instagram_videos/DY6OqqfPyJu_cover.jpg',
+  '7363984155060817160': '/tiktok_videos/7363984155060817160_cover.jpg',
+  '7453859527411125512': '/tiktok_videos/7453859527411125512_cover.jpg',
+  '7495598629625842952': '/tiktok_videos/7495598629625842952_cover.jpg',
+  '7625655459537603860': '/tiktok_videos/7625655459537603860_cover.jpg',
+};
+
+export const getPlayableInstagramCover = (item: InstagramJournalItem, index = 0): string => {
+  // 1. If the item explicitly has its own thumbnail, always honor it first
+  if (item.thumbnail && item.thumbnail.trim()) {
+    return getFreshAssetUrl(item.thumbnail.trim());
+  }
+
+  // 2. Known local covers for signature atelier reels
+  const shortcode = getInstagramShortcode(item.postUrl) || getInstagramShortcode(item.videoUrl);
+  if (shortcode && KNOWN_LOCAL_COVERS[shortcode]) {
+    return getFreshAssetUrl(KNOWN_LOCAL_COVERS[shortcode]);
+  }
+
+  // 3. Fallback signature covers
+  const defaultCovers = [
+    '/instagram_videos/DdjhhazvaRr_cover.jpg',
+    '/instagram_videos/DdMRgKdP4HK_cover.jpg',
+    '/instagram_videos/DdIUMC4BqFr_cover.jpg',
+    '/instagram_videos/DY6OqqfPyJu_cover.jpg'
+  ];
+  return getFreshAssetUrl(defaultCovers[index % defaultCovers.length]);
+};
+
 export const ATELIER_CRAFT_VIDEOS = [
   '/instagram_videos/DdjhhazvaRr.mp4',
-  '/tiktok_videos/7363984155060817160.mp4',
-  '/instagram_videos/DdIUMC4BqFr.mp4',
-  '/tiktok_videos/7625655459537603860.mp4',
   '/instagram_videos/DdMRgKdP4HK.mp4',
+  '/instagram_videos/DdIUMC4BqFr.mp4',
+  '/instagram_videos/DY6OqqfPyJu.mp4',
+  '/tiktok_videos/7363984155060817160.mp4',
+  '/tiktok_videos/7625655459537603860.mp4',
   '/tiktok_videos/7453859527411125512.mp4',
   '/tiktok_videos/7495598629625842952.mp4',
 ];
@@ -177,8 +213,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
     onOpenInstagramDirect(item.postUrl || instagramProfileUrl);
   };
 
-  const fallbackCover = '/instagram_videos/DdjhhazvaRr_cover.jpg';
-  const cleanThumbnail = item.thumbnail?.trim() || fallbackCover;
+  const itemCover = getPlayableInstagramCover(item, index);
 
   return (
     <div
@@ -191,12 +226,12 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
     >
       {/* 1. Underlying Cover Photo Thumbnail - Always crystal clear, never black while video is buffering */}
       <img
-        src={cleanThumbnail}
+        src={itemCover}
         alt={item.title || 'Artified craft showcase'}
         loading="lazy"
         decoding="async"
         onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = fallbackCover;
+          (e.currentTarget as HTMLImageElement).src = itemCover;
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
           isHovered && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'

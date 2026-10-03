@@ -37,6 +37,7 @@ import { ReferAFriendModal } from './components/ReferAFriendModal';
 import { SizeGuideModal } from './components/SizeGuideModal';
 import { OrderFAQsModal } from './components/OrderFAQsModal';
 import { useCart } from './context/CartContext';
+import { useAuthPersistence } from './hooks/useAuthPersistence';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -91,6 +92,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 function AppContent() {
+  useAuthPersistence();
   const { 
     isGoogleDriveOpen, 
     setIsGoogleDriveOpen, 

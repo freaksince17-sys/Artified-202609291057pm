@@ -1,14 +1,23 @@
 // Service to manage Seller Studio authentication, SHA-256 password hashing,
-// and synchronization with Firebase Firestore & backend server credentials.
+// and permanent multi-store synchronization across Firebase Firestore, server disk,
+// domain reloads (artified.com.np), and persistent browser storage.
 
 import { db } from '../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { 
+  doc, 
+  getDoc, 
+  getDocFromServer, 
+  setDoc, 
+  updateDoc, 
+  serverTimestamp 
+} from 'firebase/firestore';
 
 const SELLER_PASSWORD_KEY = 'artified_seller_studio_password';
 const SELLER_HASH_KEY = 'artified_seller_studio_hash';
 const SELLER_SALT_KEY = 'artified_seller_studio_salt';
+const SELLER_HAS_CUSTOM_KEY = 'artified_seller_has_custom';
 const DEFAULT_SALT = 'artified_salt_2026';
-const DEFAULT_PASSWORDS = ['1234', 'artified', 'admin', 'artified2025!'];
+const DEFAULT_PASSWORDS = ['1234'];
 
 // In-memory cache synced from Firebase & server
 let cachedCustomPassword: string | null = null;
@@ -16,21 +25,41 @@ let cachedPasswordHash: string | null = null;
 let cachedSalt: string = DEFAULT_SALT;
 let isInitialized = false;
 
+// Initialize from localStorage immediately if available
+if (typeof window !== 'undefined') {
+  try {
+    const savedPass = localStorage.getItem(SELLER_PASSWORD_KEY);
+    if (savedPass && savedPass.trim()) {
+      cachedCustomPassword = savedPass.trim();
+    }
+    const savedHash = localStorage.getItem(SELLER_HASH_KEY);
+    if (savedHash && savedHash.trim()) {
+      cachedPasswordHash = savedHash.trim();
+    }
+    const savedSalt = localStorage.getItem(SELLER_SALT_KEY);
+    if (savedSalt && savedSalt.trim()) {
+      cachedSalt = savedSalt.trim();
+    }
+  } catch {}
+}
+
 /**
- * Robust SHA-256 hashing utility compatible with browser Web Crypto API
+ * Robust SHA-256 hashing utility using browser Web Crypto API
  */
 export async function hashPassword(password: string, salt: string = DEFAULT_SALT): Promise<string> {
   const clean = (password || '').trim();
   const text = `${salt}:${clean}`;
   if (typeof crypto !== 'undefined' && crypto.subtle) {
-    const enc = new TextEncoder();
-    const data = enc.encode(text);
-    const hashBuf = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuf));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    try {
+      const enc = new TextEncoder();
+      const data = enc.encode(text);
+      const hashBuf = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuf));
+      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    } catch {}
   }
 
-  // Fallback simple 64-character hex hash if crypto.subtle is unavailable
+  // Fallback 64-character hex hash if crypto.subtle is unavailable
   let hash = 0;
   for (let i = 0; i < text.length; i++) {
     hash = ((hash << 5) - hash) + text.charCodeAt(i);
@@ -54,23 +83,46 @@ function syncHashPassword(password: string, salt: string = DEFAULT_SALT): string
 }
 
 /**
- * Eagerly fetch and sync seller credentials from Firestore & server
+ * Eagerly fetch and sync seller credentials directly from Firestore server.
+ * Uses getDocFromServer to bypass stale cache and prevent state reversion.
  */
 export async function syncSellerPasswordFromServer(): Promise<{ hasCustom: boolean; hash: string | null }> {
   try {
-    // 1. Fetch from Firestore doc: store_settings/seller_auth
+    // 1. Check Primary Firestore Document using getDocFromServer
     try {
       const authDocRef = doc(db, 'store_settings', 'seller_auth');
-      const snap = await getDoc(authDocRef);
-      if (snap.exists()) {
+      let snap;
+      try {
+        snap = await getDocFromServer(authDocRef);
+      } catch {
+        snap = await getDoc(authDocRef);
+      }
+
+      if (snap && snap.exists()) {
         const data = snap.data();
-        if (data && data.hasCustom && data.passwordHash) {
-          cachedPasswordHash = data.passwordHash;
-          cachedSalt = data.salt || DEFAULT_SALT;
+        if (data && data.hasCustom && (data.passwordHash || data.customPassword)) {
+          if (data.passwordHash) cachedPasswordHash = data.passwordHash;
+          if (data.salt) cachedSalt = data.salt;
+          if (data.customPassword) cachedCustomPassword = data.customPassword.trim();
+          
           try {
-            localStorage.setItem(SELLER_HASH_KEY, cachedPasswordHash!);
+            if (cachedPasswordHash) localStorage.setItem(SELLER_HASH_KEY, cachedPasswordHash);
             localStorage.setItem(SELLER_SALT_KEY, cachedSalt);
+            if (cachedCustomPassword) localStorage.setItem(SELLER_PASSWORD_KEY, cachedCustomPassword);
+            localStorage.setItem(SELLER_HAS_CUSTOM_KEY, 'true');
           } catch {}
+
+          // Mirror to server disk API
+          fetch('/api/seller-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              password: cachedCustomPassword || undefined, 
+              passwordHash: cachedPasswordHash, 
+              salt: cachedSalt 
+            })
+          }).catch(() => {});
+
           return { hasCustom: true, hash: cachedPasswordHash };
         }
       }
@@ -78,41 +130,109 @@ export async function syncSellerPasswordFromServer(): Promise<{ hasCustom: boole
       console.warn('Notice: Firestore seller auth sync:', fsErr);
     }
 
-    // 2. Fallback / mirror fetch from server API
-    const res = await fetch('/api/seller-password');
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.hasCustom) {
-        if (data.passwordHash) {
-          cachedPasswordHash = data.passwordHash;
-        } else if (data.customPassword) {
-          cachedPasswordHash = await hashPassword(data.customPassword, data.salt || DEFAULT_SALT);
-        }
-        cachedSalt = data.salt || DEFAULT_SALT;
-        if (data.customPassword) {
-          cachedCustomPassword = data.customPassword;
-          try {
-            localStorage.setItem(SELLER_PASSWORD_KEY, data.customPassword);
-          } catch {}
-        }
-        try {
-          if (cachedPasswordHash) localStorage.setItem(SELLER_HASH_KEY, cachedPasswordHash);
-          localStorage.setItem(SELLER_SALT_KEY, cachedSalt);
-        } catch {}
-        return { hasCustom: true, hash: cachedPasswordHash };
-      } else {
-        cachedPasswordHash = null;
-        cachedCustomPassword = null;
-        try {
-          localStorage.removeItem(SELLER_PASSWORD_KEY);
-          localStorage.removeItem(SELLER_HASH_KEY);
-        } catch {}
+    // 2. Check Backup Firestore Document: activeProfile/seller_auth_backup
+    try {
+      const backupDocRef = doc(db, 'activeProfile', 'seller_auth_backup');
+      let bSnap;
+      try {
+        bSnap = await getDocFromServer(backupDocRef);
+      } catch {
+        bSnap = await getDoc(backupDocRef);
       }
-    }
+
+      if (bSnap && bSnap.exists()) {
+        const bData = bSnap.data();
+        if (bData && bData.hasCustom && (bData.passwordHash || bData.customPassword)) {
+          if (bData.passwordHash) cachedPasswordHash = bData.passwordHash;
+          if (bData.salt) cachedSalt = bData.salt;
+          if (bData.customPassword) cachedCustomPassword = bData.customPassword.trim();
+
+          try {
+            if (cachedPasswordHash) localStorage.setItem(SELLER_HASH_KEY, cachedPasswordHash);
+            localStorage.setItem(SELLER_SALT_KEY, cachedSalt);
+            if (cachedCustomPassword) localStorage.setItem(SELLER_PASSWORD_KEY, cachedCustomPassword);
+            localStorage.setItem(SELLER_HAS_CUSTOM_KEY, 'true');
+          } catch {}
+
+          // Restore primary Firestore doc with server timestamp
+          setDoc(doc(db, 'store_settings', 'seller_auth'), {
+            ...bData,
+            updatedAt: serverTimestamp()
+          }, { merge: true }).catch(() => {});
+
+          return { hasCustom: true, hash: cachedPasswordHash };
+        }
+      }
+    } catch {}
+
+    // 3. Check Server API Disk
+    try {
+      const res = await fetch('/api/seller-password');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.hasCustom && (data.passwordHash || data.customPassword)) {
+          if (data.passwordHash) cachedPasswordHash = data.passwordHash;
+          if (data.salt) cachedSalt = data.salt;
+          if (data.customPassword) cachedCustomPassword = data.customPassword.trim();
+
+          try {
+            if (cachedPasswordHash) localStorage.setItem(SELLER_HASH_KEY, cachedPasswordHash);
+            localStorage.setItem(SELLER_SALT_KEY, cachedSalt);
+            if (cachedCustomPassword) localStorage.setItem(SELLER_PASSWORD_KEY, cachedCustomPassword);
+            localStorage.setItem(SELLER_HAS_CUSTOM_KEY, 'true');
+          } catch {}
+
+          // Push to Firestore with serverTimestamp
+          const payload = {
+            passwordHash: cachedPasswordHash,
+            salt: cachedSalt,
+            customPassword: cachedCustomPassword,
+            hasCustom: true,
+            updatedAt: serverTimestamp()
+          };
+          setDoc(doc(db, 'store_settings', 'seller_auth'), payload, { merge: true }).catch(() => {});
+          setDoc(doc(db, 'activeProfile', 'seller_auth_backup'), payload, { merge: true }).catch(() => {});
+
+          return { hasCustom: true, hash: cachedPasswordHash };
+        }
+      }
+    } catch {}
+
+    // 4. Check LocalStorage fallback recovery
+    try {
+      const localPass = localStorage.getItem(SELLER_PASSWORD_KEY);
+      const localHash = localStorage.getItem(SELLER_HASH_KEY);
+      const localSalt = localStorage.getItem(SELLER_SALT_KEY) || DEFAULT_SALT;
+
+      if (localPass || localHash) {
+        cachedCustomPassword = localPass ? localPass.trim() : null;
+        cachedPasswordHash = localHash ? localHash.trim() : null;
+        cachedSalt = localSalt;
+
+        const payload = {
+          passwordHash: cachedPasswordHash || (localPass ? await hashPassword(localPass, localSalt) : null),
+          salt: localSalt,
+          customPassword: localPass || null,
+          hasCustom: true,
+          updatedAt: serverTimestamp()
+        };
+        setDoc(doc(db, 'store_settings', 'seller_auth'), payload, { merge: true }).catch(() => {});
+        setDoc(doc(db, 'activeProfile', 'seller_auth_backup'), payload, { merge: true }).catch(() => {});
+        fetch('/api/seller-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: localPass, passwordHash: payload.passwordHash, salt: localSalt })
+        }).catch(() => {});
+
+        return { hasCustom: true, hash: cachedPasswordHash };
+      }
+    } catch {}
   } catch (err) {
-    console.warn('Notice: Could not sync seller password from server:', err);
+    console.warn('Notice: Seller password sync error:', err);
   }
-  return { hasCustom: Boolean(cachedPasswordHash || cachedCustomPassword), hash: cachedPasswordHash };
+
+  const hasCustom = Boolean(cachedPasswordHash || cachedCustomPassword);
+  return { hasCustom, hash: cachedPasswordHash };
 }
 
 // Auto-trigger sync on module load
@@ -139,6 +259,7 @@ export function getCustomSellerPassword(): string | null {
 export function isCustomPasswordSet(): boolean {
   if (cachedPasswordHash || cachedCustomPassword) return true;
   try {
+    if (localStorage.getItem(SELLER_HAS_CUSTOM_KEY) === 'true') return true;
     return Boolean(localStorage.getItem(SELLER_HASH_KEY) || localStorage.getItem(SELLER_PASSWORD_KEY));
   } catch {
     return false;
@@ -152,12 +273,9 @@ export function validateSellerPassword(input: string): boolean {
   const cleanInput = (input || '').trim();
   if (!cleanInput) return false;
 
-  // Emergency master password override
-  if (cleanInput === 'artified2025!') return true;
-
   const customPass = getCustomSellerPassword();
   if (customPass) {
-    if (cleanInput === customPass) return true;
+    return cleanInput === customPass;
   }
 
   // Verify against stored hash in memory or localStorage
@@ -165,52 +283,112 @@ export function validateSellerPassword(input: string): boolean {
   const salt = cachedSalt || (typeof window !== 'undefined' ? (localStorage.getItem(SELLER_SALT_KEY) || DEFAULT_SALT) : DEFAULT_SALT);
 
   if (storedHash) {
-    // Quick sync hash check
     const syncH = syncHashPassword(cleanInput, salt);
-    if (syncH === storedHash) return true;
+    return syncH === storedHash;
   }
 
-  // If no custom credentials are set, check defaults
-  if (!isCustomPasswordSet()) {
-    return DEFAULT_PASSWORDS.includes(cleanInput.toLowerCase());
+  if (isCustomPasswordSet()) {
+    return false;
   }
 
-  return false;
+  return DEFAULT_PASSWORDS.includes(cleanInput);
 }
 
 /**
- * Asynchronous validation with full Web Crypto SHA-256 hash matching
+ * Asynchronous validation with full Web Crypto SHA-256 hash matching and direct Firestore server lookup
  */
 export async function validateSellerPasswordAsync(input: string): Promise<boolean> {
   const cleanInput = (input || '').trim();
   if (!cleanInput) return false;
 
-  if (cleanInput === 'artified2025!') return true;
-
-  // Ensure latest credentials from Firebase / server
-  await syncSellerPasswordFromServer();
-
-  const salt = cachedSalt || DEFAULT_SALT;
-  const computedHash = await hashPassword(cleanInput, salt);
-
-  if (cachedPasswordHash) {
-    if (computedHash === cachedPasswordHash) return true;
+  // 1. Direct match with cached or local custom password
+  const customPass = getCustomSellerPassword();
+  if (customPass) {
+    if (cleanInput === customPass) {
+      return true;
+    }
+    // Custom password is active but doesn't match plain text
   }
 
-  if (cachedCustomPassword && cleanInput === cachedCustomPassword) {
-    return true;
+  // 2. Direct match with cached or local SHA-256 hash
+  const storedHash = cachedPasswordHash || (typeof window !== 'undefined' ? localStorage.getItem(SELLER_HASH_KEY) : null);
+  const salt = cachedSalt || (typeof window !== 'undefined' ? (localStorage.getItem(SELLER_SALT_KEY) || DEFAULT_SALT) : DEFAULT_SALT);
+  if (storedHash) {
+    const computedHash = await hashPassword(cleanInput, salt);
+    if (computedHash === storedHash) {
+      return true;
+    }
   }
 
-  if (!isCustomPasswordSet()) {
-    return DEFAULT_PASSWORDS.includes(cleanInput.toLowerCase());
+  // 3. Direct query to Firestore store_settings/seller_auth using getDocFromServer
+  try {
+    const authDocRef = doc(db, 'store_settings', 'seller_auth');
+    let snap;
+    try {
+      snap = await getDocFromServer(authDocRef);
+    } catch {
+      snap = await getDoc(authDocRef);
+    }
+
+    if (snap && snap.exists()) {
+      const data = snap.data();
+      if (data && data.hasCustom) {
+        if (data.customPassword && cleanInput === data.customPassword.trim()) {
+          const validPass = data.customPassword.trim();
+          cachedCustomPassword = validPass;
+          try { localStorage.setItem(SELLER_PASSWORD_KEY, validPass); } catch {}
+          return true;
+        }
+        if (data.passwordHash) {
+          const docSalt = data.salt || DEFAULT_SALT;
+          const computed = await hashPassword(cleanInput, docSalt);
+          if (computed === data.passwordHash) {
+            cachedPasswordHash = data.passwordHash;
+            cachedSalt = docSalt;
+            try {
+              localStorage.setItem(SELLER_HASH_KEY, data.passwordHash);
+              localStorage.setItem(SELLER_SALT_KEY, docSalt);
+            } catch {}
+            return true;
+          }
+        }
+        // Custom password configured in Firestore and input does not match
+        return false;
+      }
+    }
+  } catch (fsErr) {
+    console.warn('Notice: Firestore direct auth check notice:', fsErr);
   }
 
-  return false;
+  // 4. Check Backup Firestore doc using getDocFromServer
+  try {
+    const backupSnap = await getDocFromServer(doc(db, 'activeProfile', 'seller_auth_backup')).catch(() => getDoc(doc(db, 'activeProfile', 'seller_auth_backup')));
+    if (backupSnap && backupSnap.exists()) {
+      const bData = backupSnap.data();
+      if (bData && bData.hasCustom) {
+        if (bData.customPassword && cleanInput === bData.customPassword.trim()) return true;
+        if (bData.passwordHash) {
+          const bSalt = bData.salt || DEFAULT_SALT;
+          const computed = await hashPassword(cleanInput, bSalt);
+          if (computed === bData.passwordHash) return true;
+        }
+        return false;
+      }
+    }
+  } catch {}
+
+  // If ANY custom password is configured anywhere, block all default passwords
+  if (isCustomPasswordSet() || customPass || storedHash) {
+    return false;
+  }
+
+  // Only allow default password if NO custom password has ever been configured
+  return DEFAULT_PASSWORDS.includes(cleanInput);
 }
 
 /**
  * Sets a new custom password for Seller Studio, hashes it with SHA-256,
- * and writes the hashed credentials to Firestore and backend server.
+ * and writes the hashed credentials with serverTimestamp to Firestore (primary + backup), backend server, and localStorage.
  */
 export async function setCustomSellerPasswordAsync(newPassword: string): Promise<{ success: boolean; error?: string }> {
   const clean = (newPassword || '').trim();
@@ -226,26 +404,41 @@ export async function setCustomSellerPasswordAsync(newPassword: string): Promise
     cachedPasswordHash = passwordHash;
     cachedSalt = salt;
 
+    // 1. Persist to localStorage and sessionStorage immediately
     try {
       localStorage.setItem(SELLER_PASSWORD_KEY, clean);
       localStorage.setItem(SELLER_HASH_KEY, passwordHash);
       localStorage.setItem(SELLER_SALT_KEY, salt);
+      localStorage.setItem(SELLER_HAS_CUSTOM_KEY, 'true');
+      sessionStorage.setItem(SELLER_PASSWORD_KEY, clean);
+      sessionStorage.setItem(SELLER_HASH_KEY, passwordHash);
     } catch {}
 
-    // 1. Persist to Firestore: store_settings/seller_auth
+    const payload = {
+      passwordHash,
+      salt,
+      customPassword: clean,
+      hasCustom: true,
+      updatedAt: serverTimestamp()
+    };
+
+    // 2. Persist to Primary Firestore doc using setDoc / updateDoc with serverTimestamp
     try {
       const authDocRef = doc(db, 'store_settings', 'seller_auth');
-      await setDoc(authDocRef, {
-        passwordHash,
-        salt,
-        hasCustom: true,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      await setDoc(authDocRef, payload, { merge: true });
     } catch (fsErr) {
-      console.warn('Notice: Firestore save error:', fsErr);
+      console.warn('Notice: Firestore primary save error:', fsErr);
     }
 
-    // 2. Persist to server backend API
+    // 3. Persist to Backup Firestore doc
+    try {
+      const backupDocRef = doc(db, 'activeProfile', 'seller_auth_backup');
+      await setDoc(backupDocRef, payload, { merge: true });
+    } catch (fsErr) {
+      console.warn('Notice: Firestore backup save error:', fsErr);
+    }
+
+    // 4. Persist to Server backend API
     try {
       await fetch('/api/seller-password', {
         method: 'POST',
@@ -269,13 +462,12 @@ export function setCustomSellerPassword(newPassword: string): { success: boolean
     return { success: false, error: 'Password must be at least 4 characters long.' };
   }
 
-  // Trigger async update immediately
   setCustomSellerPasswordAsync(clean).catch(() => {});
   return { success: true };
 }
 
 /**
- * Resets seller credentials back to default in Firestore, server, and local storage.
+ * Resets seller credentials back to default only upon explicit user request.
  */
 export async function resetSellerPasswordToDefaultAsync(): Promise<void> {
   cachedCustomPassword = null;
@@ -286,19 +478,23 @@ export async function resetSellerPasswordToDefaultAsync(): Promise<void> {
     localStorage.removeItem(SELLER_PASSWORD_KEY);
     localStorage.removeItem(SELLER_HASH_KEY);
     localStorage.removeItem(SELLER_SALT_KEY);
+    localStorage.removeItem(SELLER_HAS_CUSTOM_KEY);
+    sessionStorage.removeItem(SELLER_PASSWORD_KEY);
+    sessionStorage.removeItem(SELLER_HASH_KEY);
   } catch {}
 
-  // 1. Reset Firestore doc
+  const resetPayload = {
+    hasCustom: false,
+    passwordHash: null,
+    customPassword: null,
+    updatedAt: serverTimestamp()
+  };
+
   try {
-    const authDocRef = doc(db, 'store_settings', 'seller_auth');
-    await setDoc(authDocRef, {
-      hasCustom: false,
-      passwordHash: null,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+    await setDoc(doc(db, 'store_settings', 'seller_auth'), resetPayload, { merge: true });
+    await setDoc(doc(db, 'activeProfile', 'seller_auth_backup'), resetPayload, { merge: true });
   } catch {}
 
-  // 2. Reset server backend
   try {
     await fetch('/api/seller-password/reset', { method: 'POST' });
   } catch {}

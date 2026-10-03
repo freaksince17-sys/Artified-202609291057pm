@@ -32,6 +32,7 @@ import { DEFAULT_CRAFT_STORY } from '../data/products';
 import { getCraftArticles, saveCraftArticle } from '../data/journalArticles';
 import { CAVIAR_PEARL_BAG_IMAGE, getRealProductImage } from '../utils/productImages';
 import { CraftArticle } from '../types';
+import { getFreshAssetUrl, getOptimizedBackgroundUrl } from '../utils/storageAssetUtils';
 
 type CategoryFilter = 'All' | 'Craft Techniques' | 'Nepali Heritage' | 'Care Guides' | 'Bridal & Styling';
 
@@ -223,12 +224,11 @@ export const CraftStoryAndJournal: React.FC = () => {
     setNewContentText('');
   };
 
-  // Safe image helper
+  // Safe image helper with cache-busting version resolution
   const getSafeImageUrl = (img?: string) => {
-    if (!img || img.startsWith('/uploads/') || img.includes('blob:') || img.includes('unsplash.com')) {
-      return '/tiktok_videos/7625655459537603860_cover.jpg';
-    }
-    return img;
+    return getOptimizedBackgroundUrl(img, {
+      fallback: '/tiktok_videos/7625655459537603860_cover.jpg'
+    });
   };
 
   return (

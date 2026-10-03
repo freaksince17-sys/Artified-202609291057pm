@@ -731,25 +731,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch(() => {});
 
-    // 3. Hydrate Instagram Journal (Preserve local/Firestore user-added items)
+    // 3. Hydrate Instagram Journal items directly from server disk and Firestore
     fetch('/api/instagram-journal')
       .then((res) => res.json())
       .then((items) => {
         if (Array.isArray(items) && items.length > 0) {
-          const isLocked = localStorage.getItem('artified_instagram_locked') === 'true';
-          const localSaved = localStorage.getItem('artified_instagram_journal_items');
-          if (isLocked && localSaved) {
-            // State is locked by user metadata, do not overwrite with server defaults
-            return;
-          }
-          if (localSaved) {
-            try {
-              const localParsed = JSON.parse(localSaved);
-              if (Array.isArray(localParsed) && localParsed.length > 0) {
-                return;
-              }
-            } catch {}
-          }
           setInstagramItems(items);
           try {
             localStorage.setItem('artified_instagram_journal_items', JSON.stringify(items));
@@ -1536,36 +1522,40 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Seller / Atelier Mode State (persists reliably in localStorage & sessionStorage)
-  const [isSellerMode, setIsSellerModeState] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('seller') === 'true' || urlParams.get('admin') === 'true' || urlParams.get('atelier') === 'admin') {
-        return true;
-      }
-      return (
-        localStorage.getItem('artified_seller_mode') === 'true' ||
-        sessionStorage.getItem('artified_seller_session') === 'active'
-      );
-    }
-    return false;
-  });
-
+  // Seller / Atelier Mode State - Starts securely locked by default for all visitors & website reloads
+  const [isSellerMode, setIsSellerModeState] = useState<boolean>(false);
   const [isSellerAuthModalOpen, setIsSellerAuthModalOpen] = useState<boolean>(false);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState<boolean>(false);
   const [isCatalogListOpen, setIsCatalogListOpen] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
+  // Check URL parameters for explicit seller access trigger (opens password prompt instead of auto-unlocking)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        // Clear any old permanent auto-unlock flags from localStorage to protect the live site
+        localStorage.removeItem('artified_seller_mode');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('seller') === 'true' || urlParams.get('admin') === 'true' || urlParams.get('atelier') === 'admin') {
+          // Open password modal so the user must authenticate securely with their password
+          setIsSellerAuthModalOpen(true);
+        }
+      } catch {}
+    }
+  }, []);
+
   const setIsSellerMode = (val: boolean) => {
     setIsSellerModeState(val);
     if (typeof window !== 'undefined') {
-      if (val) {
-        localStorage.setItem('artified_seller_mode', 'true');
-        sessionStorage.setItem('artified_seller_session', 'active');
-      } else {
-        localStorage.removeItem('artified_seller_mode');
-        sessionStorage.removeItem('artified_seller_session');
-      }
+      try {
+        if (val) {
+          sessionStorage.setItem('artified_seller_session', 'active');
+        } else {
+          sessionStorage.removeItem('artified_seller_session');
+          localStorage.removeItem('artified_seller_mode');
+        }
+      } catch {}
     }
   };
 

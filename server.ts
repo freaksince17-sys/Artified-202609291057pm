@@ -485,6 +485,11 @@ async function startServer() {
         updatedAt: new Date().toISOString()
       };
 
+      const parentDir = path.dirname(sellerSettingsJsonPath);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+
       fs.writeFileSync(sellerSettingsJsonPath, JSON.stringify(data, null, 2), 'utf-8');
       return res.json({ success: true, hasCustom: true, passwordHash: computedHash, salt: effectiveSalt, customPassword: clean });
     } catch (err: any) {
@@ -843,18 +848,33 @@ async function startServer() {
       const embedUrl = `https://www.instagram.com/p/${shortcode}/embed/captioned/`;
 
       let html = '';
-      try {
-        const response = await fetch(embedUrl, {
-          headers: {
-            'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-        });
-        if (response.ok) {
-          html = await response.text();
+      const userAgents = [
+        'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+        'Twitterbot/1.0',
+        'WhatsApp/2.21.12.21 A',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      ];
+
+      for (const ua of userAgents) {
+        try {
+          const response = await fetch(embedUrl, {
+            headers: {
+              'User-Agent': ua,
+              'Accept-Language': 'en-US,en;q=0.9',
+            },
+          });
+          if (response.ok) {
+            const body = await response.text();
+            if (body && (body.includes('class="Caption"') || body.includes('EmbeddedMediaImage') || body.includes('.mp4'))) {
+              html = body;
+              break;
+            } else if (!html) {
+              html = body;
+            }
+          }
+        } catch (e) {
+          console.warn(`Error fetching Instagram embed HTML with UA ${ua}:`, e);
         }
-      } catch (e) {
-        console.warn('Error fetching Instagram embed HTML:', e);
       }
 
       // 1. Extract real caption
@@ -863,6 +883,8 @@ async function startServer() {
         const capMatch = html.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/i);
         if (capMatch) {
           caption = capMatch[1]
+            .replace(/<a class="CaptionUsername"[^>]*>[\s\S]*?<\/a>/gi, '') // remove username header
+            .replace(/<a class="CaptionComments"[^>]*>[\s\S]*?<\/a>/gi, '') // remove comments link
             .replace(/<[^>]+>/g, ' ')
             .replace(/&amp;/g, '&')
             .replace(/&lt;/g, '<')
@@ -872,7 +894,6 @@ async function startServer() {
             .replace(/&nbsp;/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
-          caption = caption.replace(/^artified_np\s+/i, '');
         }
       }
 
@@ -936,7 +957,9 @@ async function startServer() {
       }
 
       if (!thumbnail && html) {
-        const imgMatch = html.match(/class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i) || html.match(/<img[^>]+class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i);
+        const imgMatch = html.match(/class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i) || 
+                         html.match(/<img[^>]+class="EmbeddedMediaImage"[^>]+src="([^">]+)"/i) ||
+                         html.match(/<img[^>]+src="([^">]*cdninstagram[^">]*)"/i);
         if (imgMatch) {
           const rawImgUrl = imgMatch[1].replace(/&amp;/g, '&');
           try {
@@ -954,10 +977,6 @@ async function startServer() {
         }
       }
 
-      if (!thumbnail) {
-        thumbnail = `/instagram_videos/DdjhhazvaRr_cover.jpg`;
-      }
-
       // 3. Derive clean headline and rich story caption
       let headline = '';
       if (caption) {
@@ -973,30 +992,37 @@ async function startServer() {
         }
       }
 
-      // High-quality presets and generators for specific shortcodes and craft types
-      if (!headline || !caption) {
-        if (shortcode === 'DdjhhazvaRr') {
-          headline = 'Tourmaline Gemstone & Baroque Pearl Necklace ✨';
-          caption = 'Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted by Sahina Shrestha at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram or DM us to order! #artified_np #smallbusiness #necklace';
-        } else if (shortcode === 'DdIUMC4BqFr') {
-          headline = 'Freshwater Pearl Statement Choker • Hand-Woven Elegance';
-          caption = 'Lustrous hand-selected pearls woven with fine jewelers cord. Created for festive and modern styling.\n\n✨ Pure Nepal Handcrafted\n📍 Chikamugal Atelier, Kathmandu\n🛍️ Message us to customize your piece! #artified_np #choker #pearls';
-        } else if (shortcode === 'DdMRgKdP4HK') {
-          headline = 'Artisanal Pearl & Gemstone Creation • Chikamugal Collection';
-          caption = 'Every strand is hand-knotted one bead at a time in Kathmandu for lifetime durability and brilliant organic luster.\n\n✨ Handmade with love in Nepal\n📍 Chikamugal, Kathmandu\n🛍️ Tap to shop or message to order! #artified_np #handcrafted';
-        } else {
-          headline = headline || 'Handcrafted Pearl & Gemstone Piece • Made in Kathmandu';
-          caption = caption || 'Behind the craft at Artified studio in Chikamugal, Kathmandu. Each pearl and bead is individually hand-threaded for lifetime durability and organic luster.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap or message to order! #artified_np #smallbusiness #necklace';
-        }
+      // Exact verified presets ONLY for the 4 known signature posts
+      if (shortcode === 'DdjhhazvaRr') {
+        headline = 'Tourmaline Gemstone & Baroque Pearl Necklace ✨';
+        caption = 'Me: When my husband says no to the necklace 😭 Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap to shop or DM on Instagram #artified_np #smallbusiness #necklace #pearls';
+        thumbnail = thumbnail || '/instagram_videos/DdjhhazvaRr_cover.jpg';
+      } else if (shortcode === 'DdMRgKdP4HK') {
+        headline = 'Some glimpse of todays Macrame Workshop ✨';
+        caption = "Behind the scenes at today's macrame craft workshop in Kathmandu! Each knot and weave is created by hand with natural cord and ancestral techniques.\n\n✨ 100% Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram #artified_np #macrame #workshop #handmade";
+        thumbnail = thumbnail || '/instagram_videos/DdMRgKdP4HK_cover.jpg';
+      } else if (shortcode === 'DdIUMC4BqFr') {
+        headline = 'Macrame Workshop Happening This Saturday !!! ✨';
+        caption = 'Macrame Workshop Happening This Saturday at Kalashala! Join Sahina Shrestha to learn the tactile art of macrame cord knotting, bag crafting, and sustainable wearable art in Kathmandu.\n\n✨ Workshop by Artified Nepal\n📍 Location: Kalashala, Kathmandu\n🛍️ DM us to book your seat! #artified_np #macrameworkshop #kalashala #kathmandu';
+        thumbnail = thumbnail || '/instagram_videos/DdIUMC4BqFr_cover.jpg';
+      } else if (shortcode === 'DY6OqqfPyJu') {
+        headline = 'Packing a Special Order for Pyarii Maya 🌸';
+        caption = "Let's pack a very special order for her! 🌸 Packing the handcrafted pearl bag and custom necklace for someone's pyarii Maya ❤️ Individually packed with love at our Chikamugal atelier.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ DM to purchase this for your pyarii maya! #artified_np #pyariimaya #pearlbag #smallbusiness";
+        thumbnail = thumbnail || '/instagram_videos/DY6OqqfPyJu_cover.jpg';
       }
+
+      const hasExtractedInfo = Boolean(caption || thumbnail || videoUrl);
 
       return res.json({
         success: true,
+        extracted: hasExtractedInfo,
+        hasCaption: Boolean(caption),
+        hasThumbnail: Boolean(thumbnail),
         shortcode,
-        headline,
-        caption,
-        thumbnail,
-        videoUrl: videoUrl || `/api/instagram-video/${shortcode}`,
+        headline: headline || '',
+        caption: caption || '',
+        thumbnail: thumbnail || '',
+        videoUrl: videoUrl || (directCdnUrl || `/api/instagram-video/${shortcode}`),
         directCdnUrl: directCdnUrl || null,
         postUrl: `https://www.instagram.com/p/${shortcode}/`,
       });

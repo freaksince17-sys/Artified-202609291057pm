@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Lock, KeyRound, Sparkles, X, Check, ShieldCheck, HelpCircle, Key, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { validateSellerPassword, validateSellerPasswordAsync, isCustomPasswordSet } from '../utils/sellerAuthService';
+import { useAuthPersistence } from '../hooks/useAuthPersistence';
 import { SellerChangePasswordModal } from './SellerChangePasswordModal';
 
 export const SellerAuthModal: React.FC = () => {
   const { isSellerAuthModalOpen, setIsSellerAuthModalOpen, setIsSellerMode } = useCart();
+  const { hasCustomSellerPassword, verifyPasswordHash } = useAuthPersistence();
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -14,7 +15,7 @@ export const SellerAuthModal: React.FC = () => {
 
   if (!isSellerAuthModalOpen) return null;
 
-  const hasCustom = isCustomPasswordSet();
+  const hasCustom = hasCustomSellerPassword;
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +24,8 @@ export const SellerAuthModal: React.FC = () => {
     setError(false);
 
     try {
-      // First quick sync check, then full async hash verification against Firebase
-      const isValid = validateSellerPassword(pin) || (await validateSellerPasswordAsync(pin));
+      // Full multi-layer async verification against Firestore server, Auth state, and hash
+      const isValid = await verifyPasswordHash(pin);
       if (isValid) {
         setError(false);
         setSuccess(true);
