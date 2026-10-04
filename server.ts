@@ -45,6 +45,26 @@ async function startServer() {
     }
   });
 
+  // GET /site.webmanifest & /manifest.json - Web App Manifest for mobile & search branding
+  app.get(['/site.webmanifest', '/manifest.json'], (_req, res) => {
+    const manifestPath = path.resolve(process.cwd(), 'public/site.webmanifest');
+    if (fs.existsSync(manifestPath)) {
+      res.header('Content-Type', 'application/manifest+json');
+      return res.sendFile(manifestPath);
+    }
+    return res.status(404).send('Not found');
+  });
+
+  // GET /robots.txt
+  app.get('/robots.txt', (_req, res) => {
+    const robotsPath = path.resolve(process.cwd(), 'public/robots.txt');
+    if (fs.existsSync(robotsPath)) {
+      res.header('Content-Type', 'text/plain');
+      return res.sendFile(robotsPath);
+    }
+    return res.status(404).send('Not found');
+  });
+
   // GET /api/products
   app.get('/api/products', (_req, res) => {
     try {

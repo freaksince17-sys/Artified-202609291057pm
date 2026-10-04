@@ -1,6 +1,7 @@
+User-agent: Googlebot-Image
+Allow: /
+
 User-agent: *
 Allow: /
-Allow: /favicon*
-Allow: /artified-favicon.svg
 
 Sitemap: https://www.artified.com.np/sitemap.xml
