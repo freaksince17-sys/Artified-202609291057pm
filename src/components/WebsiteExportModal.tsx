@@ -260,6 +260,71 @@ export const WebsiteExportModal: React.FC<WebsiteExportModalProps> = ({ isOpen, 
           </div>
         </div>
 
+        {/* Real MP4 Video Files for public/instagram_videos/ */}
+        <div className="space-y-3 bg-white p-4 rounded-2xl border border-[#E8DFD8]">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-[#1C1B1A] uppercase tracking-wider flex items-center gap-1.5">
+              <Video className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>Real Instagram MP4 Video Files (`public/instagram_videos/`)</span>
+            </h4>
+            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              Full Video Files (2–6 MB)
+            </span>
+          </div>
+          <p className="text-[11px] text-[#736C65] leading-relaxed">
+            Download each video below and place it into your repository's <code>public/instagram_videos/</code> folder before deploying to Vercel. This replaces the 0-byte placeholder files so videos play instantly on <code>artified.com.np</code>!
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <a
+              href="/instagram_videos/DdMRgKdP4HK.mp4"
+              download="DdMRgKdP4HK.mp4"
+              className="p-2.5 bg-[#FAF8F5] hover:bg-[#E8DFD8]/50 border border-[#E8DFD8] rounded-xl text-left flex items-center justify-between transition-colors"
+            >
+              <div className="truncate">
+                <span className="text-xs font-semibold text-[#1C1B1A] block truncate">DdMRgKdP4HK.mp4</span>
+                <span className="text-[10px] text-[#736C65]">Macrame Workshop (2.2 MB)</span>
+              </div>
+              <Download className="w-3.5 h-3.5 text-[#C5A880] shrink-0 ml-2" />
+            </a>
+
+            <a
+              href="/instagram_videos/DdIUMC4BqFr.mp4"
+              download="DdIUMC4BqFr.mp4"
+              className="p-2.5 bg-[#FAF8F5] hover:bg-[#E8DFD8]/50 border border-[#E8DFD8] rounded-xl text-left flex items-center justify-between transition-colors"
+            >
+              <div className="truncate">
+                <span className="text-xs font-semibold text-[#1C1B1A] block truncate">DdIUMC4BqFr.mp4</span>
+                <span className="text-[10px] text-[#736C65]">Kalashala (5.5 MB)</span>
+              </div>
+              <Download className="w-3.5 h-3.5 text-[#C5A880] shrink-0 ml-2" />
+            </a>
+
+            <a
+              href="/instagram_videos/DY6OqqfPyJu.mp4"
+              download="DY6OqqfPyJu.mp4"
+              className="p-2.5 bg-[#FAF8F5] hover:bg-[#E8DFD8]/50 border border-[#E8DFD8] rounded-xl text-left flex items-center justify-between transition-colors"
+            >
+              <div className="truncate">
+                <span className="text-xs font-semibold text-[#1C1B1A] block truncate">DY6OqqfPyJu.mp4</span>
+                <span className="text-[10px] text-[#736C65]">Pearl Tote / Maya (5.5 MB)</span>
+              </div>
+              <Download className="w-3.5 h-3.5 text-[#C5A880] shrink-0 ml-2" />
+            </a>
+
+            <a
+              href="/instagram_videos/DdjhhazvaRr.mp4"
+              download="DdjhhazvaRr.mp4"
+              className="p-2.5 bg-[#FAF8F5] hover:bg-[#E8DFD8]/50 border border-[#E8DFD8] rounded-xl text-left flex items-center justify-between transition-colors"
+            >
+              <div className="truncate">
+                <span className="text-xs font-semibold text-[#1C1B1A] block truncate">DdjhhazvaRr.mp4</span>
+                <span className="text-[10px] text-[#736C65]">Tourmaline Necklace (3.3 MB)</span>
+              </div>
+              <Download className="w-3.5 h-3.5 text-[#C5A880] shrink-0 ml-2" />
+            </a>
+          </div>
+        </div>
+
         {/* GitHub Migration Guide */}
         <div className="space-y-2 bg-white p-4 rounded-2xl border border-[#E8DFD8]">
           <div className="flex items-center justify-between">

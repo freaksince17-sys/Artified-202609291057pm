@@ -319,7 +319,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           setIsImageLoading(false);
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
-          isHovered ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
+          isHovered && isVideoPlaying ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
         } ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
       />
 
@@ -349,7 +349,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           onPause={() => setIsVideoPlaying(false)}
           onError={handleVideoError}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
-            isHovered ? 'opacity-100' : 'opacity-0'
+            isHovered && isVideoPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         />
       )}
@@ -365,17 +365,19 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
         </div>
 
         <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full backdrop-blur-md text-[11px] font-bold transition-all shadow-md border ${
-          isHovered
+          isHovered && isVideoPlaying
             ? 'bg-emerald-950/90 text-emerald-300 border-emerald-400 animate-pulse'
+            : isHovered
+            ? 'bg-amber-950/80 text-amber-300 border-amber-400'
             : 'bg-black/80 text-[#FFD700] border-white/30'
         }`}>
-          <Play className={`w-2.5 h-2.5 ${isHovered ? 'fill-emerald-300 text-emerald-300' : 'fill-[#FFD700] text-[#FFD700]'}`} />
-          <span>{isHovered ? 'Playing' : 'Hover to Play'}</span>
+          <Play className={`w-2.5 h-2.5 ${isHovered && isVideoPlaying ? 'fill-emerald-300 text-emerald-300' : 'fill-[#FFD700] text-[#FFD700]'}`} />
+          <span>{isHovered && isVideoPlaying ? 'Playing' : isHovered ? 'Loading...' : 'Hover to Play'}</span>
         </div>
       </div>
 
       {/* Center Play Button Overlay */}
-      {!isHovered && !isImageLoading && (
+      {(!isHovered || !isVideoPlaying) && !isImageLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
           <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/40 text-white flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
             <Play className="w-5 h-5 fill-white text-white ml-0.5" />
