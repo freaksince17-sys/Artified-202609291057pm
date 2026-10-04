@@ -100,25 +100,31 @@ export const InstagramReelDownloaderSection: React.FC<InstagramReelDownloaderSec
         throw new Error('Server could not extract video from this Instagram link.');
       }
 
-      // Step 2: Uploading to Firebase Storage cloud
+      // Step 2: Cloud & Disk Sync with fast-timeout race so Step 2 never hangs
       setStep('uploading');
-      setToastMessage('☁️ Step 2/3: Uploading MP4 video & thumbnail to Firebase Storage cloud...');
-
-      let cloudVidUrl = '';
-      let cloudCovUrl = '';
+      setToastMessage('☁️ Step 2/3: Linking MP4 video & thumbnail to public/instagram_videos/...');
 
       const nameToUse = data.friendlyName || data.shortcode;
+      let cloudVidUrl = data.localVideoUrl || `/instagram_videos/${nameToUse}.mp4`;
+      let cloudCovUrl = data.localCoverUrl || `/instagram_videos/${nameToUse}_cover.jpg`;
 
-      if (data.videoBufferBase64) {
-        cloudVidUrl = await uploadVideoToFirebaseStorage(data.videoBufferBase64, nameToUse);
-      } else {
-        cloudVidUrl = getFirebaseStorageVideoUrl(nameToUse) || data.localVideoUrl;
-      }
+      // Non-blocking upload to Firebase Storage with a strict 1.2-second timeout race
+      try {
+        const uploadTask = async () => {
+          if (data.videoBufferBase64) {
+            const resUrl = await uploadVideoToFirebaseStorage(data.videoBufferBase64, nameToUse);
+            if (resUrl) cloudVidUrl = resUrl;
+          }
+          if (data.coverBufferBase64) {
+            const covRes = await uploadCoverToFirebaseStorage(data.coverBufferBase64, nameToUse);
+            if (covRes) cloudCovUrl = covRes;
+          }
+        };
 
-      if (data.coverBufferBase64) {
-        cloudCovUrl = await uploadCoverToFirebaseStorage(data.coverBufferBase64, nameToUse);
-      } else {
-        cloudCovUrl = data.localCoverUrl;
+        const timeoutTask = new Promise((resolve) => setTimeout(resolve, 1200));
+        await Promise.race([uploadTask(), timeoutTask]);
+      } catch (cloudErr) {
+        console.warn('Notice: Background cloud sync note:', cloudErr);
       }
 
       const resultObj = {

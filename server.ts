@@ -1032,6 +1032,87 @@ async function startServer() {
     }
   });
 
+  // Helper for HTTP Range video streaming (HTTP 206 Partial Content) to prevent RangeNotSatisfiableError
+  function streamVideoFile(req: express.Request, res: express.Response, filePath: string) {
+    try {
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Video file not found' });
+      }
+
+      const stat = fs.statSync(filePath);
+      const fileSize = stat.size;
+
+      if (fileSize === 0) {
+        return res.status(404).json({ error: 'Video file is empty' });
+      }
+
+      const range = req.headers.range;
+
+      if (range) {
+        const parts = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+        if (isNaN(start) || start >= fileSize || (parts[1] && end >= fileSize) || start > end) {
+          res.status(416).set('Content-Range', `bytes */${fileSize}`);
+          return res.end();
+        }
+
+        const chunksize = end - start + 1;
+        const file = fs.createReadStream(filePath, { start, end });
+        const head = {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': 'video/mp4',
+        };
+
+        res.writeHead(206, head);
+        file.pipe(res);
+        file.on('error', (streamErr) => {
+          if (!res.headersSent) {
+            res.status(500).end();
+          }
+        });
+      } else {
+        const head = {
+          'Content-Length': fileSize,
+          'Content-Type': 'video/mp4',
+          'Accept-Ranges': 'bytes',
+        };
+        res.writeHead(200, head);
+        const file = fs.createReadStream(filePath);
+        file.pipe(res);
+        file.on('error', () => {
+          if (!res.headersSent) {
+            res.status(500).end();
+          }
+        });
+      }
+    } catch (err: any) {
+      if (!res.headersSent) {
+        res.status(500).json({ error: err.message || 'Error streaming video' });
+      }
+    }
+  }
+
+  // Dedicated route to stream video files directly from public/instagram_videos/ with Range support
+  app.get('/instagram_videos/:filename', (req, res) => {
+    const filename = path.basename(req.params.filename);
+    const filePath = path.resolve(process.cwd(), 'public', 'instagram_videos', filename);
+    if (filename.endsWith('.mp4')) {
+      return streamVideoFile(req, res, filePath);
+    }
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath, (err) => {
+        if (err && !res.headersSent) {
+          res.status(404).end();
+        }
+      });
+    }
+    return res.status(404).end();
+  });
+
   // GET /api/instagram-video/:shortcode - Stream exact Instagram video with caching
   app.get('/api/instagram-video/:shortcode', async (req, res) => {
     try {
@@ -1046,8 +1127,8 @@ async function startServer() {
       }
       const localVideoPath = path.join(igDir, `${shortcode}.mp4`);
 
-      if (fs.existsSync(localVideoPath)) {
-        return res.sendFile(localVideoPath);
+      if (fs.existsSync(localVideoPath) && fs.statSync(localVideoPath).size > 1000) {
+        return streamVideoFile(req, res, localVideoPath);
       }
 
       // If not yet saved locally, fetch from Instagram embed
@@ -1084,7 +1165,7 @@ async function startServer() {
 
       const buf = Buffer.from(await vidRes.arrayBuffer());
       fs.writeFileSync(localVideoPath, buf);
-      return res.sendFile(localVideoPath);
+      return streamVideoFile(req, res, localVideoPath);
     } catch (err: any) {
       console.error('Error in /api/instagram-video/:shortcode:', err);
       return res.status(500).json({ error: err.message || 'Internal server error' });
@@ -1370,6 +1451,20 @@ async function startServer() {
       res.sendFile(path.resolve(process.cwd(), 'dist/index.html'));
     });
   }
+
+  // Global error handler to catch and safely handle RangeNotSatisfiableError from video streams
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    if (err && (err.name === 'RangeNotSatisfiableError' || err.status === 416 || err.statusCode === 416)) {
+      if (!res.headersSent) {
+        return res.status(416).set('Content-Range', 'bytes */*').end();
+      }
+      return;
+    }
+    console.warn('Notice: Server handled request error:', err?.message || err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err?.message || 'Internal server error' });
+    }
+  });
 
   app.listen(Number(port), '0.0.0.0', () => {
     console.log(`Artified_np full-stack server running at http://0.0.0.0:${port}`);

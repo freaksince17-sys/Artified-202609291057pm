@@ -10,6 +10,7 @@ import {
   Camera
 } from 'lucide-react';
 import { useCart, AppNavTab } from '../context/CartContext';
+import { ProductVideoShowcase } from './ProductVideoShowcase';
 import { ProductGrid } from './ProductGrid';
 import { MeetArtisanSection } from './MeetArtisanSection';
 import { LookbookSection } from './LookbookSection';
@@ -121,7 +122,12 @@ export const MainSwipeDeck: React.FC = () => {
     >
       {/* DIRECT ACTIVE SCREEN - Height dynamically matches content, eliminating all gaps above footer */}
       <main className="w-full flex-grow flex flex-col">
-        {activeNavTab === 'home' && <ProductGrid />}
+        {activeNavTab === 'home' && (
+          <>
+            <ProductVideoShowcase />
+            <ProductGrid />
+          </>
+        )}
         {activeNavTab === 'artisan' && <MeetArtisanSection />}
         {activeNavTab === 'lookbook' && <LookbookSection />}
         {activeNavTab === 'tiktok' && <TikTokShowcase />}
