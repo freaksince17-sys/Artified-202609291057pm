@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { PRODUCTS, DEFAULT_INSTAGRAM_ITEMS, DEFAULT_INSTAGRAM_HANDLE, DEFAULT_INSTAGRAM_PROFILE_URL, TIKTOK_REELS, DEFAULT_CRAFT_STORY } from './src/data/products.ts';
 import { DEFAULT_ARTISAN_PROFILE } from './src/data/artisanProfile.ts';
+import { generateSitemapXml } from './src/utils/sitemapGenerator.ts';
 
 async function startServer() {
   const app = express();
@@ -22,6 +23,27 @@ async function startServer() {
   const craftStoryJsonPath = path.resolve(dataDir, 'craft_story.json');
   const artisanProfileJsonPath = path.resolve(dataDir, 'artisan_profile.json');
   const trackedOrdersJsonPath = path.resolve(dataDir, 'tracked_orders.json');
+
+  // GET /sitemap.xml - Dynamic Google Search & Image Sitemap
+  app.get('/sitemap.xml', (_req, res) => {
+    try {
+      let productList = PRODUCTS;
+      if (fs.existsSync(productsJsonPath)) {
+        productList = JSON.parse(fs.readFileSync(productsJsonPath, 'utf-8'));
+      }
+      const xml = generateSitemapXml(productList, 'https://www.artified.com.np');
+      res.header('Content-Type', 'application/xml');
+      return res.send(xml);
+    } catch (err) {
+      console.error('Error generating dynamic sitemap.xml:', err);
+      const staticSitemapPath = path.resolve(process.cwd(), 'public/sitemap.xml');
+      if (fs.existsSync(staticSitemapPath)) {
+        res.header('Content-Type', 'application/xml');
+        return res.sendFile(staticSitemapPath);
+      }
+      return res.status(500).send('Error generating sitemap');
+    }
+  });
 
   // GET /api/products
   app.get('/api/products', (_req, res) => {
@@ -64,6 +86,16 @@ async function startServer() {
       });
 
       fs.writeFileSync(productsJsonPath, JSON.stringify(cleanedProducts, null, 2), 'utf-8');
+
+      // Auto-refresh public/sitemap.xml so Googlebot always has latest product URLs
+      try {
+        const sitemapXml = generateSitemapXml(cleanedProducts, 'https://www.artified.com.np');
+        const sitemapPath = path.resolve(process.cwd(), 'public/sitemap.xml');
+        fs.writeFileSync(sitemapPath, sitemapXml, 'utf-8');
+      } catch (sitemapErr) {
+        console.warn('Notice: sitemap auto-refresh on product update:', sitemapErr);
+      }
+
       return res.json({ success: true, products: cleanedProducts });
     } catch (err) {
       console.error('Error saving products to products.json:', err);

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Download, Check, X, Package, Video, Instagram, Feather, FileJson, Code, Zap, Database, Copy, RefreshCw } from 'lucide-react';
+import { Download, Check, X, Package, Video, Instagram, Feather, FileJson, Code, Zap, Database, Copy, RefreshCw, Globe, ExternalLink } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import SAVED_PRODUCTS from '../data/products.json';
 import SAVED_TIKTOK_REELS from '../data/tiktok_reels.json';
 import SAVED_INSTAGRAM_ITEMS from '../data/instagram_journal.json';
 import SAVED_CRAFT_STORY from '../data/craft_story.json';
 import { sanitizeInstagramItemsList } from '../utils/instagramSanitizer';
+import { generateSitemapXml } from '../utils/sitemapGenerator';
 
 interface WebsiteExportModalProps {
   isOpen: boolean;
@@ -94,6 +95,25 @@ export const WebsiteExportModal: React.FC<WebsiteExportModalProps> = ({ isOpen, 
 
     setOneClickSuccess(true);
     setTimeout(() => setOneClickSuccess(false), 3000);
+  };
+
+  const [copiedSitemap, setCopiedSitemap] = useState(false);
+
+  const handleDownloadSitemap = () => {
+    const xml = generateSitemapXml(currentProducts, 'https://www.artified.com.np');
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sitemap.xml';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopySitemapUrl = () => {
+    navigator.clipboard.writeText('https://www.artified.com.np/sitemap.xml');
+    setCopiedSitemap(true);
+    setTimeout(() => setCopiedSitemap(false), 2500);
   };
 
   const handleCopyCodeInstructions = () => {
@@ -323,6 +343,43 @@ export const WebsiteExportModal: React.FC<WebsiteExportModalProps> = ({ isOpen, 
               <Download className="w-3.5 h-3.5 text-[#C5A880] shrink-0 ml-2" />
             </a>
           </div>
+        </div>
+
+        {/* Google Search & Sitemap.xml Generator Card */}
+        <div className="space-y-3 bg-white p-4 rounded-2xl border border-[#E8DFD8]">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-[#1C1B1A] uppercase tracking-wider flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>Google Search & Image Sitemap (`sitemap.xml`)</span>
+            </h4>
+            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              {1 + 7 + 3 + currentProducts.length} URLs Indexed
+            </span>
+          </div>
+          <p className="text-[11px] text-[#736C65] leading-relaxed">
+            Includes your storefront homepage, all 7 collection pages, atelier story sections, and all {currentProducts.length} handcrafted products with Google Image search metadata and high-CTR dynamic schema.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={handleDownloadSitemap}
+              className="flex-1 py-2 px-3 bg-[#FAF8F5] hover:bg-[#E8DFD8]/50 border border-[#E8DFD8] rounded-xl text-xs font-semibold text-[#1C1B1A] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>Download sitemap.xml</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleCopySitemapUrl}
+              className="flex-1 py-2 px-3 bg-[#1C1B1A] hover:bg-black text-[#D4AF37] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            >
+              {copiedSitemap ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedSitemap ? 'Sitemap URL Copied!' : 'Copy Search Console URL'}</span>
+            </button>
+          </div>
+          <p className="text-[10px] text-[#8C7A6B]">
+            Submit <code className="bg-[#FAF8F5] px-1 py-0.5 rounded text-[#1C1B1A]">https://www.artified.com.np/sitemap.xml</code> directly in <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="underline font-medium hover:text-[#1C1B1A]">Google Search Console &rarr; Sitemaps</a>.
+          </p>
         </div>
 
         {/* GitHub Migration Guide */}

@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  onAuthStateChanged, 
-  onIdTokenChanged 
-} from 'firebase/auth';
-import { auth } from '../firebase';
-import { 
   Sparkles, 
   Lock, 
   ChevronUp, 
@@ -51,68 +46,14 @@ export const SellerToolbar: React.FC = () => {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isArtisanProfileOpen, setIsArtisanProfileOpen] = useState(false);
 
-  // Session persistence check on app mount: Validate active session token against Firebase Auth
+  // Ensure persistent localStorage tokens are purged so website never opens with seller mode for visitors
   useEffect(() => {
-    let isSubscribed = true;
-
-    const validateSellerSessionToken = async () => {
-      try {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          // Force active session token validation against Firebase Auth
-          await currentUser.getIdToken(false);
-        } else {
-          // Check local seller session token validity
-          const sessionToken = localStorage.getItem('artified_seller_session_token');
-          const isSessionActive = localStorage.getItem('artified_seller_session') === 'true' || sessionStorage.getItem('artified_seller_session') === 'active';
-          const isSellerModeSaved = localStorage.getItem('artified_seller_mode') === 'true';
-
-          // If session is active or seller mode is enabled, keep session alive
-          if (isSessionActive || isSellerModeSaved || sessionToken) {
-            if (isSubscribed && !isSellerMode) {
-              setIsSellerMode(true);
-            }
-          } else if (!isSellerMode && !sessionToken && !isSessionActive && !isSellerModeSaved) {
-            if (isSubscribed) {
-              setIsSellerMode(false);
-              localStorage.setItem('artified_seller_mode', 'false');
-              localStorage.removeItem('artified_seller_session');
-              localStorage.removeItem('artified_seller_session_token');
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Seller session token validation failed, locking access:', err);
-        if (isSubscribed) {
-          setIsSellerMode(false);
-          try {
-            localStorage.setItem('artified_seller_mode', 'false');
-            localStorage.removeItem('artified_seller_session');
-            localStorage.removeItem('artified_seller_session_token');
-          } catch {}
-        }
-      }
-    };
-
-    validateSellerSessionToken();
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
-      if (authUser) {
-        try {
-          await authUser.getIdToken(false);
-        } catch {
-          if (isSubscribed) {
-            setIsSellerMode(false);
-          }
-        }
-      }
-    });
-
-    return () => {
-      isSubscribed = false;
-      unsubscribeAuth();
-    };
-  }, [setIsSellerMode]);
+    try {
+      localStorage.removeItem('artified_seller_mode');
+      localStorage.removeItem('artified_seller_session');
+      localStorage.removeItem('artified_seller_session_token');
+    } catch {}
+  }, []);
 
   const handleManualSync = async () => {
     setIsManualSyncing(true);

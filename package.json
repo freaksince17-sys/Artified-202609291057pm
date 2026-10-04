@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
+    "generate-sitemap": "tsx scripts/generateSitemap.ts",
+    "build": "tsx scripts/generateSitemap.ts && vite build",
     "preview": "vite preview",
     "start": "tsx server.ts",
     "clean": "rm -rf dist server.js",

@@ -920,6 +920,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return PRODUCTS.map(sanitizeProduct);
   });
 
+  // Google Search & Direct Link Hydration (?product=id or ?category=id)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const prodParam = params.get('product') || params.get('p');
+      if (prodParam && products.length > 0 && !quickViewProduct) {
+        const found = products.find(
+          (p) => p.id === prodParam || p.id.toLowerCase() === prodParam.toLowerCase()
+        );
+        if (found) {
+          setQuickViewProduct(found);
+        }
+      }
+
+      const catParam = params.get('category') || params.get('cat');
+      if (catParam) {
+        setSelectedCategory(catParam);
+      }
+    } catch {}
+  }, [products]);
+
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(true);
   const [syncStatusText, setSyncStatusText] = useState<string>('Live Cloud Storage Ready');
   const [isDataSyncing, setIsDataSyncing] = useState<boolean>(false);
@@ -1559,6 +1580,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         // Clear any old permanent auto-unlock flags from localStorage to protect the live site
         localStorage.removeItem('artified_seller_mode');
+        localStorage.removeItem('artified_seller_session');
+        localStorage.removeItem('artified_seller_session_token');
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('seller') === 'true' || urlParams.get('admin') === 'true' || urlParams.get('atelier') === 'admin') {
@@ -1574,16 +1597,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof window !== 'undefined') {
       try {
         if (val) {
-          const token = `seller_token_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-          localStorage.setItem('artified_seller_mode', 'true');
-          localStorage.setItem('artified_seller_session', 'true');
-          localStorage.setItem('artified_seller_session_token', token);
           sessionStorage.setItem('artified_seller_session', 'active');
         } else {
-          localStorage.setItem('artified_seller_mode', 'false');
+          sessionStorage.removeItem('artified_seller_session');
+          localStorage.removeItem('artified_seller_mode');
           localStorage.removeItem('artified_seller_session');
           localStorage.removeItem('artified_seller_session_token');
-          sessionStorage.removeItem('artified_seller_session');
         }
       } catch {}
     }

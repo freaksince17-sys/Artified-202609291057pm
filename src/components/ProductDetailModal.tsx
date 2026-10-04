@@ -35,6 +35,7 @@ import { isProductWaitlisted } from '../utils/waitlistService';
 import { submitProductReviewToFirestore, subscribeToProductReviews, FirestoreProductReview } from '../services/reviewService';
 import { ProductSpotlightOverlay, SpotlightTriggerButton } from './ProductSpotlightOverlay';
 import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
+import { applyProductSeo } from '../utils/productSeo';
 
 export const ProductDetailModal: React.FC = () => {
   const { 
@@ -107,6 +108,14 @@ export const ProductDetailModal: React.FC = () => {
       unsubscribe();
     };
   }, [quickViewProduct?.id]);
+
+  // Dynamic Google SEO, High-CTR Metadata & Schema.org Product structured data synchronization
+  useEffect(() => {
+    applyProductSeo(quickViewProduct);
+    return () => {
+      applyProductSeo(null);
+    };
+  }, [quickViewProduct]);
 
   const isOutOfStock = quickViewProduct ? (quickViewProduct.inStock === false || (typeof quickViewProduct.stockCount === 'number' && quickViewProduct.stockCount <= 0)) : false;
   const isWaitlisted = quickViewProduct ? isProductWaitlisted(quickViewProduct.id) : false;
