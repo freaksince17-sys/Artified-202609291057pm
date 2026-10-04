@@ -223,6 +223,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const initialVideoSrc = getPlayableInstagramVideo(item, index);
   const [activeVideoSrc, setActiveVideoSrc] = useState(initialVideoSrc);
@@ -231,16 +232,8 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
     setActiveVideoSrc(getPlayableInstagramVideo(item, index));
   }, [item, index]);
 
-  const { videoRef, play, pause } = useVideoController({
-    autoPlay: false,
-    muted: isMuted,
-    loop: true,
-    playsInline: true
-  });
-
   const handleVideoError = () => {
     setIsVideoPlaying(false);
-    // Never fallback to DdjhhazvaRr.mp4 for every card! Retain this item's specific distinct video
     const safeFallback = getPlayableInstagramVideo(item, index);
     if (activeVideoSrc !== safeFallback) {
       setActiveVideoSrc(safeFallback);
@@ -249,27 +242,38 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    // Check user preference toggle for 'Auto-play on hover' to conserve cellular data
-    const autoplayHoverEnabled = localStorage.getItem('artified_autoplay_on_hover') !== 'false';
-    if (!autoplayHoverEnabled) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-      videoRef.current.play().catch(() => {
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          videoRef.current.play().catch(() => {});
-        }
-      });
+    video.muted = isMuted;
+    video.defaultMuted = isMuted;
+    video.playsInline = true;
+    video.loop = true;
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsVideoPlaying(true);
+        })
+        .catch(() => {
+          if (videoRef.current) {
+            videoRef.current.muted = true;
+            videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {});
+          }
+        });
     }
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
     setIsVideoPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+      try {
+        video.currentTime = 0;
+      } catch {}
     }
   };
 
@@ -279,7 +283,6 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
     }
-    // Delay single-click slightly so double-click can cancel it
     clickTimerRef.current = setTimeout(() => {
       onOpenModal(item);
       clickTimerRef.current = null;
@@ -343,9 +346,14 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
           muted={isMuted}
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
           onPlay={() => setIsVideoPlaying(true)}
           onPlaying={() => setIsVideoPlaying(true)}
+          onTimeUpdate={() => {
+            if (!isVideoPlaying && videoRef.current && videoRef.current.currentTime > 0) {
+              setIsVideoPlaying(true);
+            }
+          }}
           onPause={() => setIsVideoPlaying(false)}
           onError={handleVideoError}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none ${
@@ -365,14 +373,12 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
         </div>
 
         <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full backdrop-blur-md text-[11px] font-bold transition-all shadow-md border ${
-          isHovered && isVideoPlaying
+          isHovered
             ? 'bg-emerald-950/90 text-emerald-300 border-emerald-400 animate-pulse'
-            : isHovered
-            ? 'bg-amber-950/80 text-amber-300 border-amber-400'
             : 'bg-black/80 text-[#FFD700] border-white/30'
         }`}>
-          <Play className={`w-2.5 h-2.5 ${isHovered && isVideoPlaying ? 'fill-emerald-300 text-emerald-300' : 'fill-[#FFD700] text-[#FFD700]'}`} />
-          <span>{isHovered && isVideoPlaying ? 'Playing' : isHovered ? 'Loading...' : 'Hover to Play'}</span>
+          <Play className={`w-2.5 h-2.5 ${isHovered ? 'fill-emerald-300 text-emerald-300' : 'fill-[#FFD700] text-[#FFD700]'}`} />
+          <span>{isHovered ? 'Playing' : 'Hover to Play'}</span>
         </div>
       </div>
 
