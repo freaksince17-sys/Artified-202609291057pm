@@ -5,6 +5,7 @@ import SAVED_PRODUCTS from '../data/products.json';
 import SAVED_TIKTOK_REELS from '../data/tiktok_reels.json';
 import SAVED_INSTAGRAM_ITEMS from '../data/instagram_journal.json';
 import SAVED_CRAFT_STORY from '../data/craft_story.json';
+import { sanitizeInstagramItemsList } from '../utils/instagramSanitizer';
 
 interface WebsiteExportModalProps {
   isOpen: boolean;
@@ -22,7 +23,8 @@ export const WebsiteExportModal: React.FC<WebsiteExportModalProps> = ({ isOpen, 
 
   const currentProducts = products && products.length > 0 ? products : SAVED_PRODUCTS;
   const currentReels = reels && reels.length > 0 ? reels : SAVED_TIKTOK_REELS;
-  const currentInstagram = instagramItems && instagramItems.length > 0 ? instagramItems : SAVED_INSTAGRAM_ITEMS;
+  const rawInstagram = instagramItems && instagramItems.length > 0 ? instagramItems : SAVED_INSTAGRAM_ITEMS;
+  const currentInstagram = sanitizeInstagramItemsList(rawInstagram);
   const currentCraftStory = craftStory || SAVED_CRAFT_STORY;
 
   const handleSyncToServerDisk = async () => {

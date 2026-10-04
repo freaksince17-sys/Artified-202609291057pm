@@ -133,37 +133,61 @@ export const isDirectVideo = (u?: string): boolean => {
 };
 
 export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0): string => {
-  const v = item.videoUrl?.trim();
+  const text = (
+    (item.title || '') + ' ' + 
+    (item.caption || '') + ' ' + 
+    (item.postUrl || '') + ' ' + 
+    (item.thumbnail || '')
+  ).toLowerCase();
 
-  // 1. Direct local video path inside public/instagram_videos/ or direct video file takes absolute top priority
-  if (v && isDirectVideo(v)) {
-    return v;
-  }
+  const v = item.videoUrl?.trim() || '';
 
-  // 2. Direct Firebase Storage URL if provided
-  if (v && v.includes('firebasestorage')) {
-    return v;
-  }
-
-  // 3. Shortcode check: if shortcode has a known local video on disk, use that
-  const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
-  if (shortcode) {
-    if (KNOWN_LOCAL_VIDEOS[shortcode]) {
-      return KNOWN_LOCAL_VIDEOS[shortcode];
-    }
-    return `/instagram_videos/${shortcode}.mp4`;
-  }
-
-  // 4. Explicit ID matches resolved to local signature videos
+  // 1. Explicit ID matches for core signature posts
+  if (item.id === 'ig-1791099498584') return '/instagram_videos/DdMRgKdP4HK.mp4';
   if (item.id === 'ig-item-1') return '/instagram_videos/DdjhhazvaRr.mp4';
   if (item.id === 'ig-item-2') return '/instagram_videos/DdMRgKdP4HK.mp4';
   if (item.id === 'ig-item-3') return '/instagram_videos/DdIUMC4BqFr.mp4';
   if (item.id === 'ig-item-4') return '/instagram_videos/DY6OqqfPyJu.mp4';
 
-  // 5. Guaranteed local fallback pre-buffered MP4 video files
-  const signatureShortcodes = ['DdjhhazvaRr', 'DdMRgKdP4HK', 'DdIUMC4BqFr', 'DY6OqqfPyJu'];
-  const sc = signatureShortcodes[index % signatureShortcodes.length];
-  return `/instagram_videos/${sc}.mp4`;
+  // 2. Intelligent semantic content matching - prevents stale DdjhhazvaRr defaults on macrame or bag reels
+  if (text.includes('macrame') || text.includes('workshop') || text.includes('weaving') || text.includes('knot')) {
+    return '/instagram_videos/DdMRgKdP4HK.mp4';
+  }
+  if (text.includes('kalashala')) {
+    return '/instagram_videos/DdIUMC4BqFr.mp4';
+  }
+  if (text.includes('tote') || text.includes('bloom') || text.includes('clutch') || text.includes('bag') || text.includes('maya') || text.includes('pyarii')) {
+    return '/instagram_videos/DY6OqqfPyJu.mp4';
+  }
+  if (text.includes('tourmaline') || text.includes('gemstone') || text.includes('necklace') || text.includes('choker') || text.includes('baroque')) {
+    return '/instagram_videos/DdjhhazvaRr.mp4';
+  }
+
+  // 3. Shortcode check: if shortcode has a known local video on disk, use that
+  const shortcode = getInstagramShortcode(v) || getInstagramShortcode(item.postUrl);
+  if (shortcode && KNOWN_LOCAL_VIDEOS[shortcode]) {
+    return KNOWN_LOCAL_VIDEOS[shortcode];
+  }
+
+  // 4. Direct local video path inside public/instagram_videos/ or direct video file if explicitly specified and not stale DdjhhazvaRr
+  if (v && isDirectVideo(v) && v !== '/instagram_videos/DdjhhazvaRr.mp4') {
+    return v;
+  }
+
+  // 5. Direct Firebase Storage URL if provided
+  if (v && v.includes('firebasestorage')) {
+    return v;
+  }
+
+  // 6. Guaranteed distinct distribution by index: EVERY card slot gets its own dedicated video file
+  const signatureVideos = [
+    '/instagram_videos/DdMRgKdP4HK.mp4',
+    '/instagram_videos/DdjhhazvaRr.mp4',
+    '/instagram_videos/DdMRgKdP4HK.mp4',
+    '/instagram_videos/DdIUMC4BqFr.mp4',
+    '/instagram_videos/DY6OqqfPyJu.mp4'
+  ];
+  return signatureVideos[index % signatureVideos.length];
 };
 
 interface InstagramJournalCardProps {
@@ -216,14 +240,10 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleVideoError = () => {
     setIsVideoPlaying(false);
-    const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
-    if (shortcode && !activeVideoSrc.includes('/api/instagram-video/')) {
-      setActiveVideoSrc(`/api/instagram-video/${shortcode}`);
-      return;
-    }
-    const ultimateFallback = '/instagram_videos/DdjhhazvaRr.mp4';
-    if (activeVideoSrc !== ultimateFallback) {
-      setActiveVideoSrc(ultimateFallback);
+    // Never fallback to DdjhhazvaRr.mp4 for every card! Retain this item's specific distinct video
+    const safeFallback = getPlayableInstagramVideo(item, index);
+    if (activeVideoSrc !== safeFallback) {
+      setActiveVideoSrc(safeFallback);
     }
   };
 
@@ -242,14 +262,13 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
         }
       });
     }
-    play().catch(() => {});
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
     setIsVideoPlaying(false);
-    pause();
     if (videoRef.current) {
+      videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
   };

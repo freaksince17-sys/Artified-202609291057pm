@@ -597,11 +597,22 @@ export const InstagramManageModal: React.FC = () => {
       let finalVid = videoUrl.trim();
       const extractedSC = getInstagramShortcode(postUrl) || getInstagramShortcode(finalVid);
       
-      if (!finalVid) {
-        if (extractedSC) {
+      if (!finalVid || finalVid === '/instagram_videos/DdjhhazvaRr.mp4') {
+        const text = (title + ' ' + caption + ' ' + postUrl).toLowerCase();
+        if (extractedSC && KNOWN_LOCAL_VIDEOS[extractedSC]) {
+          finalVid = KNOWN_LOCAL_VIDEOS[extractedSC];
+        } else if (text.includes('macrame') || text.includes('workshop')) {
+          finalVid = '/instagram_videos/DdMRgKdP4HK.mp4';
+        } else if (text.includes('kalashala')) {
+          finalVid = '/instagram_videos/DdIUMC4BqFr.mp4';
+        } else if (text.includes('bag') || text.includes('tote') || text.includes('clutch') || text.includes('maya')) {
+          finalVid = '/instagram_videos/DY6OqqfPyJu.mp4';
+        } else if (text.includes('tourmaline') || text.includes('gemstone') || text.includes('necklace') || text.includes('choker')) {
+          finalVid = '/instagram_videos/DdjhhazvaRr.mp4';
+        } else if (extractedSC) {
           finalVid = `/instagram_videos/${extractedSC}.mp4`;
         } else {
-          finalVid = '/instagram_videos/DdjhhazvaRr.mp4';
+          finalVid = '/instagram_videos/DdMRgKdP4HK.mp4';
         }
       }
 

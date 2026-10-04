@@ -44,6 +44,7 @@ import {
   RestockAlertItem 
 } from '../utils/waitlistService';
 import { ArtisanProfileData, getArtisanProfile, saveArtisanProfile, fetchArtisanProfileFromServer } from '../data/artisanProfile';
+import { sanitizeInstagramItemsList } from '../utils/instagramSanitizer';
 
 export type AppNavTab = 'home' | 'artisan' | 'lookbook' | 'tiktok' | 'journal' | 'craft' | 'craft-journal' | 'track' | 'orders';
 
@@ -642,11 +643,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          const sanitized = sanitizeInstagramItemsList(parsed);
+          try {
+            localStorage.setItem('artified_instagram_journal_items', JSON.stringify(sanitized));
+          } catch {}
+          return sanitized;
         }
       }
     } catch {}
-    return DEFAULT_INSTAGRAM_ITEMS;
+    return sanitizeInstagramItemsList(DEFAULT_INSTAGRAM_ITEMS);
   });
 
   const [instagramHandle, setInstagramHandle] = useState<string>(() => {
@@ -745,9 +750,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then((res) => res.json())
       .then((items) => {
         if (Array.isArray(items) && items.length > 0) {
-          setInstagramItems(items);
+          const sanitized = sanitizeInstagramItemsList(items);
+          setInstagramItems(sanitized);
           try {
-            localStorage.setItem('artified_instagram_journal_items', JSON.stringify(items));
+            localStorage.setItem('artified_instagram_journal_items', JSON.stringify(sanitized));
           } catch {}
         }
       })
