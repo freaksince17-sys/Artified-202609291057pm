@@ -66,6 +66,13 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
   const [editPhone, setEditPhone] = useState(account.phone);
   const [editEmail, setEditEmail] = useState(account.email);
   const [isSavedProfile, setIsSavedProfile] = useState(false);
+  const [autoplayHover, setAutoplayHover] = useState(() => {
+    try {
+      return localStorage.getItem('artified_autoplay_on_hover') !== 'false';
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -670,7 +677,14 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                 )}
               </div>
 
-              <form onSubmit={handleSaveProfile} className="bg-white p-4 rounded-2xl border border-[#E8DFD8] shadow-2xs space-y-3">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleSaveProfile(e);
+                try {
+                  localStorage.setItem('artified_autoplay_on_hover', String(autoplayHover));
+                  window.dispatchEvent(new CustomEvent('artified_autoplay_on_hover_changed'));
+                } catch {}
+              }} className="bg-white p-4 rounded-2xl border border-[#E8DFD8] shadow-2xs space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
                     Your Full Name:
@@ -709,11 +723,46 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   </div>
                 </div>
 
+                {/* User Preferences Section */}
+                <div className="pt-3 border-t border-[#F0EBE5] space-y-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C7A6B] block">
+                    Device & Data Preferences:
+                  </span>
+                  
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#FAF8F5] border border-[#E8DFD8] hover:border-[#C5A880]/60 transition-colors">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-bold text-[#1C1B1A] block">
+                        Auto-play on hover
+                      </span>
+                      <span className="text-[10px] text-[#736C65] block leading-normal">
+                        Toggle slow-motion video playback on hover. Turn off to conserve cellular data on mobile devices.
+                      </span>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={autoplayHover}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setAutoplayHover(val);
+                          try {
+                            localStorage.setItem('artified_autoplay_on_hover', String(val));
+                            window.dispatchEvent(new CustomEvent('artified_autoplay_on_hover_changed'));
+                          } catch {}
+                        }}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-[#E8DFD8] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1C1B1A]"></div>
+                    </label>
+                  </div>
+                </div>
+
                 <div className="pt-2 flex items-center justify-between">
                   {isSavedProfile ? (
                     <span className="text-emerald-700 font-bold flex items-center gap-1 text-xs">
                       <Check className="w-3.5 h-3.5" />
-                      <span>Profile Saved!</span>
+                      <span>Changes Saved!</span>
                     </span>
                   ) : <span />}
 

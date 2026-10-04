@@ -1091,6 +1091,211 @@ async function startServer() {
     }
   });
 
+  // POST /api/save-instagram-video - Save MP4 video file or download remote video to public/instagram_videos/
+  app.post('/api/save-instagram-video', async (req, res) => {
+    try {
+      const { videoBufferBase64, videoUrl, shortcode, filename } = req.body;
+      const targetShortcode = shortcode || filename || `vid_${Date.now()}`;
+      const igDir = path.resolve(process.cwd(), 'public', 'instagram_videos');
+      if (!fs.existsSync(igDir)) {
+        fs.mkdirSync(igDir, { recursive: true });
+      }
+
+      const localVideoPath = path.join(igDir, `${targetShortcode}.mp4`);
+      const localCoverPath = path.join(igDir, `${targetShortcode}_cover.jpg`);
+
+      if (videoBufferBase64 && typeof videoBufferBase64 === 'string') {
+        const cleanBase64 = videoBufferBase64.replace(/^data:video\/\w+;base64,/, '');
+        const buf = Buffer.from(cleanBase64, 'base64');
+        fs.writeFileSync(localVideoPath, buf);
+      } else if (videoUrl && typeof videoUrl === 'string' && videoUrl.startsWith('http')) {
+        const vidRes = await fetch(videoUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        });
+        if (vidRes.ok) {
+          const buf = Buffer.from(await vidRes.arrayBuffer());
+          fs.writeFileSync(localVideoPath, buf);
+        }
+      }
+
+      let savedCoverPath = '';
+      if (fs.existsSync(localVideoPath)) {
+        try {
+          const { execSync } = await import('child_process');
+          execSync(`ffmpeg -y -ss 00:00:00.500 -i "${localVideoPath}" -vframes 1 -q:v 2 "${localCoverPath}"`, { stdio: 'ignore' });
+          if (fs.existsSync(localCoverPath)) {
+            savedCoverPath = `/instagram_videos/${targetShortcode}_cover.jpg`;
+          }
+        } catch {}
+      }
+
+      return res.json({
+        success: true,
+        videoUrl: `/instagram_videos/${targetShortcode}.mp4`,
+        coverUrl: savedCoverPath || `/instagram_videos/${targetShortcode}_cover.jpg`,
+        shortcode: targetShortcode,
+      });
+    } catch (err: any) {
+      console.error('Error saving Instagram video:', err);
+      return res.status(500).json({ error: err.message || 'Failed to save video file' });
+    }
+  });
+
+  // POST /api/download-instagram-reel - Download reel from Instagram URL, save to public/instagram_videos/, and return base64 for Firebase Storage upload
+  app.post('/api/download-instagram-reel', async (req, res) => {
+    try {
+      const { url, customFilename } = req.body;
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'Please provide a valid Instagram URL' });
+      }
+
+      const match = url.match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
+      if (!match) {
+        return res.status(400).json({ error: 'Could not extract reel shortcode from URL' });
+      }
+
+      const shortcode = match[1];
+      const friendlyName = (customFilename || `reel_${shortcode}`).replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+
+      const igDir = path.resolve(process.cwd(), 'public', 'instagram_videos');
+      if (!fs.existsSync(igDir)) {
+        fs.mkdirSync(igDir, { recursive: true });
+      }
+
+      const localVideoPath = path.join(igDir, `${friendlyName}.mp4`);
+      const localCoverPath = path.join(igDir, `${friendlyName}_cover.jpg`);
+
+      // Check if shortcode video file already exists on server
+      const existingShortcodePath = path.join(igDir, `${shortcode}.mp4`);
+      if (fs.existsSync(existingShortcodePath) && fs.statSync(existingShortcodePath).size > 1000) {
+        if (!fs.existsSync(localVideoPath)) {
+          fs.copyFileSync(existingShortcodePath, localVideoPath);
+        }
+      }
+
+      let directMp4Url = '';
+      let headline = '';
+      let caption = '';
+
+      // Preset metadata for verified signature reels
+      if (shortcode === 'DdjhhazvaRr') {
+        headline = 'Tourmaline Gemstone & Baroque Pearl Necklace ✨';
+        caption = 'Me: When my husband says no to the necklace 😭 Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones.';
+      } else if (shortcode === 'DdMRgKdP4HK') {
+        headline = 'Some glimpse of todays Macrame Workshop ✨';
+        caption = "Behind the scenes at today's macrame craft workshop in Kathmandu! Each knot and weave is created by hand.";
+      } else if (shortcode === 'DdIUMC4BqFr') {
+        headline = 'Macrame Workshop Happening This Saturday !!! ✨';
+        caption = 'Macrame Workshop Happening This Saturday at Kalashala! Learn the tactile art of macrame cord knotting.';
+      } else if (shortcode === 'DY6OqqfPyJu') {
+        headline = 'Packing a Special Order for Pyarii Maya 🌸';
+        caption = "Let's pack a very special order for her! 🌸 Packing the handcrafted pearl bag and custom necklace.";
+      }
+
+      // Fetch embed page HTML to extract video stream & caption if not yet available
+      if (!fs.existsSync(localVideoPath) || fs.statSync(localVideoPath).size < 1000) {
+        const embedUrl = `https://www.instagram.com/p/${shortcode}/embed/captioned/`;
+        const userAgents = [
+          'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+          'Twitterbot/1.0',
+          'WhatsApp/2.21.12.21 A',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        ];
+
+        let embedHtml = '';
+        for (const ua of userAgents) {
+          try {
+            const resp = await fetch(embedUrl, {
+              headers: { 'User-Agent': ua, 'Accept-Language': 'en-US,en;q=0.9' }
+            });
+            if (resp.ok) {
+              const text = await resp.text();
+              if (text && (text.includes('.mp4') || text.includes('Caption'))) {
+                embedHtml = text;
+                break;
+              }
+            }
+          } catch {}
+        }
+
+        if (embedHtml) {
+          if (!caption) {
+            const capMatch = embedHtml.match(/class="Caption"[^>]*>([\s\S]*?)<\/div>/i);
+            if (capMatch) {
+              caption = capMatch[1]
+                .replace(/<[^>]+>/g, ' ')
+                .replace(/&amp;/g, '&')
+                .replace(/\s+/g, ' ')
+                .trim();
+              if (caption && !headline) {
+                const firstSentence = caption.split(/[.\n!?]+/)[0]?.trim();
+                if (firstSentence && firstSentence.length > 5) {
+                  headline = firstSentence.length > 60 ? firstSentence.slice(0, 57) + '...' : firstSentence;
+                }
+              }
+            }
+          }
+
+          const mp4Matches = embedHtml.match(/https?:[^"'\s<>]+\.mp4[^"'\s<>]*/g) || [];
+          if (mp4Matches.length > 0 && mp4Matches[0]) {
+            directMp4Url = mp4Matches[0].replace(/\\u0026/g, '&').replace(/&amp;/g, '&').replace(/\\/g, '');
+            try {
+              const vidRes = await fetch(directMp4Url, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+              });
+              if (vidRes.ok) {
+                const buf = Buffer.from(await vidRes.arrayBuffer());
+                fs.writeFileSync(localVideoPath, buf);
+                fs.writeFileSync(path.join(igDir, `${shortcode}.mp4`), buf);
+              }
+            } catch (dlErr) {
+              console.warn('Failed to download MP4 video stream locally:', dlErr);
+            }
+          }
+        }
+      }
+
+      // Generate cover thumbnail using ffmpeg if video exists on disk
+      if (fs.existsSync(localVideoPath) && fs.statSync(localVideoPath).size > 1000) {
+        if (!fs.existsSync(localCoverPath)) {
+          try {
+            const { execSync } = await import('child_process');
+            execSync(`ffmpeg -y -ss 00:00:00.500 -i "${localVideoPath}" -vframes 1 -q:v 2 "${localCoverPath}"`, { stdio: 'ignore' });
+          } catch {}
+        }
+      }
+
+      // Read video buffer as base64 for Firebase Storage client upload
+      let videoBufferBase64 = '';
+      if (fs.existsSync(localVideoPath) && fs.statSync(localVideoPath).size > 1000) {
+        const vidBuffer = fs.readFileSync(localVideoPath);
+        videoBufferBase64 = `data:video/mp4;base64,${vidBuffer.toString('base64')}`;
+      }
+
+      let coverBufferBase64 = '';
+      if (fs.existsSync(localCoverPath) && fs.statSync(localCoverPath).size > 100) {
+        const covBuffer = fs.readFileSync(localCoverPath);
+        coverBufferBase64 = `data:image/jpeg;base64,${covBuffer.toString('base64')}`;
+      }
+
+      return res.json({
+        success: true,
+        shortcode,
+        friendlyName,
+        headline: headline || `Instagram Reel • ${friendlyName}`,
+        caption: caption || `Handcrafted story from @artified_np on Instagram. Saved as ${friendlyName}.mp4`,
+        localVideoUrl: `/instagram_videos/${friendlyName}.mp4`,
+        localCoverUrl: fs.existsSync(localCoverPath) ? `/instagram_videos/${friendlyName}_cover.jpg` : '/instagram_videos/DdjhhazvaRr_cover.jpg',
+        videoBufferBase64,
+        coverBufferBase64,
+        directMp4Url: directMp4Url || null,
+      });
+    } catch (err: any) {
+      console.error('Error in /api/download-instagram-reel:', err);
+      return res.status(500).json({ error: err.message || 'Failed to process Instagram reel download' });
+    }
+  });
+
   // OpenGraph social sharing middleware: injects absolute domain into og:image and twitter:image
   app.use(async (req, res, next) => {
     const userAgent = (req.headers['user-agent'] || '').toLowerCase();
@@ -1142,7 +1347,55 @@ async function startServer() {
 
   app.listen(Number(port), '0.0.0.0', () => {
     console.log(`Artified_np full-stack server running at http://0.0.0.0:${port}`);
+    // Run background self-healing task to download missing signature videos so they exist physically on disk
+    ensureSignatureVideosExist().catch((err) => {
+      console.warn('Notice: Background self-healing signature videos pre-fetch completed with warning:', err);
+    });
   });
+}
+
+async function ensureSignatureVideosExist() {
+  const shortcodes = ['DdjhhazvaRr', 'DdMRgKdP4HK', 'DdIUMC4BqFr', 'DY6OqqfPyJu'];
+  const igDir = path.resolve(process.cwd(), 'public', 'instagram_videos');
+  if (!fs.existsSync(igDir)) {
+    fs.mkdirSync(igDir, { recursive: true });
+  }
+
+  for (const sc of shortcodes) {
+    const localVideoPath = path.join(igDir, `${sc}.mp4`);
+    if (!fs.existsSync(localVideoPath) || fs.statSync(localVideoPath).size < 1000) {
+      console.log(`[Self-Healing] Downloading signature Instagram video stream for shortcode: ${sc}...`);
+      try {
+        const embedUrl = `https://www.instagram.com/p/${sc}/embed/captioned/`;
+        const response = await fetch(embedUrl, {
+          headers: {
+            'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+        });
+        if (response.ok) {
+          const html = await response.text();
+          const mp4Matches = html.match(/https?:[^"'\s<>]+\.mp4[^"'\s<>]*/g) || [];
+          if (mp4Matches.length > 0 && mp4Matches[0]) {
+            const rawMp4 = mp4Matches[0]
+              .replace(/\\u0026/g, '&')
+              .replace(/&amp;/g, '&')
+              .replace(/\\/g, '');
+            const vidRes = await fetch(rawMp4, {
+              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+            });
+            if (vidRes.ok) {
+              const buf = Buffer.from(await vidRes.arrayBuffer());
+              fs.writeFileSync(localVideoPath, buf);
+              console.log(`[Self-Healing] Successfully downloaded & saved ${sc}.mp4 physically to local disk!`);
+            }
+          }
+        }
+      } catch (err: any) {
+        console.warn(`[Self-Healing] Failed to pre-download video for shortcode: ${sc}:`, err.message);
+      }
+    }
+  }
 }
 
 startServer();

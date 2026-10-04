@@ -415,27 +415,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 </button>
               </div>
 
-              {/* Mobile Real-time Search Trigger */}
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setSearchOpen(true);
-                  }}
-                  aria-label="Open search catalog modal"
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white dark:bg-[#1C1B1A] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-xl text-xs text-[#736C65] dark:text-[#A69E96] hover:border-[#C5A880] transition-colors shadow-2xs"
-                >
-                  <span className="flex items-center gap-2">
-                    <Search className="w-4 h-4 text-[#C5A880]" />
-                    <span>{searchQuery ? `"${searchQuery}"` : t('searchPlaceholder')}</span>
-                  </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C5A880] bg-[#FAF8F5] dark:bg-[#141312] px-2 py-0.5 rounded border border-[#E8DFD8] dark:border-[#2D2B28]">
-                    Live
-                  </span>
-                </button>
-              </div>
-
               {/* Navigation links */}
               <div className="mt-4 flex flex-col space-y-1">
                 {/* 0. Shop */}

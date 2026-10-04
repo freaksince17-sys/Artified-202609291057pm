@@ -20,13 +20,15 @@ import {
 import { 
   collection, 
   doc, 
-  getDoc,
-  setDoc, 
-  deleteDoc, 
-  onSnapshot, 
+  getDoc, 
   writeBatch,
   getDocFromServer 
 } from 'firebase/firestore';
+import {
+  safeSetDoc as setDoc,
+  safeDeleteDoc as deleteDoc,
+  safeOnSnapshot as onSnapshot
+} from '../utils/safeFirestore';
 import { handleFirestoreError, OperationType } from '../utils/firestoreErrors';
 import { compressImage } from '../utils/imageCompressor';
 import { sanitizeForFirestore } from '../utils/firestoreSanitizer';
@@ -1224,7 +1226,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (snapshot) => {
         if (!snapshot.empty) {
           const cloudProducts: Product[] = [];
-          snapshot.forEach((docSnap) => {
+          snapshot.forEach((docSnap: any) => {
             cloudProducts.push(sanitizeProduct(docSnap.data() as Product));
           });
 
@@ -1306,7 +1308,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       reelsCol,
       async (snapshot) => {
         const cloudReels: TikTokReel[] = [];
-        snapshot.forEach((docSnap) => {
+        snapshot.forEach((docSnap: any) => {
           cloudReels.push(docSnap.data() as TikTokReel);
         });
         if (cloudReels.length > 0) {
@@ -1365,7 +1367,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (snapshot) => {
         if (!snapshot.empty) {
           const cloudItems: InstagramJournalItem[] = [];
-          snapshot.forEach((docSnap) => {
+          snapshot.forEach((docSnap: any) => {
             const data = docSnap.data() as InstagramJournalItem;
             cloudItems.push(data);
           });
@@ -1416,22 +1418,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const assignedVid = signatureVideos[idx % signatureVideos.length];
               const assignedCover = signatureCovers[idx % signatureCovers.length];
 
-              const extractSC = (url?: string) => {
-                if (!url) return null;
-                const match = url.match(/(?:reel|p)\/([A-Za-z0-9_-]+)/);
-                return match ? match[1] : null;
-              };
-              const shortcode = extractSC(it.videoUrl) || extractSC(it.postUrl);
+              let finalVid = it.videoUrl?.trim();
+              if (!finalVid) {
+                finalVid = assignedVid;
+              }
 
-              const localVid = (it.videoUrl && it.videoUrl.startsWith('/instagram_videos/'))
-                ? it.videoUrl
-                : (shortcode ? `/instagram_videos/${shortcode}.mp4` : assignedVid);
+              let finalCover = it.thumbnail?.trim();
+              if (!finalCover) {
+                finalCover = assignedCover;
+              }
 
-              const localCover = (it.thumbnail && it.thumbnail.startsWith('/instagram_videos/'))
-                ? it.thumbnail
-                : assignedCover;
-
-              return { ...it, videoUrl: localVid, thumbnail: localCover };
+              return { ...it, videoUrl: finalVid, thumbnail: finalCover };
             });
             if (reconciledList.length > 0) {
               setInstagramItems(reconciledList);

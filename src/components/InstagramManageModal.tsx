@@ -17,26 +17,33 @@ import {
   RotateCcw,
   ClipboardPaste,
   Play,
-  Loader2
+  Loader2,
+  Download,
+  BarChart3
 } from 'lucide-react';
+import { InstagramReelDownloaderSection } from './InstagramReelDownloaderSection';
+import { InstagramPerformanceDashboard } from './InstagramPerformanceDashboard';
 import { db } from '../firebase';
 import { 
   doc, 
   getDoc, 
   getDocFromServer,
-  setDoc, 
-  updateDoc,
-  deleteDoc, 
   collection, 
   getDocs,
   getDocsFromServer,
-  onSnapshot,
   serverTimestamp
 } from 'firebase/firestore';
+import {
+  safeSetDoc as setDoc,
+  safeUpdateDoc as updateDoc,
+  safeDeleteDoc as deleteDoc,
+  safeOnSnapshot as onSnapshot
+} from '../utils/safeFirestore';
 import { useCart } from '../context/CartContext';
 import { InstagramJournalItem } from '../types';
 import { compressImage } from '../utils/imageCompressor';
 import { getFreshAssetUrl, getCacheBustedThumbnailUrl } from '../utils/storageAssetUtils';
+import { uploadVideoToFirebaseStorage, getFirebaseStorageVideoUrl } from '../utils/firebaseVideoStorage';
 import { getPlayableInstagramCover, getInstagramShortcode, KNOWN_LOCAL_VIDEOS } from './InstagramShowcase';
 
 // Helper to sanitize payload for Cloud Firestore storage
@@ -90,7 +97,7 @@ export const InstagramManageModal: React.FC = () => {
     updateInstagramSettings
   } = useCart();
 
-  const [activeTab, setActiveTab] = useState<'list' | 'editor' | 'settings'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'editor' | 'downloader' | 'settings' | 'performance'>('list');
   
   // Post editor form states
   const [itemId, setItemId] = useState('');
@@ -275,6 +282,12 @@ export const InstagramManageModal: React.FC = () => {
               setVideoUrl(targetUrl);
             }
 
+            // Trigger immediate local physical video download and save to public/instagram_videos/ folder
+            const sc = getInstagramShortcode(targetUrl) || getInstagramShortcode(data.videoUrl);
+            if (sc) {
+              fetch(`/api/instagram-video/${sc}`).catch(() => {});
+            }
+
             if (data.hasCaption && data.hasThumbnail) {
               setClipboardNotice('✨ Auto-extracted exact Instagram caption & cover photo!');
             } else if (data.hasCaption) {
@@ -397,7 +410,7 @@ export const InstagramManageModal: React.FC = () => {
         if (!snapshot.empty) {
           const items: InstagramJournalItem[] = [];
           const nowTs = Date.now();
-          snapshot.forEach((d) => {
+          snapshot.forEach((d: any) => {
             const data = d.data() as InstagramJournalItem;
             if (data && (data.id || d.id)) {
               const uniqueVersion = `${nowTs}_${d.id}`;
@@ -492,6 +505,53 @@ export const InstagramManageModal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  // Upload MP4 Video File directly to Firebase Storage & local public directory
+  const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      const shortcode = getInstagramShortcode(postUrl) || getInstagramShortcode(videoUrl) || `ig_${Date.now()}`;
+      
+      // 1. Upload directly to Firebase Storage bucket
+      const firebaseStorageUrl = await uploadVideoToFirebaseStorage(file, shortcode);
+      if (firebaseStorageUrl) {
+        setVideoUrl(firebaseStorageUrl);
+        setClipboardNotice('✅ MP4 Video uploaded & saved to Firebase Storage!');
+      }
+
+      // 2. Parallel backup to local Express server disk
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        try {
+          const res = await fetch('/api/save-instagram-video', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              videoBufferBase64: base64,
+              shortcode,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.coverUrl && !thumbnail) {
+              setThumbnail(data.coverUrl);
+            }
+          }
+        } catch {}
+        setIsSubmitting(false);
+        setTimeout(() => setClipboardNotice(null), 3500);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.warn('Firebase storage video upload notice:', err);
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSaveItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
@@ -510,10 +570,14 @@ export const InstagramManageModal: React.FC = () => {
       const cacheBustedThumb = getCacheBustedThumbnailUrl(rawThumbnail, uniqueSaveVersion);
 
       let finalVid = videoUrl.trim();
-      if (!finalVid || !finalVid.startsWith('/instagram_videos/')) {
-        const shortcode = getInstagramShortcode(postUrl) || getInstagramShortcode(finalVid);
-        const known = shortcode ? KNOWN_LOCAL_VIDEOS[shortcode] : null;
-        finalVid = known || '/instagram_videos/DdjhhazvaRr.mp4';
+      const extractedSC = getInstagramShortcode(postUrl) || getInstagramShortcode(finalVid);
+      
+      if (!finalVid || (!finalVid.includes('firebasestorage') && !finalVid.startsWith('/instagram_videos/'))) {
+        if (extractedSC) {
+          finalVid = getFirebaseStorageVideoUrl(extractedSC) || `/instagram_videos/${extractedSC}.mp4`;
+        } else {
+          finalVid = getFirebaseStorageVideoUrl('DdjhhazvaRr') || '/instagram_videos/DdjhhazvaRr.mp4';
+        }
       }
 
       const payload: InstagramJournalItem = {
@@ -537,6 +601,11 @@ export const InstagramManageModal: React.FC = () => {
         await updateInstagramItem(payload);
       } else {
         await addInstagramItem(payload);
+      }
+
+      // STEP 1.5: Trigger direct, instant local physical video download and save to public/instagram_videos/ folder
+      if (extractedSC) {
+        fetch(`/api/instagram-video/${extractedSC}`).catch(() => {});
       }
 
       // STEP 2: Asynchronous Non-blocking Firestore Write (Never blocks UI or hangs on quota backoff)
@@ -717,6 +786,32 @@ export const InstagramManageModal: React.FC = () => {
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{editingInstagramItem || itemId ? 'Edit Post Details' : 'Add New Instagram Post'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('downloader')}
+            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 ${
+              activeTab === 'downloader'
+                ? 'bg-white text-[#1C1B1A] border-t-2 border-[#1C1B1A] shadow-xs'
+                : 'text-[#8C7A6B] hover:text-[#1C1B1A]'
+            }`}
+          >
+            <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>Reel Downloader</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('performance')}
+            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 ${
+              activeTab === 'performance'
+                ? 'bg-white text-[#1C1B1A] border-t-2 border-[#1C1B1A] shadow-xs'
+                : 'text-[#8C7A6B] hover:text-[#1C1B1A]'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5 text-purple-600" />
+            <span>Instagram Performance</span>
           </button>
 
           <button
@@ -1178,6 +1273,35 @@ export const InstagramManageModal: React.FC = () => {
                 </div>
               </div>
 
+              {/* Video Source & MP4 File Upload */}
+              <div className="p-3 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-[#1C1B1A]">
+                    Reel MP4 Video File / Source
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-[#D5C7BC] hover:border-[#1C1B1A] rounded-lg text-xs font-semibold text-[#1C1B1A] cursor-pointer transition-colors shadow-2xs">
+                    <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Upload .mp4 Video</span>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/*"
+                      onChange={handleVideoFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="/instagram_videos/SHORTCODE.mp4 or video URL"
+                  className="w-full px-3 py-1.5 text-xs font-semibold text-[#1C1B1A] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                />
+                <p className="text-[10px] text-[#736C65]">
+                  Videos uploaded here are automatically saved directly into <code>public/instagram_videos/</code> on the repository.
+                </p>
+              </div>
+
               {/* Tag Product */}
               <div>
                 <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
@@ -1241,7 +1365,17 @@ export const InstagramManageModal: React.FC = () => {
             </form>
           )}
 
-          {/* TAB 3: SETTINGS (HANDLE & PROFILE LINK) */}
+          {/* TAB 3: REEL DOWNLOADER */}
+          {activeTab === 'downloader' && (
+            <InstagramReelDownloaderSection onSuccessPublished={() => setActiveTab('list')} />
+          )}
+
+          {/* TAB 5: INSTAGRAM PERFORMANCE */}
+          {activeTab === 'performance' && (
+            <InstagramPerformanceDashboard />
+          )}
+
+          {/* TAB 4: SETTINGS (HANDLE & PROFILE LINK) */}
           {activeTab === 'settings' && (
             <form onSubmit={handleSaveSettings} className="space-y-4">
               <div className="p-3 bg-gradient-to-r from-[#FAF0E6] to-[#F4EFEB] border border-[#E8DFD8] rounded-xl flex items-start gap-2.5 text-xs text-[#4A423B]">

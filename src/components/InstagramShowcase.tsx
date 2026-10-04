@@ -18,6 +18,7 @@ import { useCart } from '../context/CartContext';
 import { InstagramJournalItem } from '../types';
 import { useVideoController } from '../hooks/useVideoController';
 import { getFreshAssetUrl } from '../utils/storageAssetUtils';
+import { getFirebaseStorageVideoUrl, getFirebaseStorageCoverUrl } from '../utils/firebaseVideoStorage';
 
 export interface InstagramShowcaseProps {
   embedded?: boolean;
@@ -54,21 +55,32 @@ export const KNOWN_LOCAL_COVERS: Record<string, string> = {
 
 export const getPlayableInstagramCover = (item: InstagramJournalItem, index = 0): string => {
   const shortcode = getInstagramShortcode(item.postUrl) || getInstagramShortcode(item.videoUrl);
-  // 1. Known local covers for signature atelier reels always take priority over default fallback thumbnails
+
+  // 1. Known local covers for signature atelier reels always take top priority as they are 100% present on disk
   if (shortcode && KNOWN_LOCAL_COVERS[shortcode]) {
     return getFreshAssetUrl(KNOWN_LOCAL_COVERS[shortcode]);
   }
 
-  // 2. If the item explicitly has its own non-default thumbnail, honor it
+  // 2. Prioritize explicit Firebase Storage cover URL if item has it
+  if (item.thumbnail && item.thumbnail.includes('firebasestorage')) {
+    return getFreshAssetUrl(item.thumbnail.trim());
+  }
+
+  // 3. If the item explicitly has its own non-default thumbnail, honor it
   if (item.thumbnail && item.thumbnail.trim() && !item.thumbnail.includes('DdjhhazvaRr_cover.jpg')) {
     return getFreshAssetUrl(item.thumbnail.trim());
+  }
+
+  // 4. Resolve to Firebase Storage cover first for custom downloaded reels
+  if (shortcode) {
+    return getFirebaseStorageCoverUrl(shortcode);
   }
 
   if (item.thumbnail && item.thumbnail.trim()) {
     return getFreshAssetUrl(item.thumbnail.trim());
   }
 
-  // 3. Fallback signature covers
+  // 5. Fallback signature covers
   const defaultCovers = [
     '/instagram_videos/DdjhhazvaRr_cover.jpg',
     '/instagram_videos/DdMRgKdP4HK_cover.jpg',
@@ -93,13 +105,16 @@ export const isDirectVideo = (u?: string): boolean => {
   if (!u || typeof u !== 'string') return false;
   const lower = u.trim().toLowerCase();
 
-  // Local files, blob, data URLs, and API endpoints are 100% direct and reliable
+  // Local files, blob, data URLs, Firebase Storage URLs, and API endpoints are 100% direct and reliable
   if (
     lower.startsWith('/instagram_videos/') ||
     lower.startsWith('/tiktok_videos/') ||
     lower.startsWith('/api/') ||
     lower.startsWith('blob:') ||
-    lower.startsWith('data:video')
+    lower.startsWith('data:video') ||
+    lower.includes('firebasestorage.googleapis.com') ||
+    lower.includes('firebasestorage.app') ||
+    lower.includes('firebasestorage')
   ) {
     return true;
   }
@@ -118,36 +133,34 @@ export const isDirectVideo = (u?: string): boolean => {
 };
 
 export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0): string => {
-  // 1. Direct local video path always takes absolute top priority
   const v = item.videoUrl?.trim();
+
+  // 1. Prioritize direct Firebase Storage URL if provided
+  if (v && v.includes('firebasestorage')) {
+    return v;
+  }
+
+  // 2. Resolve to Firebase Storage video URL for persistent availability from the cloud
+  const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
+  if (shortcode) {
+    return getFirebaseStorageVideoUrl(shortcode);
+  }
+
+  // 3. Fallback direct video URL (e.g. blobs, APIs)
   if (v && isDirectVideo(v)) {
     return v;
   }
 
-  // 2. Extract shortcode and match against KNOWN_LOCAL_VIDEOS or local directory
-  const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
-  if (shortcode) {
-    if (KNOWN_LOCAL_VIDEOS[shortcode]) {
-      return KNOWN_LOCAL_VIDEOS[shortcode];
-    }
-    return `/instagram_videos/${shortcode}.mp4`;
-  }
+  // 4. Explicit ID matches resolved to Firebase Storage
+  if (item.id === 'ig-item-1') return getFirebaseStorageVideoUrl('DdjhhazvaRr');
+  if (item.id === 'ig-item-2') return getFirebaseStorageVideoUrl('DdMRgKdP4HK');
+  if (item.id === 'ig-item-3') return getFirebaseStorageVideoUrl('DdIUMC4BqFr');
+  if (item.id === 'ig-item-4') return getFirebaseStorageVideoUrl('DY6OqqfPyJu');
 
-  // 3. Explicit ID matches
-  if (item.id === 'ig-item-1') return '/instagram_videos/DdjhhazvaRr.mp4';
-  if (item.id === 'ig-item-2') return '/instagram_videos/DdMRgKdP4HK.mp4';
-  if (item.id === 'ig-item-3') return '/instagram_videos/DdIUMC4BqFr.mp4';
-  if (item.id === 'ig-item-4') return '/instagram_videos/DY6OqqfPyJu.mp4';
-
-  // 4. Guaranteed local pre-buffered MP4 video files by index position
-  const signatureLocalVideos = [
-    '/instagram_videos/DdjhhazvaRr.mp4',
-    '/instagram_videos/DdMRgKdP4HK.mp4',
-    '/instagram_videos/DdIUMC4BqFr.mp4',
-    '/instagram_videos/DY6OqqfPyJu.mp4'
-  ];
-
-  return signatureLocalVideos[index % signatureLocalVideos.length];
+  // 5. Guaranteed local/cloud fallback pre-buffered MP4 video files
+  const signatureShortcodes = ['DdjhhazvaRr', 'DdMRgKdP4HK', 'DdIUMC4BqFr', 'DY6OqqfPyJu'];
+  const sc = signatureShortcodes[index % signatureShortcodes.length];
+  return getFirebaseStorageVideoUrl(sc);
 };
 
 interface InstagramJournalCardProps {
@@ -181,6 +194,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const initialVideoSrc = getPlayableInstagramVideo(item, index);
@@ -212,6 +226,10 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
 
   const handleMouseEnter = () => {
     setIsHovered(true);
+    // Check user preference toggle for 'Auto-play on hover' to conserve cellular data
+    const autoplayHoverEnabled = localStorage.getItem('artified_autoplay_on_hover') !== 'false';
+    if (!autoplayHoverEnabled) return;
+
     if (videoRef.current) {
       videoRef.current.muted = isMuted;
       videoRef.current.play().catch(() => {
@@ -273,17 +291,31 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
         alt={item.title || 'Artified craft showcase'}
         loading="lazy"
         decoding="async"
+        onLoad={() => setIsImageLoading(false)}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src = itemCover;
+          setIsImageLoading(false);
         }}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
           isHovered ? 'opacity-0' : 'opacity-100 group-hover:scale-105'
-        }`}
+        } ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
       />
 
-      {/* 2. Video Preview: Plays instantly on hover */}
+      {/* Shimmer skeleton loader shown until the individual video thumbnail covers are fetched/loaded */}
+      {isImageLoading && (
+        <div className="absolute inset-0 bg-neutral-900 flex flex-col items-center justify-center p-4 z-15">
+          <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center mb-3 animate-bounce">
+            <Instagram className="w-5 h-5 text-neutral-500" />
+          </div>
+          <div className="w-3/4 h-2.5 bg-neutral-800 rounded-full mb-1.5 animate-pulse" />
+          <div className="w-1/2 h-2.5 bg-neutral-800 rounded-full animate-pulse" />
+        </div>
+      )}
+
+      {/* 2. Video Preview: Plays instantly on hover - rendered in its own dedicated, isolated player instance */}
       {activeVideoSrc && (
         <video
+          id={`player-${item.id}`}
           ref={videoRef}
           src={activeVideoSrc}
           muted={isMuted}
@@ -321,7 +353,7 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
       </div>
 
       {/* Center Play Button Overlay */}
-      {!isHovered && (
+      {!isHovered && !isImageLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none">
           <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/40 text-white flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
             <Play className="w-5 h-5 fill-white text-white ml-0.5" />
@@ -368,29 +400,31 @@ const InstagramJournalCard: React.FC<InstagramJournalCardProps> = ({
       </div>
 
       {/* 6. Card Footer Information & High-Contrast Open Post Link */}
-      <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4 z-20 flex flex-col justify-end">
-        <h3 className="text-white text-xs sm:text-sm font-bold line-clamp-2 leading-snug drop-shadow-lg">
-          {item.title}
-        </h3>
+      {!isImageLoading && (
+        <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4 z-20 flex flex-col justify-end">
+          <h3 className="text-white text-xs sm:text-sm font-bold line-clamp-2 leading-snug drop-shadow-lg">
+            {item.title}
+          </h3>
 
-        {/* Double-Click direct hint & Instagram link */}
-        <div className="mt-2 pt-2 border-t border-white/20 flex items-center justify-between gap-2 text-xs">
-          <span className="text-xs font-bold text-white drop-shadow-md truncate max-w-[100px]">
-            {item.handle || instagramHandle}
-          </span>
-          <span 
-            onClick={handleDoubleClick}
-            className="text-xs font-extrabold text-[#FFD700] hover:text-white bg-black/80 hover:bg-[#E1306C] border border-[#FFD700]/70 px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-all shadow-md ml-auto shrink-0"
-            title="Double click card to open Instagram post directly"
-          >
-            <span>Open Post</span>
-            <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-          </span>
+          {/* Double-Click direct hint & Instagram link */}
+          <div className="mt-2 pt-2 border-t border-white/20 flex items-center justify-between gap-2 text-xs">
+            <span className="text-xs font-bold text-white drop-shadow-md truncate max-w-[100px]">
+              {item.handle || instagramHandle}
+            </span>
+            <span 
+              onClick={handleDoubleClick}
+              className="text-xs font-extrabold text-[#FFD700] hover:text-white bg-black/80 hover:bg-[#E1306C] border border-[#FFD700]/70 px-2.5 py-1 rounded-full flex items-center gap-1 cursor-pointer transition-all shadow-md ml-auto shrink-0"
+              title="Double click card to open Instagram post directly"
+            >
+              <span>Open Post</span>
+              <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            </span>
+          </div>
+          <div className="text-[10px] font-semibold text-white/90 text-right mt-1 drop-shadow-md">
+            Double click to open ↗
+          </div>
         </div>
-        <div className="text-[10px] font-semibold text-white/90 text-right mt-1 drop-shadow-md">
-          Double click to open ↗
-        </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -411,6 +445,15 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
   const [copiedLink, setCopiedLink] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [isGalleryLoading, setIsGalleryLoading] = useState(true);
+
+  useEffect(() => {
+    // Shimmer grid elements during data loading
+    const timer = setTimeout(() => {
+      setIsGalleryLoading(false);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [instagramItems.length]);
 
   // Modal video player state
   const modalVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -550,7 +593,26 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
         )}
 
         {/* Video & Posts Grid - Auto-plays video on mouse hover, double click opens Instagram post */}
-        {instagramItems.length === 0 ? (
+        {isGalleryLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {[1, 2, 3, 4].map((num) => (
+              <div key={`skeleton-${num}`} className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#1A1817] flex flex-col justify-between p-4 border border-[#FAD2E1]/20 shadow-md animate-pulse">
+                <div className="flex justify-between items-start">
+                  <div className="h-6 w-16 bg-neutral-800 rounded-full" />
+                  <div className="h-8 w-8 rounded-full bg-neutral-800" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-3/4 bg-neutral-800 rounded-full mb-1" />
+                  <div className="h-3 w-1/2 bg-neutral-800 rounded-full" />
+                  <div className="pt-2 border-t border-neutral-800/60 flex justify-between items-center">
+                    <div className="h-3 w-1/3 bg-neutral-800 rounded-full" />
+                    <div className="h-5 w-16 bg-neutral-800 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : instagramItems.length === 0 ? (
           <div className="py-12 sm:py-16 px-6 text-center max-w-lg mx-auto bg-white rounded-3xl border border-[#E8DFD8] shadow-xs">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center text-white mx-auto mb-4 shadow-sm">
               <Instagram className="w-7 h-7 text-white" />

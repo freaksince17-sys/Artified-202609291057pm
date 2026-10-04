@@ -333,7 +333,6 @@ export const Footer: React.FC = () => {
               className="text-[10px] text-[#4A4540] hover:text-[#A69E96] transition-colors flex items-center gap-1 cursor-pointer focus:outline-none"
               title="Seller Studio Login (Passcode required)"
             >
-              <Lock className="w-2.5 h-2.5" />
               <span>Studio</span>
             </button>
           </div>

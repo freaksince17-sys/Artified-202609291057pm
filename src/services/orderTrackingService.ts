@@ -1,15 +1,17 @@
 import { db } from '../firebase';
 import { 
   doc, 
-  setDoc, 
   getDoc, 
-  onSnapshot, 
   collection, 
   getDocs, 
   query,
   where,
   writeBatch 
 } from 'firebase/firestore';
+import {
+  safeSetDoc as setDoc,
+  safeOnSnapshot as onSnapshot
+} from '../utils/safeFirestore';
 import { TrackedOrderData, OrderProductionPhase, OrderDetails } from '../types';
 import { 
   DEMO_TRACKED_ORDERS, 

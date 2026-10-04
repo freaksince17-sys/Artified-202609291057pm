@@ -2,14 +2,16 @@ import { db } from '../firebase';
 import { 
   collection, 
   doc, 
-  setDoc, 
-  deleteDoc, 
-  onSnapshot, 
   query, 
   where, 
   orderBy, 
   getDocs 
 } from 'firebase/firestore';
+import {
+  safeSetDoc as setDoc,
+  safeDeleteDoc as deleteDoc,
+  safeOnSnapshot as onSnapshot
+} from '../utils/safeFirestore';
 import { ProductReviewItem, Product } from '../types';
 import { sanitizeReviewItem } from '../utils/productStats';
 import { handleFirestoreError, OperationType } from '../utils/firestoreErrors';
@@ -92,7 +94,7 @@ export function subscribeToProductReviews(
     collectionRef,
     (snapshot) => {
       const firestoreReviews: FirestoreProductReview[] = [];
-      snapshot.forEach((docSnap) => {
+      snapshot.forEach((docSnap: any) => {
         const data = docSnap.data() as FirestoreProductReview;
         if (data.productId === productId) {
           firestoreReviews.push(data);
@@ -151,7 +153,7 @@ export function subscribeToAllProductReviews(
     collectionRef,
     (snapshot) => {
       const firestoreReviews: FirestoreProductReview[] = [];
-      snapshot.forEach((docSnap) => {
+      snapshot.forEach((docSnap: any) => {
         const data = docSnap.data() as FirestoreProductReview;
         if (data && data.author && data.comment) {
           firestoreReviews.push(data);

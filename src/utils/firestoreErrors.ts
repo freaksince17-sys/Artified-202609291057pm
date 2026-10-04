@@ -1,4 +1,5 @@
 import { auth } from '../firebase';
+import { detectQuotaError } from './safeFirestore';
 
 export enum OperationType {
   CREATE = 'create',
@@ -28,11 +29,7 @@ export interface FirestoreErrorInfo {
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
   const errMsg = error instanceof Error ? error.message : String(error);
-  const isQuotaError = 
-    errMsg.toLowerCase().includes('quota limit exceeded') || 
-    errMsg.toLowerCase().includes('quota exceeded') ||
-    errMsg.toLowerCase().includes('resource-exhausted') ||
-    errMsg.toLowerCase().includes('maximum backoff delay');
+  const isQuotaError = detectQuotaError(error);
 
   const errInfo: FirestoreErrorInfo = {
     error: errMsg,

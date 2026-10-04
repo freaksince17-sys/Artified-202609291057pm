@@ -1,12 +1,14 @@
 import { 
   collection, 
-  addDoc, 
   doc, 
-  setDoc, 
-  getDocs, 
-  updateDoc, 
-  onSnapshot 
+  getDocs 
 } from 'firebase/firestore';
+import {
+  safeAddDoc as addDoc,
+  safeSetDoc as setDoc,
+  safeUpdateDoc as updateDoc,
+  safeOnSnapshot as onSnapshot
+} from './safeFirestore';
 import { db } from '../firebase';
 
 export interface WaitlistEntry {
@@ -240,7 +242,7 @@ export function subscribeToWaitlistCounts(
     collection(db, 'waitlist_subscribers'),
     (snapshot) => {
       const counts: Record<string, number> = {};
-      snapshot.forEach((docSnap) => {
+      snapshot.forEach((docSnap: any) => {
         const data = docSnap.data() as WaitlistEntry;
         if (data.productId && (!data.notified || data.status === 'pending')) {
           counts[data.productId] = (counts[data.productId] || 0) + 1;

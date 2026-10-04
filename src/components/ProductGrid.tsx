@@ -196,11 +196,6 @@ export const ProductGrid: React.FC = () => {
           )}
         </div>
 
-        {/* Center: Search Bar inside Shop between All Creations and Sort by */}
-        <div className="flex-1 min-w-[180px] order-3 sm:order-2 w-full sm:w-auto">
-          <GlobalSearchBar />
-        </div>
-
         {/* Right: Custom Sort Dropdown */}
         <div ref={sortDropdownRef} className="relative shrink-0 z-[60] order-2 sm:order-3">
           <button

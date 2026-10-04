@@ -15,12 +15,14 @@ import {
   Image as ImageIcon,
   Eye,
   Heart,
-  Sliders
+  Sliders,
+  Download
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { TikTokReel } from '../types';
 import { compressImage } from '../utils/imageCompressor';
 import { getReelCoverImage } from './TikTokShowcase';
+import { InstagramReelDownloaderSection } from './InstagramReelDownloaderSection';
 
 export const TikTokManageModal: React.FC = () => {
   const { 
@@ -35,7 +37,7 @@ export const TikTokManageModal: React.FC = () => {
     setEditingReel
   } = useCart();
 
-  const [activeTab, setActiveTab] = useState<'list' | 'editor'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'editor' | 'downloader'>('list');
   const [reelId, setReelId] = useState('');
   const [title, setTitle] = useState('');
   const [handle, setHandle] = useState('@artified_np');
@@ -303,6 +305,19 @@ export const TikTokManageModal: React.FC = () => {
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{editingReel ? 'Edit Video Details' : 'Add New TikTok Video'}</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setActiveTab('downloader')}
+            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 ${
+              activeTab === 'downloader'
+                ? 'bg-white text-[#1C1B1A] border-t-2 border-[#1C1B1A] shadow-xs'
+                : 'text-[#8C7A6B] hover:text-[#1C1B1A]'
+            }`}
+          >
+            <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>Reel Downloader</span>
           </button>
         </div>
 
@@ -858,6 +873,11 @@ export const TikTokManageModal: React.FC = () => {
               </div>
 
             </form>
+          )}
+
+          {/* Downloader Section */}
+          {activeTab === 'downloader' && (
+            <InstagramReelDownloaderSection onSuccessPublished={() => setActiveTab('list')} />
           )}
 
         </div>
