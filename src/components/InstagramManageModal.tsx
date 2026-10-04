@@ -18,11 +18,9 @@ import {
   ClipboardPaste,
   Play,
   Loader2,
-  Download,
-  BarChart3
+  Download
 } from 'lucide-react';
 import { InstagramReelDownloaderSection } from './InstagramReelDownloaderSection';
-import { InstagramPerformanceDashboard } from './InstagramPerformanceDashboard';
 import { db } from '../firebase';
 import { 
   doc, 
@@ -97,7 +95,7 @@ export const InstagramManageModal: React.FC = () => {
     updateInstagramSettings
   } = useCart();
 
-  const [activeTab, setActiveTab] = useState<'list' | 'editor' | 'downloader' | 'settings' | 'performance'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'editor' | 'downloader' | 'settings'>('list');
   
   // Post editor form states
   const [itemId, setItemId] = useState('');
@@ -803,19 +801,6 @@ export const InstagramManageModal: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setActiveTab('performance')}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 ${
-              activeTab === 'performance'
-                ? 'bg-white text-[#1C1B1A] border-t-2 border-[#1C1B1A] shadow-xs'
-                : 'text-[#8C7A6B] hover:text-[#1C1B1A]'
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5 text-purple-600" />
-            <span>Instagram Performance</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab('settings')}
             className={`px-4 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 ${
               activeTab === 'settings'
@@ -1368,11 +1353,6 @@ export const InstagramManageModal: React.FC = () => {
           {/* TAB 3: REEL DOWNLOADER */}
           {activeTab === 'downloader' && (
             <InstagramReelDownloaderSection onSuccessPublished={() => setActiveTab('list')} />
-          )}
-
-          {/* TAB 5: INSTAGRAM PERFORMANCE */}
-          {activeTab === 'performance' && (
-            <InstagramPerformanceDashboard />
           )}
 
           {/* TAB 4: SETTINGS (HANDLE & PROFILE LINK) */}

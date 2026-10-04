@@ -36,6 +36,7 @@ import { CompareFloatingDock } from './components/CompareFloatingDock';
 import { ReferAFriendModal } from './components/ReferAFriendModal';
 import { SizeGuideModal } from './components/SizeGuideModal';
 import { OrderFAQsModal } from './components/OrderFAQsModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { useCart } from './context/CartContext';
 import { useAuthPersistence } from './hooks/useAuthPersistence';
 import { LanguageProvider } from './context/LanguageContext';
@@ -178,6 +179,7 @@ function AppContent() {
 
       {/* Mobile Sticky Quick Navigation */}
       <MobileBottomBar />
+      <OfflineIndicator />
     </div>
   );
 }

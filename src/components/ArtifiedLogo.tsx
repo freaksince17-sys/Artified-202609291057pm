@@ -185,7 +185,7 @@ export const ArtifiedLogo: React.FC<ArtifiedLogoProps> = ({
               filter: resolvedVariant === 'light' ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))' : undefined
             }}
           >
-            (Art made with love)
+            -Art made with love
           </text>
         )}
       </svg>
