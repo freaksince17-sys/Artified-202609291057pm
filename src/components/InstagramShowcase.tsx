@@ -135,32 +135,35 @@ export const isDirectVideo = (u?: string): boolean => {
 export const getPlayableInstagramVideo = (item: InstagramJournalItem, index = 0): string => {
   const v = item.videoUrl?.trim();
 
-  // 1. Prioritize direct Firebase Storage URL if provided
-  if (v && v.includes('firebasestorage')) {
-    return v;
-  }
-
-  // 2. Resolve to Firebase Storage video URL for persistent availability from the cloud
-  const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
-  if (shortcode) {
-    return getFirebaseStorageVideoUrl(shortcode);
-  }
-
-  // 3. Fallback direct video URL (e.g. blobs, APIs)
+  // 1. Direct local video path inside public/instagram_videos/ or direct video file takes absolute top priority
   if (v && isDirectVideo(v)) {
     return v;
   }
 
-  // 4. Explicit ID matches resolved to Firebase Storage
-  if (item.id === 'ig-item-1') return getFirebaseStorageVideoUrl('DdjhhazvaRr');
-  if (item.id === 'ig-item-2') return getFirebaseStorageVideoUrl('DdMRgKdP4HK');
-  if (item.id === 'ig-item-3') return getFirebaseStorageVideoUrl('DdIUMC4BqFr');
-  if (item.id === 'ig-item-4') return getFirebaseStorageVideoUrl('DY6OqqfPyJu');
+  // 2. Direct Firebase Storage URL if provided
+  if (v && v.includes('firebasestorage')) {
+    return v;
+  }
 
-  // 5. Guaranteed local/cloud fallback pre-buffered MP4 video files
+  // 3. Shortcode check: if shortcode has a known local video on disk, use that
+  const shortcode = getInstagramShortcode(item.videoUrl) || getInstagramShortcode(item.postUrl);
+  if (shortcode) {
+    if (KNOWN_LOCAL_VIDEOS[shortcode]) {
+      return KNOWN_LOCAL_VIDEOS[shortcode];
+    }
+    return `/instagram_videos/${shortcode}.mp4`;
+  }
+
+  // 4. Explicit ID matches resolved to local signature videos
+  if (item.id === 'ig-item-1') return '/instagram_videos/DdjhhazvaRr.mp4';
+  if (item.id === 'ig-item-2') return '/instagram_videos/DdMRgKdP4HK.mp4';
+  if (item.id === 'ig-item-3') return '/instagram_videos/DdIUMC4BqFr.mp4';
+  if (item.id === 'ig-item-4') return '/instagram_videos/DY6OqqfPyJu.mp4';
+
+  // 5. Guaranteed local fallback pre-buffered MP4 video files
   const signatureShortcodes = ['DdjhhazvaRr', 'DdMRgKdP4HK', 'DdIUMC4BqFr', 'DY6OqqfPyJu'];
   const sc = signatureShortcodes[index % signatureShortcodes.length];
-  return getFirebaseStorageVideoUrl(sc);
+  return `/instagram_videos/${sc}.mp4`;
 };
 
 interface InstagramJournalCardProps {

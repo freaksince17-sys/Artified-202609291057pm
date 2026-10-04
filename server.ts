@@ -1091,6 +1091,28 @@ async function startServer() {
     }
   });
 
+  // GET /api/instagram-videos-list - List all available .mp4 videos inside public/instagram_videos/
+  app.get('/api/instagram-videos-list', (_req, res) => {
+    try {
+      const igDir = path.resolve(process.cwd(), 'public', 'instagram_videos');
+      if (!fs.existsSync(igDir)) {
+        return res.json({ videos: [] });
+      }
+      const files = fs.readdirSync(igDir);
+      const mp4Files = files
+        .filter((f) => f.endsWith('.mp4'))
+        .map((f) => ({
+          filename: f,
+          path: `/instagram_videos/${f}`,
+          name: f.replace('.mp4', ''),
+        }));
+      return res.json({ videos: mp4Files });
+    } catch (err: any) {
+      console.error('Error listing instagram videos:', err);
+      return res.status(500).json({ error: 'Failed to list videos', videos: [] });
+    }
+  });
+
   // POST /api/save-instagram-video - Save MP4 video file or download remote video to public/instagram_videos/
   app.post('/api/save-instagram-video', async (req, res) => {
     try {
@@ -1296,13 +1318,25 @@ async function startServer() {
     }
   });
 
-  // OpenGraph social sharing middleware: injects absolute domain into og:image and twitter:image
+  const isProd = process.env.NODE_ENV === 'production';
+
+  // Setup Vite dev server middleware or serve production build
+  let viteInstance: any = null;
+  if (!isProd) {
+    const vite = await createViteServer({
+      server: { middlewareMode: true, port: Number(port), host: '0.0.0.0' },
+      appType: 'spa',
+    });
+    viteInstance = vite;
+  }
+
+  // OpenGraph social sharing middleware for crawler bots (WhatsApp, Facebook, Twitter, Slack, etc.)
   app.use(async (req, res, next) => {
     const userAgent = (req.headers['user-agent'] || '').toLowerCase();
     const isBot = /facebookexternalhit|facebot|twitterbot|whatsapp|telegrambot|linkedinbot|discordbot|slackbot|googlebot|bingbot|pinterest/i.test(userAgent);
-    const isHtml = req.accepts('html') && (req.path === '/' || req.path === '/index.html' || !req.path.includes('.'));
 
-    if (isBot || (isHtml && req.path === '/')) {
+    // Only intercept for external crawler bots requesting social cards
+    if (isBot) {
       try {
         const indexPath = path.resolve(process.cwd(), isProd ? 'dist/index.html' : 'index.html');
         if (fs.existsSync(indexPath)) {
@@ -1322,22 +1356,14 @@ async function startServer() {
           return res.status(200).set({ 'Content-Type': 'text/html' }).send(html);
         }
       } catch (err) {
-        console.warn('Notice: Error serving dynamic OpenGraph html:', err);
+        console.warn('Notice: Error serving dynamic OpenGraph html for bot:', err);
       }
     }
     next();
   });
 
-  // Setup Vite dev server middleware or serve production build
-  let viteInstance: any = null;
-  const isProd = process.env.NODE_ENV === 'production';
-  if (!isProd) {
-    const vite = await createViteServer({
-      server: { middlewareMode: true, port: Number(port), host: '0.0.0.0' },
-      appType: 'spa',
-    });
-    viteInstance = vite;
-    app.use(vite.middlewares);
+  if (!isProd && viteInstance) {
+    app.use(viteInstance.middlewares);
   } else {
     app.use(express.static(path.resolve(process.cwd(), 'dist')));
     app.get('*', (_req, res) => {

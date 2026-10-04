@@ -42,7 +42,7 @@ import { InstagramJournalItem } from '../types';
 import { compressImage } from '../utils/imageCompressor';
 import { getFreshAssetUrl, getCacheBustedThumbnailUrl } from '../utils/storageAssetUtils';
 import { uploadVideoToFirebaseStorage, getFirebaseStorageVideoUrl } from '../utils/firebaseVideoStorage';
-import { getPlayableInstagramCover, getInstagramShortcode, KNOWN_LOCAL_VIDEOS } from './InstagramShowcase';
+import { getPlayableInstagramCover, getInstagramShortcode, KNOWN_LOCAL_VIDEOS, KNOWN_LOCAL_COVERS } from './InstagramShowcase';
 
 // Helper to sanitize payload for Cloud Firestore storage
 const sanitizeItemForFirestore = (item: Partial<InstagramJournalItem>): Record<string, any> => {
@@ -108,6 +108,32 @@ export const InstagramManageModal: React.FC = () => {
   const [taggedProductId, setTaggedProductId] = useState('');
   const [clipboardNotice, setClipboardNotice] = useState<string | null>(null);
   const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+
+  // Available local .mp4 videos in public/instagram_videos/
+  const [availableLocalVideos, setAvailableLocalVideos] = useState<{ filename: string; path: string; name: string }[]>([
+    { filename: 'DdjhhazvaRr.mp4', path: '/instagram_videos/DdjhhazvaRr.mp4', name: 'DdjhhazvaRr (Tourmaline & Baroque Pearl Necklace)' },
+    { filename: 'DdMRgKdP4HK.mp4', path: '/instagram_videos/DdMRgKdP4HK.mp4', name: 'DdMRgKdP4HK (Macrame Workshop Glimpse)' },
+    { filename: 'DdIUMC4BqFr.mp4', path: '/instagram_videos/DdIUMC4BqFr.mp4', name: 'DdIUMC4BqFr (Saturday Macrame Workshop Announcement)' },
+    { filename: 'DY6OqqfPyJu.mp4', path: '/instagram_videos/DY6OqqfPyJu.mp4', name: 'DY6OqqfPyJu (Packing a Special Order for Pyarii Maya)' },
+  ]);
+
+  const fetchAvailableVideos = async () => {
+    try {
+      const res = await fetch('/api/instagram-videos-list');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
+          setAvailableLocalVideos(data.videos);
+        }
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (isInstagramManagerOpen) {
+      fetchAvailableVideos();
+    }
+  }, [isInstagramManagerOpen]);
 
   // Global settings state
   const [globalHandleInput, setGlobalHandleInput] = useState(instagramHandle || '@artified_np');
@@ -503,7 +529,7 @@ export const InstagramManageModal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  // Upload MP4 Video File directly to Firebase Storage & local public directory
+  // Upload MP4 Video File directly to public/instagram_videos/ folder
   const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -511,16 +537,9 @@ export const InstagramManageModal: React.FC = () => {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      const shortcode = getInstagramShortcode(postUrl) || getInstagramShortcode(videoUrl) || `ig_${Date.now()}`;
+      const cleanBaseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const shortcode = getInstagramShortcode(postUrl) || cleanBaseName || `reel_${Date.now()}`;
       
-      // 1. Upload directly to Firebase Storage bucket
-      const firebaseStorageUrl = await uploadVideoToFirebaseStorage(file, shortcode);
-      if (firebaseStorageUrl) {
-        setVideoUrl(firebaseStorageUrl);
-        setClipboardNotice('✅ MP4 Video uploaded & saved to Firebase Storage!');
-      }
-
-      // 2. Parallel backup to local Express server disk
       const reader = new FileReader();
       reader.onload = async () => {
         const base64 = reader.result as string;
@@ -535,17 +554,27 @@ export const InstagramManageModal: React.FC = () => {
           });
           if (res.ok) {
             const data = await res.json();
+            const localVidPath = data.videoUrl || `/instagram_videos/${shortcode}.mp4`;
+            setVideoUrl(localVidPath);
             if (data.coverUrl && !thumbnail) {
               setThumbnail(data.coverUrl);
             }
+            setClipboardNotice(`✅ Video saved directly to public/instagram_videos/${shortcode}.mp4!`);
+            fetchAvailableVideos();
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            setErrorMessage(errData.error || 'Failed to save video to local directory');
           }
-        } catch {}
-        setIsSubmitting(false);
-        setTimeout(() => setClipboardNotice(null), 3500);
+        } catch (uploadErr: any) {
+          setErrorMessage(uploadErr.message || 'Error uploading video');
+        } finally {
+          setIsSubmitting(false);
+          setTimeout(() => setClipboardNotice(null), 4000);
+        }
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
-      console.warn('Firebase storage video upload notice:', err);
+      console.warn('Video upload error:', err);
       setIsSubmitting(false);
     }
   };
@@ -561,20 +590,18 @@ export const InstagramManageModal: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const matchedProd = taggedProductId ? products.find((p) => p.id === taggedProductId) : null;
-
-      const rawThumbnail = thumbnail.trim() || (matchedProd?.images?.[0] || '/instagram_videos/DdjhhazvaRr_cover.jpg');
+      const rawThumbnail = thumbnail.trim() || '/instagram_videos/DdjhhazvaRr_cover.jpg';
       const uniqueSaveVersion = `${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const cacheBustedThumb = getCacheBustedThumbnailUrl(rawThumbnail, uniqueSaveVersion);
 
       let finalVid = videoUrl.trim();
       const extractedSC = getInstagramShortcode(postUrl) || getInstagramShortcode(finalVid);
       
-      if (!finalVid || (!finalVid.includes('firebasestorage') && !finalVid.startsWith('/instagram_videos/'))) {
+      if (!finalVid) {
         if (extractedSC) {
-          finalVid = getFirebaseStorageVideoUrl(extractedSC) || `/instagram_videos/${extractedSC}.mp4`;
+          finalVid = `/instagram_videos/${extractedSC}.mp4`;
         } else {
-          finalVid = getFirebaseStorageVideoUrl('DdjhhazvaRr') || '/instagram_videos/DdjhhazvaRr.mp4';
+          finalVid = '/instagram_videos/DdjhhazvaRr.mp4';
         }
       }
 
@@ -587,11 +614,6 @@ export const InstagramManageModal: React.FC = () => {
         thumbnail: cacheBustedThumb,
         videoUrl: finalVid,
         isLocked: true,
-        ...(taggedProductId && matchedProd ? {
-          taggedProductId: taggedProductId.trim(),
-          taggedProductName: matchedProd.title || 'Handcrafted Artisan Piece',
-          taggedProductPrice: matchedProd.price || 0,
-        } : {}),
       };
 
       // STEP 1: Apply immediate update to CartContext, LocalStorage, and Express Server API
@@ -1259,12 +1281,15 @@ export const InstagramManageModal: React.FC = () => {
               </div>
 
               {/* Video Source & MP4 File Upload */}
-              <div className="p-3 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl space-y-2">
+              <div className="p-3 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-[#1C1B1A]">
-                    Reel MP4 Video File / Source
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-[#D5C7BC] hover:border-[#1C1B1A] rounded-lg text-xs font-semibold text-[#1C1B1A] cursor-pointer transition-colors shadow-2xs">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1C1B1A]">
+                      Reel MP4 Video File / Source
+                    </label>
+                    <span className="text-[10px] text-[#736C65]">Directly links to physical .mp4 video files</span>
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#D5C7BC] hover:border-[#1C1B1A] rounded-lg text-xs font-semibold text-[#1C1B1A] cursor-pointer transition-colors shadow-2xs">
                     <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Upload .mp4 Video</span>
                     <input
@@ -1275,35 +1300,48 @@ export const InstagramManageModal: React.FC = () => {
                     />
                   </label>
                 </div>
-                <input
-                  type="text"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="/instagram_videos/SHORTCODE.mp4 or video URL"
-                  className="w-full px-3 py-1.5 text-xs font-semibold text-[#1C1B1A] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
-                />
-                <p className="text-[10px] text-[#736C65]">
-                  Videos uploaded here are automatically saved directly into <code>public/instagram_videos/</code> on the repository.
-                </p>
-              </div>
 
-              {/* Tag Product */}
-              <div>
-                <label className="block text-xs font-semibold text-[#1C1B1A] mb-1">
-                  Tag a Catalog Piece (Optional)
-                </label>
-                <select
-                  value={taggedProductId}
-                  onChange={(e) => handleProductSelect(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-bold text-[#1C1B1A] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
-                >
-                  <option value="">None (General Journal Entry)</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      🛍️ {p.title} (NPR {p.price.toLocaleString()})
-                    </option>
-                  ))}
-                </select>
+                {/* Dropdown to select existing video in public/instagram_videos/ */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
+                    Select video inside public/instagram_videos/:
+                  </label>
+                  <select
+                    value={videoUrl}
+                    onChange={(e) => {
+                      const selectedVal = e.target.value;
+                      setVideoUrl(selectedVal);
+                      const sc = getInstagramShortcode(selectedVal) || selectedVal.replace('/instagram_videos/', '').replace('.mp4', '');
+                      if (sc && KNOWN_LOCAL_COVERS[sc] && !thumbnail) {
+                        setThumbnail(KNOWN_LOCAL_COVERS[sc]);
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                  >
+                    <option value="">-- Choose video in public/instagram_videos/ --</option>
+                    {availableLocalVideos.map((v) => (
+                      <option key={v.path} value={v.path}>
+                        🎬 {v.name || v.filename} ({v.path})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Or type/edit path directly */}
+                <div>
+                  <span className="text-[10px] text-[#8C7A6B] block mb-0.5">Linked video path:</span>
+                  <input
+                    type="text"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="/instagram_videos/DdjhhazvaRr.mp4 or video URL"
+                    className="w-full px-3 py-1.5 text-xs font-semibold text-[#1C1B1A] bg-white border border-[#D5C7BC] rounded-lg focus:outline-hidden focus:border-[#1C1B1A]"
+                  />
+                </div>
+
+                <p className="text-[10px] text-[#736C65]">
+                  Videos are linked directly from <code>public/instagram_videos/</code>. Uploaded MP4 files are physically stored on disk and will play instantly offline or online without remote dependencies.
+                </p>
               </div>
 
               {/* Pro-Tip guidance box */}
