@@ -5,7 +5,7 @@ import {
   Truck, 
   Video, 
   Instagram, 
-  Hammer,
+  Award,
   User
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -41,7 +41,7 @@ export const MobileBottomBar: React.FC = () => {
   };
 
   const handleWorkshop = () => {
-    setActiveNavTab('craft');
+    setActiveNavTab('workshops');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -99,8 +99,8 @@ export const MobileBottomBar: React.FC = () => {
           onClick={handleWorkshop}
           className="flex flex-col items-center justify-center min-w-[48px] min-h-[44px] text-[#5E5955] dark:text-[#A8A096] hover:text-[#C5A880] cursor-pointer"
         >
-          <Hammer className="w-4 h-4 text-[#C5A880]" />
-          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Workshop</span>
+          <Award className="w-4 h-4 text-[#C5A880]" />
+          <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Workshops</span>
         </button>
 
         {/* 6. Track */}

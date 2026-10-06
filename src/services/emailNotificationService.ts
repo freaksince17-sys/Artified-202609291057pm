@@ -1,6 +1,6 @@
 /**
  * Automated Restock Notification & Email Dispatch Service
- * Artified_np - Handcrafted in Chikamugal, Kathmandu
+ * Artified_np - Handcrafted in Kathmandu, Nepal
  */
 
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
@@ -29,7 +29,7 @@ export function generateRestockEmailTemplate(product: Product, recipientEmail: s
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #FAF8F5; padding: 24px; border: 1px solid #E8DFD8; border-radius: 16px;">
       <div style="background: #1C1B1A; padding: 24px; text-align: center; border-radius: 12px; margin-bottom: 20px;">
         <h1 style="color: #FAF8F5; margin: 0; font-family: serif; font-size: 24px; letter-spacing: 2px;">ARTIFIED<span style="color: #D4AF37;">_np</span></h1>
-        <p style="color: #C5A880; font-size: 11px; margin: 4px 0 0; text-transform: uppercase;">Handmade Luxury • Chikamugal, Kathmandu</p>
+        <p style="color: #C5A880; font-size: 11px; margin: 4px 0 0; text-transform: uppercase;">Handmade Luxury • Kathmandu, Nepal</p>
       </div>
 
       <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #E8DFD8; text-align: center;">

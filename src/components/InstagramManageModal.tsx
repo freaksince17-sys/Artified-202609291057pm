@@ -254,7 +254,7 @@ export const InstagramManageModal: React.FC = () => {
     }
 
     if (!title.trim()) {
-      setTitle(`${prod.title} • Handcrafted in Chikamugal, Kathmandu`);
+      setTitle(`${prod.title} • Handcrafted in Kathmandu, Nepal`);
     }
 
     if (!caption.trim()) {
@@ -262,7 +262,7 @@ export const InstagramManageModal: React.FC = () => {
         ? prod.materials.join(', ') 
         : 'lustrous freshwater pearls and durable cord';
       const subtitlePart = prod.subtitle ? `${prod.subtitle}. ` : '';
-      const generatedCaption = `${subtitlePart}Handcrafted elegance by Sahina Shrestha at our workshop in Chikamugal, Kathmandu with ${materialsStr}. Individually hand-knotted for lifetime durability and brilliant luster.\n\n✨ Price: NPR ${prod.price.toLocaleString()} (${prod.category})\n📍 Handcrafted at Chikamugal Store, Kathmandu\n🛍️ Tap the piece to shop or message us to order! #artified_np #ChikamugalStore #KathmanduCraft #necklace`;
+      const generatedCaption = `${subtitlePart}Handcrafted elegance by Sahina Shrestha at our workshop in Kathmandu, Nepal with ${materialsStr}. Individually hand-knotted for lifetime durability and brilliant luster.\n\n✨ Price: NPR ${prod.price.toLocaleString()} (${prod.category})\n📍 Handcrafted in Kathmandu, Nepal\n🛍️ Tap the piece to shop or message us to order! #artified_np #KathmanduCraft #pearljewelry #necklace`;
       setCaption(generatedCaption);
     }
   };
@@ -337,7 +337,7 @@ export const InstagramManageModal: React.FC = () => {
     // 2. Specific exact presets for the 4 signature atelier reels
     if (targetUrl.includes('DdjhhazvaRr')) {
       setTitle('Tourmaline Gemstone & Baroque Pearl Necklace ✨');
-      setCaption('Me: When my husband says no to the necklace 😭 Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap to shop or DM on Instagram #artified_np #smallbusiness #necklace #pearls');
+      setCaption('Me: When my husband says no to the necklace 😭 Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our workshop in Kathmandu, Nepal.\n\n✨ Pure Nepal Handcrafted\n📍 Store: Kathmandu, Nepal\n🛍️ Tap to shop or DM on Instagram #artified_np #smallbusiness #necklace #pearls');
       setVideoUrl('/instagram_videos/DdjhhazvaRr.mp4');
       setThumbnail('/instagram_videos/DdjhhazvaRr_cover.jpg');
       setClipboardNotice('Loaded Tourmaline & Pearl Necklace exact reel video & details!');
@@ -347,7 +347,7 @@ export const InstagramManageModal: React.FC = () => {
 
     if (targetUrl.includes('DdMRgKdP4HK')) {
       setTitle('Some glimpse of todays Macrame Workshop ✨');
-      setCaption("Behind the scenes at today's macrame craft workshop in Kathmandu! Each knot and weave is created by hand with natural cord and ancestral techniques.\n\n✨ 100% Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram #artified_np #macrame #workshop #handmade");
+      setCaption("Behind the scenes at today's macrame craft workshop in Kathmandu! Each knot and weave is created by hand with natural cord and ancestral techniques.\n\n✨ 100% Handcrafted in Kathmandu, Nepal\n📍 Store: Kathmandu, Nepal\n🛍️ Tap or double-click to view on Instagram #artified_np #macrame #workshop #handmade");
       setVideoUrl('/instagram_videos/DdMRgKdP4HK.mp4');
       setThumbnail('/instagram_videos/DdMRgKdP4HK_cover.jpg');
       setClipboardNotice('Loaded Macrame Workshop Behind-The-Scenes reel & details!');
@@ -367,7 +367,7 @@ export const InstagramManageModal: React.FC = () => {
 
     if (targetUrl.includes('DY6OqqfPyJu')) {
       setTitle('Packing a Special Order for Pyarii Maya 🌸');
-      setCaption("Let's pack a very special order for her! 🌸 Packing the handcrafted pearl bag and custom necklace for someone's pyarii Maya ❤️ Individually packed with love at our Chikamugal atelier.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ DM to purchase this for your pyarii maya! #artified_np #pyariimaya #pearlbag #smallbusiness");
+      setCaption("Let's pack a very special order for her! 🌸 Packing the handcrafted pearl bag and custom necklace for someone's pyarii Maya ❤️ Individually packed with love at our Kathmandu workshop.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Kathmandu, Nepal\n🛍️ DM to purchase this for your pyarii maya! #artified_np #pyariimaya #pearlbag #smallbusiness");
       setVideoUrl('/instagram_videos/DY6OqqfPyJu.mp4');
       setThumbnail('/instagram_videos/DY6OqqfPyJu_cover.jpg');
       setClipboardNotice('Loaded Packing Order for Pyarii Maya reel & details!');
@@ -621,7 +621,7 @@ export const InstagramManageModal: React.FC = () => {
         title: title.trim(),
         handle: handle.trim() || instagramHandle || '@artified_np',
         postUrl: postUrl.trim() || instagramProfileUrl,
-        caption: caption.trim() || 'Latest artisanal release from @artified_np on Instagram.',
+        caption: caption.trim() || 'Latest handcrafted release from @artified_np on Instagram.',
         thumbnail: cacheBustedThumb,
         videoUrl: finalVid,
         isLocked: true,
@@ -1196,7 +1196,7 @@ export const InstagramManageModal: React.FC = () => {
                   rows={3}
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  placeholder="Paste or write your artisanal story, styling tips, materials, or Instagram caption..."
+                  placeholder="Paste or write your story, styling tips, materials, or Instagram caption..."
                   className="w-full px-3 py-2 text-xs font-semibold text-[#1C1B1A] placeholder:text-[#8C7A6B] bg-white border border-[#BFAFA2] rounded-lg focus:outline-hidden focus:border-[#1C1B1A] focus:ring-1 focus:ring-[#1C1B1A] resize-none"
                 />
               </div>

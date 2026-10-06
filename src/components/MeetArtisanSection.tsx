@@ -78,7 +78,7 @@ export const MeetArtisanSection: React.FC = () => {
     const text = encodeURIComponent(
       isNe
         ? (profile.whatsappGreetingNe || 'नमस्ते सहिना दिदी! 🌸 मैले Artified वेबसाइटमा तपाईंको कथा पढें र हस्तनिर्मित मोती/म्याक्रामे सिर्जनाबारे कुरा गर्न चाहन्छु।')
-        : (profile.whatsappGreetingEn || 'Namaste Sahina! 🌸 I just read your artisan story on Artified Nepal and would love to consult with you regarding your handcrafted pearl creations.')
+        : (profile.whatsappGreetingEn || 'Namaste Sahina! 🌸 I just read your story on Artified Nepal and would love to consult with you regarding your handcrafted pearl creations.')
     );
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
@@ -97,7 +97,7 @@ export const MeetArtisanSection: React.FC = () => {
           <div className="p-3 bg-emerald-600 text-white font-bold text-xs rounded-2xl shadow-xl flex items-center justify-between gap-3 animate-fade-in">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-200" />
-              <span>Sahina Shrestha's artisan photo updated & saved live!</span>
+              <span>Sahina Shrestha's founder & creator photo updated & saved live!</span>
             </div>
             <button 
               type="button" 
@@ -170,12 +170,12 @@ export const MeetArtisanSection: React.FC = () => {
           <div className="flex items-center justify-between pb-2.5 mb-3 sm:mb-4 border-b border-[#F0EBE5] dark:border-[#262422] flex-wrap gap-2">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-[#8C5D36] dark:text-[#E6CA9E] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
               <MapPin className="w-3 h-3 text-[#D4AF37]" />
-              <span>{profile.atelierLocation}</span>
+              <span>Kathmandu, Nepal</span>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-[11px] sm:text-xs font-semibold text-[#736C65] dark:text-[#A69E96]">
-                {profile.establishedText}
+                {profile.establishedText || 'Est. 2024 • 100% Handcrafted in Nepal'}
               </span>
 
               {/* Direct Edit & Upload Buttons - Restricted exclusively to Seller Mode */}
@@ -195,7 +195,7 @@ export const MeetArtisanSection: React.FC = () => {
                     type="button"
                     onClick={() => setIsEditModalOpen(true)}
                     className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF8F5] dark:bg-[#252422] border border-[#E8DFD8] dark:border-[#3A3835] hover:border-[#D4AF37] text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E] shadow-2xs hover:shadow-xs transition-all cursor-pointer"
-                    title="Edit Sahina's profile, photos, stories, quotes & stats"
+                    title="Edit profile details"
                   >
                     <Edit3 className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Edit Profile</span>
@@ -206,9 +206,9 @@ export const MeetArtisanSection: React.FC = () => {
           </div>
 
           {/* Main 2-Column Showcase */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-start">
             
-            {/* Left: Artisan Portrait & Stats with Drag & Drop */}
+            {/* Left: Founder & Creator Portrait */}
             <div className="lg:col-span-5 flex flex-col items-center">
               <div 
                 onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
@@ -220,7 +220,7 @@ export const MeetArtisanSection: React.FC = () => {
               >
                 <img
                   src={getFreshArtisanAvatarUrl(profile.avatarUrl, profile.avatarUpdatedAt)}
-                  alt={`${profile.artisanName} - ${profile.artisanRole}`}
+                  alt="Sahina Shrestha - Founder & Creator"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = '/artisan_avatar.png';
                   }}
@@ -264,14 +264,14 @@ export const MeetArtisanSection: React.FC = () => {
                 {/* Subtle gradient vignette */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
-                {/* Floating Artisan Bio Pill */}
+                {/* Floating Founder & Creator Bio Pill */}
                 <div className="absolute bottom-3 left-3 right-3 text-white z-10 space-y-0.5">
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#D4AF37] text-[#1C1B1A] text-[9px] font-bold uppercase tracking-wider shadow-sm">
                     <Sparkles className="w-2.5 h-2.5" />
-                    <span>{profile.artisanRole}</span>
+                    <span>Founder & Creator</span>
                   </div>
                   <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-white flex items-center justify-between">
-                    <span>{profile.artisanName}</span>
+                    <span>{profile.artisanName || 'Sahina Shrestha'}</span>
                     {isSellerMode && (
                       <button
                         type="button"
@@ -284,41 +284,18 @@ export const MeetArtisanSection: React.FC = () => {
                     )}
                   </h3>
                   <p className="text-[11px] text-white/80">
-                    {profile.atelierLocation}
+                    Kathmandu, Nepal
                   </p>
-                </div>
-              </div>
-
-              {/* Quick Trust Strip Below Avatar */}
-              <div className="grid grid-cols-2 gap-2.5 w-full max-w-sm mt-3">
-                <div 
-                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
-                  className={`p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-center transition-colors group ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
-                  title={isSellerMode ? "Click to edit stat" : undefined}
-                >
-                  <Clock className="w-3.5 h-3.5 text-[#D4AF37] mx-auto mb-0.5 group-hover:scale-110 transition-transform" />
-                  <p className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">{profile.stat1Value}</p>
-                  <p className="text-[9px] sm:text-[10px] text-[#736C65] dark:text-[#A69E96]">{profile.stat1Label}</p>
-                </div>
-
-                <div 
-                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
-                  className={`p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-center transition-colors group ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
-                  title={isSellerMode ? "Click to edit stat" : undefined}
-                >
-                  <Heart className="w-3.5 h-3.5 text-[#D4AF37] mx-auto mb-0.5 group-hover:scale-110 transition-transform" />
-                  <p className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">{profile.stat2Value}</p>
-                  <p className="text-[9px] sm:text-[10px] text-[#736C65] dark:text-[#A69E96]">{profile.stat2Label}</p>
                 </div>
               </div>
             </div>
 
-            {/* Right: Story, Philosophy & The 4 Pillars */}
+            {/* Right: Story, Philosophy & Journey */}
             <div className="lg:col-span-7 space-y-3.5 sm:space-y-4">
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold tracking-tight">
-                    {profile.headline}
+                    Meet the Founder & Creator: Sahina Shrestha
                   </h1>
                   {isSellerMode && (
                     <button
@@ -332,15 +309,15 @@ export const MeetArtisanSection: React.FC = () => {
                   )}
                 </div>
                 <p className="text-xs text-[#8C5D36] dark:text-[#E6CA9E] font-medium tracking-wide uppercase">
-                  {profile.subheadline}
+                  From Childhood Passion to Creative Journey
                 </p>
               </div>
 
-              {/* Artisan Quote Card */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] relative group">
-                <div className="flex items-center justify-between mb-1.5">
+              {/* Founder and Creator Story & Philosophy */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] relative group space-y-3.5">
+                <div className="flex items-center justify-between">
                   <span className="px-2 py-0.5 bg-[#1C1B1A] dark:bg-[#121110] text-[#D4AF37] text-[9px] font-bold uppercase tracking-widest rounded-full border border-[#D4AF37]/30">
-                    {isNe ? 'कालिगढको भनाइ' : 'Artisan Philosophy'}
+                    {isNe ? 'संस्थापक र सिर्जनाकर्ताको यात्रा' : 'Founder & Creator Journey'}
                   </span>
                   {isSellerMode && (
                     <button
@@ -353,94 +330,29 @@ export const MeetArtisanSection: React.FC = () => {
                     </button>
                   )}
                 </div>
-                <p className="font-serif italic text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB] leading-relaxed">
-                  {profile.quote}
-                </p>
-              </div>
 
-              {/* The 4 Craft Pillars (Compact 2x2 Grid) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                
-                {/* Pillar 1 */}
-                <div 
-                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
-                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
-                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
-                >
-                  <div className="flex items-center justify-between text-[#D4AF37]">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" />
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
-                        {profile.pillar1?.title || '1. Chikamugal Heritage'}
-                      </h4>
-                    </div>
-                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
-                  </div>
-                  <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
-                    {profile.pillar1?.desc}
+                <div className="space-y-2.5 text-xs sm:text-[13px] text-[#2C2926] dark:text-[#F5F2EB] leading-relaxed">
+                  <p>
+                    My love for art and crafts began in childhood, inspired by watching my mother create beautiful handicrafts. I have always been drawn to unique and different designs, especially those inspired by cultures around the world.
+                  </p>
+                  <p>
+                    When I couldn’t find the pieces I loved in the local market, I started creating them myself. What began as a personal passion soon received appreciation from others, encouraging me to share my creations and turn my creativity into a small business.
                   </p>
                 </div>
 
-                {/* Pillar 2 */}
-                <div 
-                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
-                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
-                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
-                >
-                  <div className="flex items-center justify-between text-[#D4AF37]">
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
-                        {profile.pillar2?.title || '2. 9–14h Hand-Knotting'}
-                      </h4>
-                    </div>
-                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
+                <div className="pt-3 border-t border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
+                  <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#FAF8F5]">
+                    Why “Artified”?
+                  </h3>
+                  <div className="space-y-2.5 text-xs sm:text-[13px] text-[#2C2926] dark:text-[#F5F2EB] leading-relaxed">
+                    <p>
+                      Artified comes from the combination of “Art” and “Modified.” It reflects my belief that creativity can transform ordinary ideas into something unique and meaningful.
+                    </p>
+                    <p>
+                      Every creation is an opportunity to experiment, add a personal touch, and make something truly different. What began as childhood curiosity has grown into a journey of creativity, learning, and entrepreneurship—with the goal of creating pieces that make people think, “I haven’t seen this before.”
+                    </p>
                   </div>
-                  <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
-                    {profile.pillar2?.desc}
-                  </p>
                 </div>
-
-                {/* Pillar 3 */}
-                <div 
-                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
-                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
-                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
-                >
-                  <div className="flex items-center justify-between text-[#D4AF37]">
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
-                        {profile.pillar3?.title || '3. Empowering Women'}
-                      </h4>
-                    </div>
-                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
-                  </div>
-                  <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
-                    {profile.pillar3?.desc}
-                  </p>
-                </div>
-
-                {/* Pillar 4 */}
-                <div 
-                  onClick={() => isSellerMode && setIsEditModalOpen(true)}
-                  className={`p-2.5 sm:p-3 rounded-xl bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1 shadow-2xs transition-colors ${isSellerMode ? 'hover:border-[#C5A880] dark:hover:border-[#D4AF37] cursor-pointer' : 'cursor-default'}`}
-                  title={isSellerMode ? "Click to edit craft pillars" : undefined}
-                >
-                  <div className="flex items-center justify-between text-[#D4AF37]">
-                    <div className="flex items-center gap-1.5">
-                      <Heart className="w-3.5 h-3.5" />
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] dark:text-[#F5F2EB]">
-                        {profile.pillar4?.title || '4. Bespoke Tailoring'}
-                      </h4>
-                    </div>
-                    {isSellerMode && <Edit3 className="w-2.5 h-2.5 text-[#C5A880]" />}
-                  </div>
-                  <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug line-clamp-2">
-                    {profile.pillar4?.desc}
-                  </p>
-                </div>
-
               </div>
 
               {/* Call-to-Action Buttons */}

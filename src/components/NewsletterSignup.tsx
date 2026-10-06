@@ -94,7 +94,7 @@ export const NewsletterSignup: React.FC = () => {
             </h3>
 
             <p className="text-xs sm:text-sm text-[#A69E96] leading-relaxed max-w-xl">
-              Subscribe to get secret studio previews of our upcoming handmade pearl bags, baroque chokers, and festive collection drops woven in Chikamugal, Kathmandu.
+              Subscribe to get secret studio previews of our upcoming handmade pearl bags, baroque chokers, and festive collection drops woven in Kathmandu, Nepal.
             </p>
 
             {/* Value prop pills */}
@@ -125,11 +125,11 @@ export const NewsletterSignup: React.FC = () => {
                   Namaste & Welcome!
                 </h4>
                 <p className="text-xs text-[#C5A880] leading-relaxed">
-                  You are now subscribed to Artified's handmade collection drops. We'll email you the moment our next batch is hand-finished in Chikamugal!
+                  You are now subscribed to Artified's handmade collection drops. We'll email you the moment our next batch is hand-finished in Kathmandu, Nepal!
                 </p>
                 <div className="pt-1">
                   <span className="text-[10px] text-[#8C847E]">
-                    Joined by {subscriberCount.toLocaleString()} handmade jewelry patrons across Nepal.
+                    Joined by {subscriberCount.toLocaleString()} handmade jewelry lovers across Nepal.
                   </span>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export const NewsletterSignup: React.FC = () => {
                 <div className="flex items-center justify-between text-[11px] text-[#736C65] px-1">
                   <span className="flex items-center gap-1">
                     <Heart className="w-3 h-3 text-[#C5A880] fill-[#C5A880]" />
-                    <span>{subscriberCount.toLocaleString()} patrons subscribed</span>
+                    <span>{subscriberCount.toLocaleString()} customers subscribed</span>
                   </span>
                   <span>Unsubscribe anytime with 1-click</span>
                 </div>

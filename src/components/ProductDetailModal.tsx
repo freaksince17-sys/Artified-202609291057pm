@@ -33,7 +33,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { RestockNotifyModal } from './RestockNotifyModal';
 import { isProductWaitlisted } from '../utils/waitlistService';
 import { submitProductReviewToFirestore, subscribeToProductReviews, FirestoreProductReview } from '../services/reviewService';
-import { ProductSpotlightOverlay, SpotlightTriggerButton } from './ProductSpotlightOverlay';
 import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 import { applyProductSeo } from '../utils/productSeo';
 
@@ -54,8 +53,7 @@ export const ProductDetailModal: React.FC = () => {
     openReviewsManager,
     toggleCompareProduct,
     isProductCompared,
-    openCompareModal,
-    openSizeGuideModal
+    openCompareModal
   } = useCart();
 
   const { language, t } = useLanguage();
@@ -75,7 +73,7 @@ export const ProductDetailModal: React.FC = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewAuthor, setNewReviewAuthor] = useState('');
   const [newReviewLocation, setNewReviewLocation] = useState('');
-  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewRating, setNewReviewRating] = useState(4.8);
   const [newReviewComment, setNewReviewComment] = useState('');
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -84,7 +82,6 @@ export const ProductDetailModal: React.FC = () => {
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
   const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0);
-  const [isSpotlightActive, setIsSpotlightActive] = useState(false);
 
   // Subscribe to real-time reviews stored in Firestore for the active product
   useEffect(() => {
@@ -124,7 +121,7 @@ export const ProductDetailModal: React.FC = () => {
   const handleShareWhatsApp = () => {
     if (!quickViewProduct) return;
     const shareUrl = window.location.href;
-    const text = `Look at this stunning handmade ${quickViewProduct.title} from Artified Nepal! ✨\nPrice: Rs. ${quickViewProduct.price.toLocaleString()}\nHandcrafted with pearls in Chikamugal, Kathmandu 🌸\nTake a look: ${shareUrl}`;
+    const text = `Look at this stunning handmade ${quickViewProduct.title} from Artified Nepal! ✨\nPrice: Rs. ${quickViewProduct.price.toLocaleString()}\nHandcrafted with pearls in Kathmandu, Nepal 🌸\nTake a look: ${shareUrl}`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -274,9 +271,10 @@ export const ProductDetailModal: React.FC = () => {
   const fallbackReviews = getProductReviews(product);
   const reviewsList = firestoreReviews.length > 0 ? firestoreReviews : fallbackReviews;
   const dynamicReviewsCount = reviewsList.length;
-  const averageRating = reviewsList.length > 0
-    ? (reviewsList.reduce((acc, r) => acc + (r.rating || 5), 0) / reviewsList.length).toFixed(1)
-    : product.rating.toFixed(1);
+  const rawRatingVal = reviewsList.length > 0
+    ? (reviewsList.reduce((acc, r) => acc + (r.rating || 4.7), 0) / reviewsList.length)
+    : (product.rating ? Number(product.rating) : 4.7);
+  const averageRating = Math.min(4.8, Math.max(4.0, rawRatingVal)).toFixed(1);
 
   const handleAddToCart = () => {
     addToCart(product, quantity, '', selectedStyle);
@@ -454,28 +452,22 @@ export const ProductDetailModal: React.FC = () => {
               
               {/* Left: Gallery Column */}
               <div className="md:col-span-6 flex flex-col gap-3">
-                {/* Atelier Inspection Bar with Spotlight Tour Trigger */}
+                {/* Atelier Inspection Bar */}
                 <div className="flex items-center justify-between px-1">
                   <div className="flex items-center gap-1.5 text-xs text-[#8C7A6B]">
                     <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span className="font-serif italic text-xs text-[#1C1B1A]">Chikamugal Atelier Craft View</span>
+                    <span className="font-serif italic text-xs text-[#1C1B1A]">Kathmandu Atelier Craft View</span>
                   </div>
-                  <SpotlightTriggerButton
-                    isActive={isSpotlightActive}
-                    onToggle={() => setIsSpotlightActive(!isSpotlightActive)}
-                  />
                 </div>
 
-                {/* Main Feature View with Hover-to-Zoom and Guided Spotlight */}
+                {/* Main Feature View with Hover-to-Zoom */}
                 <div 
-                  className={`relative aspect-[4/5] rounded-xl overflow-hidden bg-white border border-[#E8DFD8] shadow-xs select-none group ${
-                    isSpotlightActive ? 'cursor-default ring-2 ring-[#D4AF37]/50' : 'cursor-crosshair'
-                  }`}
-                  onMouseEnter={!isSpotlightActive ? handleMouseEnter : undefined}
-                  onMouseMove={!isSpotlightActive ? handleMouseMove : undefined}
+                  className="relative aspect-[4/5] rounded-xl overflow-hidden bg-white border border-[#E8DFD8] shadow-xs select-none group cursor-crosshair"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseMove={handleMouseMove}
                   onMouseLeave={handleMouseLeave}
-                  onTouchStart={!isSpotlightActive ? handleTouchMove : undefined}
-                  onTouchMove={!isSpotlightActive ? handleTouchMove : undefined}
+                  onTouchStart={handleTouchMove}
+                  onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                 >
                   <img
@@ -489,75 +481,62 @@ export const ProductDetailModal: React.FC = () => {
                     className="w-full h-full object-cover object-center pointer-events-none will-change-transform"
                     style={{
                       transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                      transform: (!isSpotlightActive && isZoomed) ? `scale(${zoomScale})` : 'scale(1)',
+                      transform: isZoomed ? `scale(${zoomScale})` : 'scale(1)',
                       transition: isZoomed ? 'transform 0.05s ease-out' : 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                     }}
                   />
 
-                  {/* Guided Product Spotlight Overlay (Highlights Clasp Quality, Pearl Grade & Tensile Core) */}
-                  <ProductSpotlightOverlay
-                    product={product}
-                    isActive={isSpotlightActive}
-                    onToggleActive={() => setIsSpotlightActive(false)}
-                  />
-
-                  {/* Hover-to-zoom craft inspection status badge (hidden when spotlight is active) */}
-                  {!isSpotlightActive && (
-                    <div 
-                      className={`absolute top-3 left-3 py-1 px-2.5 rounded-full text-[11px] font-medium transition-all duration-200 flex items-center gap-1.5 shadow-xs backdrop-blur-md pointer-events-none z-10 ${
-                        isZoomed 
-                          ? 'bg-[#1C1B1A]/90 text-[#FAF8F5] border border-[#C5A880]/50' 
-                          : 'bg-white/95 text-[#5E5955] border border-[#E8DFD8] opacity-90 group-hover:opacity-100'
-                      }`}
-                    >
-                      {isZoomed ? (
-                        <>
-                          <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] animate-pulse" />
-                          <span>Inspecting Bead Details ({zoomScale}x)</span>
-                        </>
-                      ) : (
-                        <>
-                          <ZoomIn className="w-3.5 h-3.5 text-[#C5A880]" />
-                          <span>Hover / Pan to Inspect Beads</span>
-                        </>
-                      )}
-                    </div>
-                  )}
+                  {/* Hover-to-zoom craft inspection status badge */}
+                  <div 
+                    className={`absolute top-3 left-3 py-1 px-2.5 rounded-full text-[11px] font-medium transition-all duration-200 flex items-center gap-1.5 shadow-xs backdrop-blur-md pointer-events-none z-10 ${
+                      isZoomed 
+                        ? 'bg-[#1C1B1A]/90 text-[#FAF8F5] border border-[#C5A880]/50' 
+                        : 'bg-white/95 text-[#5E5955] border border-[#E8DFD8] opacity-90 group-hover:opacity-100'
+                    }`}
+                  >
+                    {isZoomed ? (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] animate-pulse" />
+                        <span>Inspecting Bead Details ({zoomScale}x)</span>
+                      </>
+                    ) : (
+                      <>
+                        <ZoomIn className="w-3.5 h-3.5 text-[#C5A880]" />
+                        <span>Hover / Pan to Inspect Beads</span>
+                      </>
+                    )}
+                  </div>
 
                   {/* Zoom Scale Selector Pills (2x, 2.5x, 3.2x) */}
-                  {!isSpotlightActive && (
-                    <div 
-                      className="absolute bottom-3 right-3 flex items-center bg-[#1C1B1A]/85 backdrop-blur-md rounded-full p-0.5 border border-white/10 shadow-sm z-10"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {[2.0, 2.5, 3.2].map((scaleVal) => (
-                        <button
-                          key={scaleVal}
-                          type="button"
-                          onClick={() => setZoomScale(scaleVal)}
-                          className={`px-2 py-0.5 text-[10px] rounded-full font-mono transition-colors ${
-                            zoomScale === scaleVal
-                              ? 'bg-[#C5A880] text-[#1C1B1A] font-bold shadow-2xs'
-                              : 'text-[#FAF8F5]/80 hover:text-white'
-                          }`}
-                        >
-                          {scaleVal}x
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <div 
+                    className="absolute bottom-3 right-3 flex items-center bg-[#1C1B1A]/85 backdrop-blur-md rounded-full p-0.5 border border-white/10 shadow-sm z-10"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {[2.0, 2.5, 3.2].map((scaleVal) => (
+                      <button
+                        key={scaleVal}
+                        type="button"
+                        onClick={() => setZoomScale(scaleVal)}
+                        className={`px-2 py-0.5 text-[10px] rounded-full font-mono transition-colors ${
+                          zoomScale === scaleVal
+                            ? 'bg-[#C5A880] text-[#1C1B1A] font-bold shadow-2xs'
+                            : 'text-[#FAF8F5]/80 hover:text-white'
+                        }`}
+                      >
+                        {scaleVal}x
+                      </button>
+                    ))}
+                  </div>
 
                   {/* Craft Lead Time Floating Tag */}
-                  {!isSpotlightActive && (
-                    <div 
-                      className={`absolute bottom-3 left-3 bg-[#1C1B1A]/85 backdrop-blur-md text-white text-[11px] py-1 px-3 rounded-full flex items-center gap-1.5 shadow-sm transition-opacity duration-200 pointer-events-none ${
-                        isZoomed ? 'opacity-30' : 'opacity-100'
-                      }`}
-                    >
-                      <Clock className="w-3 h-3 text-[#D4AF37]" />
-                      <span>{product.leadTime}</span>
-                    </div>
-                  )}
+                  <div 
+                    className={`absolute bottom-3 left-3 bg-[#1C1B1A]/85 backdrop-blur-md text-white text-[11px] py-1 px-3 rounded-full flex items-center gap-1.5 shadow-sm transition-opacity duration-200 pointer-events-none ${
+                      isZoomed ? 'opacity-30' : 'opacity-100'
+                    }`}
+                  >
+                    <Clock className="w-3 h-3 text-[#D4AF37]" />
+                    <span>{product.leadTime}</span>
+                  </div>
                 </div>
 
               {/* Thumbnail Strip */}
@@ -597,7 +576,7 @@ export const ProductDetailModal: React.FC = () => {
                 <div className="bg-white p-2.5 rounded-lg border border-[#E8DFD8] text-center">
                   <HeartHandshake className="w-4 h-4 text-[#C5A880] mx-auto mb-1" />
                   <p className="text-[10px] font-semibold text-[#1C1B1A]">100% Handcrafted</p>
-                  <p className="text-[9px] text-[#736C65]">Chikamugal, Kathmandu</p>
+                  <p className="text-[9px] text-[#736C65]">Kathmandu, Nepal</p>
                 </div>
                 <div className="bg-white p-2.5 rounded-lg border border-[#E8DFD8] text-center">
                   <ShieldCheck className="w-4 h-4 text-[#C5A880] mx-auto mb-1" />
@@ -699,7 +678,7 @@ export const ProductDetailModal: React.FC = () => {
                       <div className="space-y-0.5">
                         <p className="font-bold">This handcrafted creation is currently sold out</p>
                         <p className="text-[11px] text-amber-900 leading-relaxed">
-                          Due to high artisan demand, this piece is in queue at our Chikamugal workshop. Join the waitlist to receive an email alert the moment it is restocked.
+                          Due to high customer demand, this handcrafted piece is in queue at our Kathmandu workshop. Join the waitlist to receive an email alert the moment it is restocked.
                         </p>
                       </div>
                     </div>
@@ -829,7 +808,7 @@ export const ProductDetailModal: React.FC = () => {
                       onClick={() => toggleAccordion('care')}
                       className="w-full py-2.5 flex items-center justify-between text-xs font-semibold text-[#1C1B1A] uppercase tracking-wider text-left cursor-pointer"
                     >
-                      <span>Artisan Care Guide</span>
+                      <span>Care Guide</span>
                       {activeAccordion === 'care' ? (
                         <ChevronUp className="w-4 h-4 text-[#8C7A6B]" />
                       ) : (
@@ -839,7 +818,7 @@ export const ProductDetailModal: React.FC = () => {
                     {activeAccordion === 'care' && (
                       <div className="pb-3 text-xs text-[#5E5955] space-y-1.5 animate-in fade-in">
                         <p className="text-[#5E5955] leading-relaxed">
-                          Store in the provided organic cotton pouch. Avoid direct exposure to perfume and cosmetics to preserve natural baroque luster.
+                          Store in cotton or silk pouch.
                         </p>
                       </div>
                     )}
@@ -860,8 +839,8 @@ export const ProductDetailModal: React.FC = () => {
                     </button>
                     {activeAccordion === 'delivery' && (
                       <div className="pb-3 text-xs text-[#5E5955] space-y-1 animate-in fade-in">
-                        <p>• <strong>Kathmandu Valley:</strong> Rs. 100 (1–2 days delivery)</p>
-                        <p>• <strong>Outside Valley (Pokhara, Chitwan, etc.):</strong> Rs. 220 (3–5 days)</p>
+                        <p>• <strong>Kathmandu Valley:</strong> Rs. 120 (1 to 2 days)</p>
+                        <p>• <strong>Outside Valley:</strong> Rs. 250 to 300 (can increase) (3 to 7 days)</p>
                         <p>• <strong>Payment Methods:</strong> Cash on Delivery (COD), eSewa QR, Khalti QR, Mobile Banking.</p>
                       </div>
                     )}
@@ -869,25 +848,7 @@ export const ProductDetailModal: React.FC = () => {
                 </div>
 
                 {/* Minimalist Secondary Utilities Row */}
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E8DFD8] text-[11px] text-[#736C65]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const tab = product?.category === 'pearl-necklaces' 
-                        ? 'necklaces' 
-                        : product?.category === 'accessories' 
-                          ? 'rings' 
-                          : 'bags';
-                      openSizeGuideModal(tab);
-                    }}
-                    className="hover:text-[#1C1B1A] flex items-center gap-1 font-medium transition-colors cursor-pointer"
-                  >
-                    <Ruler className="w-3.5 h-3.5 text-[#C5A880]" />
-                    <span>Size Guide</span>
-                  </button>
-
-                  <span className="text-[#D8CFCA]">•</span>
-
+                <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#E8DFD8] text-[11px] text-[#736C65]">
                   <button
                     type="button"
                     onClick={handleCopyProductLink}
@@ -948,9 +909,9 @@ export const ProductDetailModal: React.FC = () => {
                       <Star key={s} className="w-4 h-4 fill-amber-400" />
                     ))}
                   </div>
-                  <span className="text-xs font-bold text-[#1C1B1A]">{product.rating} out of 5</span>
+                  <span className="text-xs font-bold text-[#1C1B1A]">{averageRating} out of 5</span>
                   <span className="text-zinc-300">•</span>
-                  <span className="text-xs text-[#736C65]">{totalSold} verified pieces delivered from Chikamugal</span>
+                  <span className="text-xs text-[#736C65]">{totalSold} verified pieces delivered from Kathmandu, Nepal</span>
                 </div>
               </div>
 
@@ -1027,7 +988,7 @@ export const ProductDetailModal: React.FC = () => {
                       type="text"
                       value={newReviewLocation}
                       onChange={(e) => setNewReviewLocation(e.target.value)}
-                      placeholder="e.g. Chikamugal, Kathmandu / Pokhara"
+                      placeholder="e.g. Kathmandu, Nepal / Pokhara"
                       className="w-full text-xs p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-lg focus:outline-none focus:border-[#C5A880]"
                     />
                   </div>
@@ -1128,7 +1089,7 @@ export const ProductDetailModal: React.FC = () => {
 
             {/* Assurance Footnote */}
             <div className="mt-4 p-3 bg-white/70 rounded-xl border border-[#E8DFD8] flex items-center justify-between text-[11px] text-[#736C65] flex-wrap gap-2">
-              <span>📍 Handcrafted & Dispatched from <strong>Chikamugal, Kathmandu</strong></span>
+              <span>📍 Handcrafted & Dispatched from <strong>Kathmandu, Nepal</strong></span>
               <span>🔄 <strong>Easy Exchange within 24 hrs</strong> of delivery</span>
             </div>
           </div>

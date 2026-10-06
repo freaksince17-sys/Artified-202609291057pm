@@ -7,12 +7,14 @@ import {
   ClipboardCheck,
   Feather,
   Sparkles,
-  Camera
+  Camera,
+  Award
 } from 'lucide-react';
 import { useCart, AppNavTab } from '../context/CartContext';
 import { ProductGrid } from './ProductGrid';
 import { MeetArtisanSection } from './MeetArtisanSection';
 import { LookbookSection } from './LookbookSection';
+import { WorkshopGallery } from './WorkshopGallery';
 import { TikTokShowcase } from './TikTokShowcase';
 import { InstagramShowcase } from './InstagramShowcase';
 import { CraftStoryAndJournal } from './CraftStoryAndJournal';
@@ -33,7 +35,8 @@ const TikTokIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 
 export const TABS_SEQUENCE: TabMeta[] = [
   { id: 'home', label: 'Shop', icon: Home },
-  { id: 'artisan', label: 'Meet the Artisan', icon: Sparkles },
+  { id: 'artisan', label: 'Meet the Founder & Creator', icon: Sparkles },
+  { id: 'workshops', label: 'Workshops', icon: Award },
   { id: 'lookbook', label: 'Lookbook', icon: Camera },
   { id: 'tiktok', label: 'Follow on TikTok', icon: TikTokIcon },
   { id: 'journal', label: 'Follow on Instagram', icon: Instagram },
@@ -123,6 +126,7 @@ export const MainSwipeDeck: React.FC = () => {
       <main className="w-full flex-grow flex flex-col">
         {activeNavTab === 'home' && <ProductGrid />}
         {activeNavTab === 'artisan' && <MeetArtisanSection />}
+        {activeNavTab === 'workshops' && <WorkshopGallery />}
         {activeNavTab === 'lookbook' && <LookbookSection />}
         {activeNavTab === 'tiktok' && <TikTokShowcase />}
         {activeNavTab === 'journal' && <InstagramShowcase />}

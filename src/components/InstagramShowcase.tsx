@@ -560,7 +560,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                 Follow on Instagram
               </h2>
               <p className="text-xs sm:text-sm text-[#736C65] mt-1 max-w-lg">
-                Discover real customer unboxings, slow-motion pearl shine tests, and wedding styling guides straight from our store in Chikamugal, Kathmandu.
+                Discover real customer unboxings, slow-motion pearl shine tests, and wedding styling guides straight from our workshop in Kathmandu, Nepal.
               </p>
             </div>
 
@@ -651,7 +651,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
               Instagram Journal
             </h3>
             <p className="text-xs sm:text-sm text-[#736C65] leading-relaxed mb-6">
-              Connect with us directly on Instagram <span className="font-semibold text-[#1C1B1A]">{instagramHandle}</span> for behind-the-scenes craftsmanship in Chikamugal, Kathmandu, new drops, and customer unboxings.
+              Connect with us directly on Instagram <span className="font-semibold text-[#1C1B1A]">{instagramHandle}</span> for behind-the-scenes craftsmanship in Kathmandu, Nepal, new drops, and customer unboxings.
             </p>
             {isSellerMode && (
               <div className="mb-4">
@@ -708,7 +708,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
           </h3>
 
           <p className="text-xs sm:text-sm text-[#736C65] max-w-md mx-auto leading-relaxed">
-            Stay updated with daily store clips, fresh product drops, customer reviews, and handcrafted pearl creations directly from Chikamugal, Kathmandu.
+            Stay updated with daily store clips, fresh product drops, customer reviews, and handcrafted pearl creations directly from Kathmandu, Nepal.
           </p>
 
           <div className="pt-2 flex items-center justify-center gap-3 flex-wrap">
@@ -867,7 +867,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                     </div>
                     <div>
                       <h4 className="text-xs sm:text-sm font-extrabold text-white tracking-wide">{activeItem.handle || instagramHandle}</h4>
-                      <span className="text-[11px] font-semibold text-amber-200">Store: Chikamugal, Kathmandu</span>
+                      <span className="text-[11px] font-semibold text-amber-200">Kathmandu, Nepal</span>
                     </div>
                   </div>
 
@@ -921,7 +921,7 @@ export const InstagramShowcase: React.FC<InstagramShowcaseProps> = ({ embedded =
                   </button>
 
                   <span className="text-xs font-medium text-slate-300">
-                    Chikamugal Store, Kathmandu
+                    Kathmandu, Nepal
                   </span>
                 </div>
 

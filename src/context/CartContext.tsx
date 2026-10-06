@@ -46,7 +46,7 @@ import {
 import { ArtisanProfileData, getArtisanProfile, saveArtisanProfile, fetchArtisanProfileFromServer } from '../data/artisanProfile';
 import { sanitizeInstagramItemsList } from '../utils/instagramSanitizer';
 
-export type AppNavTab = 'home' | 'artisan' | 'lookbook' | 'tiktok' | 'journal' | 'craft' | 'craft-journal' | 'track' | 'orders';
+export type AppNavTab = 'home' | 'artisan' | 'lookbook' | 'workshops' | 'tiktok' | 'journal' | 'craft' | 'craft-journal' | 'track' | 'orders';
 
 interface CartContextType {
   cart: CartItem[];
@@ -81,6 +81,9 @@ interface CartContextType {
   isReferralOpen: boolean;
   setIsReferralOpen: (val: boolean) => void;
   openReferralModal: () => void;
+  isReferralVisible: boolean;
+  setIsReferralVisible: (val: boolean) => void;
+  toggleReferralVisibility: () => void;
   // Size Guide Modal
   isSizeGuideOpen: boolean;
   setIsSizeGuideOpen: (val: boolean) => void;
@@ -343,8 +346,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [isCompareOpen, setIsCompareOpen] = useState<boolean>(false);
 
-  // Refer a Friend Community Rewards State
+  // Refer a Friend Community Rewards State (Seller can hide or show)
   const [isReferralOpen, setIsReferralOpen] = useState<boolean>(false);
+  const [isReferralVisible, setIsReferralVisible] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('artified_referral_visible');
+      return stored !== null ? stored !== 'false' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleReferralVisibility = () => {
+    setIsReferralVisible((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('artified_referral_visible', String(next));
+      } catch (e) {
+        // ignore
+      }
+      return next;
+    });
+  };
+
   const openReferralModal = () => setIsReferralOpen(true);
 
   // Size Guide Modal State
@@ -639,11 +663,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Instagram Journal & Profile Handle State (Locked-State Pattern against default fallbacks)
   const [instagramItems, setInstagramItems] = useState<InstagramJournalItem[]>(() => {
     try {
+      const deletedIds = JSON.parse(localStorage.getItem('artified_instagram_deleted_ids') || '["ig-1791099498584"]');
       const saved = localStorage.getItem('artified_instagram_journal_items');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const sanitized = sanitizeInstagramItemsList(parsed);
+          const filtered = parsed.filter((it: any) => it.id !== 'ig-1791099498584' && !deletedIds.includes(it.id));
+          const sanitized = sanitizeInstagramItemsList(filtered);
           try {
             localStorage.setItem('artified_instagram_journal_items', JSON.stringify(sanitized));
           } catch {}
@@ -651,7 +677,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch {}
-    return sanitizeInstagramItemsList(DEFAULT_INSTAGRAM_ITEMS);
+    const deletedIds = ['ig-1791099498584'];
+    return sanitizeInstagramItemsList(DEFAULT_INSTAGRAM_ITEMS.filter((it) => !deletedIds.includes(it.id)));
   });
 
   const [instagramHandle, setInstagramHandle] = useState<string>(() => {
@@ -750,7 +777,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then((res) => res.json())
       .then((items) => {
         if (Array.isArray(items) && items.length > 0) {
-          const sanitized = sanitizeInstagramItemsList(items);
+          const deletedIds: string[] = (() => {
+            try {
+              return JSON.parse(localStorage.getItem('artified_instagram_deleted_ids') || '["ig-1791099498584"]');
+            } catch {
+              return ['ig-1791099498584'];
+            }
+          })();
+          const filtered = items.filter((it: any) => it.id !== 'ig-1791099498584' && !deletedIds.includes(it.id));
+          const sanitized = sanitizeInstagramItemsList(filtered);
           setInstagramItems(sanitized);
           try {
             localStorage.setItem('artified_instagram_journal_items', JSON.stringify(sanitized));
@@ -1392,11 +1427,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onSnapshot(
       igCol,
       async (snapshot) => {
+        const deletedIds: string[] = (() => {
+          try {
+            return JSON.parse(localStorage.getItem('artified_instagram_deleted_ids') || '["ig-1791099498584"]');
+          } catch {
+            return ['ig-1791099498584'];
+          }
+        })();
+
         if (!snapshot.empty) {
           const cloudItems: InstagramJournalItem[] = [];
           snapshot.forEach((docSnap: any) => {
             const data = docSnap.data() as InstagramJournalItem;
-            cloudItems.push(data);
+            if (data.id === 'ig-1791099498584' || docSnap.id === 'ig-1791099498584') {
+              // Asynchronously clean up from Firestore
+              deleteDoc(doc(db, 'instagram_journal', docSnap.id)).catch(() => {});
+              return;
+            }
+            if (!deletedIds.includes(data.id) && !deletedIds.includes(docSnap.id)) {
+              cloudItems.push(data);
+            }
           });
           
           if (cloudItems.length > 0) {
@@ -1406,7 +1456,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const localSaved = localStorage.getItem('artified_instagram_journal_items');
               if (localSaved) {
                 const parsed = JSON.parse(localSaved);
-                if (Array.isArray(parsed)) localItems = parsed;
+                if (Array.isArray(parsed)) {
+                  localItems = parsed.filter((it: any) => it.id !== 'ig-1791099498584' && !deletedIds.includes(it.id));
+                }
               }
             } catch {}
 
@@ -1415,16 +1467,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             // 1. Add cloud items first
             cloudItems.forEach((cItem) => {
-              reconciledMap.set(cItem.id, cItem);
+              if (cItem.id !== 'ig-1791099498584' && !deletedIds.includes(cItem.id)) {
+                reconciledMap.set(cItem.id, cItem);
+              }
             });
 
             // 2. Overlay local locked/customized items so user edits are never reverted
             localItems.forEach((lItem) => {
-              const existingCloud = reconciledMap.get(lItem.id);
-              if (lItem.isLocked || !existingCloud) {
-                reconciledMap.set(lItem.id, { ...(existingCloud || {}), ...lItem });
-              } else if (lItem.postUrl && lItem.postUrl !== 'https://www.instagram.com/artified_np/') {
-                reconciledMap.set(lItem.id, { ...existingCloud, ...lItem });
+              if (lItem.id !== 'ig-1791099498584' && !deletedIds.includes(lItem.id)) {
+                const existingCloud = reconciledMap.get(lItem.id);
+                if (lItem.isLocked || !existingCloud) {
+                  reconciledMap.set(lItem.id, { ...(existingCloud || {}), ...lItem });
+                } else if (lItem.postUrl && lItem.postUrl !== 'https://www.instagram.com/artified_np/') {
+                  reconciledMap.set(lItem.id, { ...existingCloud, ...lItem });
+                }
               }
             });
 
@@ -1441,22 +1497,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               '/instagram_videos/DY6OqqfPyJu_cover.jpg'
             ];
 
-            const reconciledList = Array.from(reconciledMap.values()).map((it, idx) => {
-              const assignedVid = signatureVideos[idx % signatureVideos.length];
-              const assignedCover = signatureCovers[idx % signatureCovers.length];
+            const reconciledList = Array.from(reconciledMap.values())
+              .filter((it) => it.id !== 'ig-1791099498584' && !deletedIds.includes(it.id))
+              .map((it, idx) => {
+                const assignedVid = signatureVideos[idx % signatureVideos.length];
+                const assignedCover = signatureCovers[idx % signatureCovers.length];
 
-              let finalVid = it.videoUrl?.trim();
-              if (!finalVid) {
-                finalVid = assignedVid;
-              }
+                let finalVid = it.videoUrl?.trim();
+                if (!finalVid) {
+                  finalVid = assignedVid;
+                }
 
-              let finalCover = it.thumbnail?.trim();
-              if (!finalCover) {
-                finalCover = assignedCover;
-              }
+                let finalCover = it.thumbnail?.trim();
+                if (!finalCover) {
+                  finalCover = assignedCover;
+                }
 
-              return { ...it, videoUrl: finalVid, thumbnail: finalCover };
-            });
+                return { ...it, videoUrl: finalVid, thumbnail: finalCover };
+              });
             if (reconciledList.length > 0) {
               setInstagramItems(reconciledList);
               try {
@@ -1473,12 +1531,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (saved) {
               const parsed = JSON.parse(saved);
               if (Array.isArray(parsed) && parsed.length > 0) {
-                existingLocal = parsed;
+                existingLocal = parsed.filter((it: any) => it.id !== 'ig-1791099498584' && !deletedIds.includes(it.id));
               }
             }
           } catch {}
 
-          const listToSeed = existingLocal.length > 0 ? existingLocal : DEFAULT_INSTAGRAM_ITEMS;
+          const listToSeed = existingLocal.length > 0 
+            ? existingLocal 
+            : DEFAULT_INSTAGRAM_ITEMS.filter((it) => it.id !== 'ig-1791099498584' && !deletedIds.includes(it.id));
           setInstagramItems(listToSeed);
         }
       },
@@ -1985,6 +2045,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteInstagramItem = async (id: string) => {
+    // Record in deleted IDs list so it is never resurrected from any stale snapshot or network response
+    try {
+      const deletedIds: string[] = JSON.parse(localStorage.getItem('artified_instagram_deleted_ids') || '["ig-1791099498584"]');
+      if (!deletedIds.includes(id)) {
+        deletedIds.push(id);
+        localStorage.setItem('artified_instagram_deleted_ids', JSON.stringify(deletedIds));
+      }
+    } catch {}
+
     setInstagramItems((prev) => {
       const next = prev.filter((item) => item.id !== id);
       try {
@@ -2284,7 +2353,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const calculatedDiscount = Math.min(subtotal, 250);
       setDiscount(calculatedDiscount);
       setPromoCode(clean);
-      setPromoSuccess(`Patron voucher applied (-Rs. 250)`);
+      setPromoSuccess(`Special member voucher applied (-Rs. 250)`);
       setPromoError(null);
     } else if (clean === 'PEARL100') {
       const calculatedDiscount = Math.min(subtotal, 100);
@@ -2308,7 +2377,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const calculatedDiscount = Math.min(subtotal, 50);
       setDiscount(calculatedDiscount);
       setPromoCode(clean);
-      setPromoSuccess(`Welcome Patron voucher applied (-Rs. 50)`);
+      setPromoSuccess(`Welcome voucher applied (-Rs. 50)`);
       setPromoError(null);
     } else if (clean === 'REFER250' || clean.startsWith('REFER')) {
       const calculatedDiscount = Math.min(subtotal, 250);
@@ -2513,6 +2582,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isReferralOpen,
         setIsReferralOpen,
         openReferralModal,
+        isReferralVisible,
+        setIsReferralVisible,
+        toggleReferralVisibility,
         // Size Guide Modal
         isSizeGuideOpen,
         setIsSizeGuideOpen,

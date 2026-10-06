@@ -13,12 +13,15 @@ import {
   RefreshCw,
   QrCode,
   KeyRound,
-  Check
+  Check,
+  Award,
+  Gift
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { SellerPaymentSettingsModal } from './SellerPaymentSettingsModal';
 import { SellerChangePasswordModal } from './SellerChangePasswordModal';
 import { ArtisanProfileEditModal } from './ArtisanProfileEditModal';
+import { UnifiedMasterclassModal } from './UnifiedMasterclassModal';
 
 export const SellerToolbar: React.FC = () => {
   const { 
@@ -36,7 +39,9 @@ export const SellerToolbar: React.FC = () => {
     openReviewsManager,
     setIsWebsiteExportOpen,
     isDataSyncing,
-    triggerCloudSync
+    triggerCloudSync,
+    isReferralVisible,
+    toggleReferralVisibility
   } = useCart();
 
   const [isMinimized, setIsMinimized] = useState(false);
@@ -45,6 +50,7 @@ export const SellerToolbar: React.FC = () => {
   const [isPaymentSettingsOpen, setIsPaymentSettingsOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isArtisanProfileOpen, setIsArtisanProfileOpen] = useState(false);
+  const [isWorkshopModalOpen, setIsWorkshopModalOpen] = useState(false);
 
   // Ensure persistent localStorage tokens are purged so website never opens with seller mode for visitors
   useEffect(() => {
@@ -164,10 +170,20 @@ export const SellerToolbar: React.FC = () => {
               type="button"
               onClick={() => setIsArtisanProfileOpen(true)}
               className="w-full py-1.5 px-2.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-white/10"
-              title="Edit Sahina Shrestha's biography, quotes, photos, and pillars"
+              title="Edit Sahina Shrestha's biography, quotes, and photos"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Edit "Meet the Artisan" Profile</span>
+              <span>Edit "Meet the Founder & Creator" Profile</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsWorkshopModalOpen(true)}
+              className="w-full py-1.5 px-2.5 bg-[#C5A880]/20 hover:bg-[#C5A880]/30 text-[#E6CA9E] text-[11px] font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-[#C5A880]/40"
+              title="Edit masterclass details, syllabus, schedule, and upload photos/videos saved to public/workshops"
+            >
+              <Award className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>Manage Masterclasses & Media</span>
             </button>
 
             <button
@@ -196,6 +212,26 @@ export const SellerToolbar: React.FC = () => {
             >
               <Package className="w-3.5 h-3.5 text-amber-300" />
               <span>Export Complete Website & Products</span>
+            </button>
+
+            {/* Refer a Friend Visibility Toggle for Seller */}
+            <button
+              type="button"
+              onClick={toggleReferralVisibility}
+              className={`w-full py-1.5 px-2.5 text-[11px] font-semibold rounded-lg flex items-center justify-between gap-1.5 transition-colors border ${
+                isReferralVisible
+                  ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40'
+                  : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-400 border-zinc-700'
+              }`}
+              title="Click to toggle 'Refer a Friend' visibility on storefront"
+            >
+              <div className="flex items-center gap-1.5">
+                <Gift className="w-3.5 h-3.5" />
+                <span>Refer to Friend</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/40 font-bold uppercase tracking-wider">
+                {isReferralVisible ? 'Visible' : 'Hidden'}
+              </span>
             </button>
 
             {/* On-Demand Manual Cloud Sync Button */}
@@ -263,6 +299,12 @@ export const SellerToolbar: React.FC = () => {
       <ArtisanProfileEditModal
         isOpen={isArtisanProfileOpen}
         onClose={() => setIsArtisanProfileOpen(false)}
+      />
+
+      {/* Unified Masterclass & Media Management Modal */}
+      <UnifiedMasterclassModal
+        isOpen={isWorkshopModalOpen}
+        onClose={() => setIsWorkshopModalOpen(false)}
       />
     </aside>
   );

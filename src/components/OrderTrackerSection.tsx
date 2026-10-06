@@ -16,7 +16,6 @@ import { getTrackedOrder, updateOrderPhase, normalizeOrderId, sanitizeOrderItems
 import { TrackedOrderData, OrderProductionPhase } from '../types';
 import { useCart } from '../context/CartContext';
 import { OrderProgressManagerModal } from './OrderProgressManagerModal';
-import { CustomerReviews } from './CustomerReviews';
 import { subscribeToTrackedOrder } from '../services/orderTrackingService';
 import { getRealProductImage, CAVIAR_PEARL_BAG_IMAGE } from '../utils/productImages';
 
@@ -151,7 +150,7 @@ export const OrderTrackerSection: React.FC = () => {
             Track Your Order
           </h1>
           <p className="text-xs text-[#5E5955] dark:text-[#A69E96] mt-0.5 leading-relaxed">
-            Follow the handcrafting progress of your pearl piece in our Chikamugal workshop, handcrafted by Sahina Shrestha through packaging and express dispatch to your doorstep.
+            Follow the handcrafting progress of your pearl piece in our Kathmandu workshop, handcrafted by Sahina Shrestha through packaging and express dispatch to your doorstep.
           </p>
         </div>
 
@@ -227,7 +226,7 @@ export const OrderTrackerSection: React.FC = () => {
                 </p>
                 <p className="text-[11px] text-[#C5A880] mt-0.5 font-semibold flex items-center gap-1">
                   <User className="w-3.5 h-3.5" />
-                  <span>Handcrafted by: <strong>Sahina Shrestha</strong> (Artified Chikamugal Workshop)</span>
+                  <span>Handcrafted by: <strong>Sahina Shrestha</strong> (Artified Kathmandu Workshop)</span>
                 </p>
               </div>
 
@@ -297,13 +296,13 @@ export const OrderTrackerSection: React.FC = () => {
                 <Sparkles className="w-4 h-4 text-[#C5A880] shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-[11px] font-bold text-[#1C1B1A] dark:text-[#F5F2EB] uppercase tracking-wider">
-                    Chikamugal Workshop Craft Update
+                    Kathmandu Workshop Craft Update
                   </h4>
                   <p className="text-xs text-[#5E5955] dark:text-[#C2BBB2] mt-0.5 leading-relaxed">
                     {trackedOrder.liveCraftNotes}
                   </p>
                   <p className="text-[10px] text-[#8C7A6B] dark:text-[#A69E96] mt-0.5 font-medium">
-                    Handcrafted at Artified Workshop, Chikamugal, Kathmandu
+                    Handcrafted at Artified Workshop, Kathmandu, Nepal
                   </p>
                 </div>
               </div>
@@ -403,11 +402,6 @@ export const OrderTrackerSection: React.FC = () => {
           initialOrderId={trackedOrder?.orderId}
         />
 
-      </div>
-
-      {/* Customer Reviews Section transferred to bottom of Track Order */}
-      <div className="mt-8 border-t border-[#E8DFD8] dark:border-[#2D2B28]">
-        <CustomerReviews />
       </div>
     </section>
   );

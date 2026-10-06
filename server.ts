@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { PRODUCTS, DEFAULT_INSTAGRAM_ITEMS, DEFAULT_INSTAGRAM_HANDLE, DEFAULT_INSTAGRAM_PROFILE_URL, TIKTOK_REELS, DEFAULT_CRAFT_STORY } from './src/data/products.ts';
 import { DEFAULT_ARTISAN_PROFILE } from './src/data/artisanProfile.ts';
 import { generateSitemapXml } from './src/utils/sitemapGenerator.ts';
@@ -23,6 +24,8 @@ async function startServer() {
   const craftStoryJsonPath = path.resolve(dataDir, 'craft_story.json');
   const artisanProfileJsonPath = path.resolve(dataDir, 'artisan_profile.json');
   const trackedOrdersJsonPath = path.resolve(dataDir, 'tracked_orders.json');
+  const workshopMediaJsonPath = path.resolve(dataDir, 'workshop_media.json');
+  const workshopGroupsJsonPath = path.resolve(dataDir, 'workshop_groups.json');
 
   // GET /sitemap.xml - Dynamic Google Search & Image Sitemap
   app.get('/sitemap.xml', (_req, res) => {
@@ -196,14 +199,26 @@ async function startServer() {
     }
   });
 
-  // GET /api/artisan-profile - Retrieve permanently saved artisan profile
+  // GET /api/artisan-profile - Retrieve permanently saved founder & creator profile
   app.get('/api/artisan-profile', (_req, res) => {
     try {
       if (fs.existsSync(artisanProfileJsonPath)) {
         const raw = fs.readFileSync(artisanProfileJsonPath, 'utf-8');
         const data = JSON.parse(raw);
         if (data && typeof data === 'object') {
-          return res.json({ ...DEFAULT_ARTISAN_PROFILE, ...data });
+          const cleaned = {
+            ...DEFAULT_ARTISAN_PROFILE,
+            ...data,
+            headline: 'Meet the Founder & Creator: Sahina Shrestha',
+            subheadline: 'From Childhood Passion to Creative Journey',
+            atelierLocation: 'Kathmandu, Nepal',
+            artisanRole: 'Founder & Creator',
+            stat1Value: '',
+            stat1Label: '',
+            stat2Value: '',
+            stat2Label: '',
+          };
+          return res.json(cleaned);
         }
       }
       return res.json(DEFAULT_ARTISAN_PROFILE);
@@ -479,11 +494,275 @@ async function startServer() {
     }
   });
 
+  // Workshop directory for storing user-uploaded masterclass photos and videos
+  const workshopsDir = path.resolve(process.cwd(), 'public/workshops');
+  if (!fs.existsSync(workshopsDir)) {
+    fs.mkdirSync(workshopsDir, { recursive: true });
+  }
+
+  // GET /api/workshop-files - List all physical files stored in public/workshops/
+  app.get('/api/workshop-files', (_req, res) => {
+    try {
+      if (!fs.existsSync(workshopsDir)) {
+        return res.json({ success: true, files: [] });
+      }
+      const files = fs.readdirSync(workshopsDir).map((f) => {
+        const fullPath = path.join(workshopsDir, f);
+        const stats = fs.statSync(fullPath);
+        const isVid = /\.(mp4|mov|webm|m4v)$/i.test(f);
+        const isThumb = f.includes('_thumb.');
+        return {
+          filename: f,
+          url: `/workshops/${encodeURIComponent(f)}`,
+          size: stats.size,
+          type: isVid ? 'video' : 'image',
+          isThumbnail: isThumb,
+          createdAt: stats.birthtime,
+          modifiedAt: stats.mtime
+        };
+      }).filter((f) => !f.isThumbnail);
+      return res.json({ success: true, files });
+    } catch (err: any) {
+      console.error('Error listing workshop files:', err);
+      return res.status(500).json({ error: err.message || 'Failed to list workshop files' });
+    }
+  });
+
+  // POST /api/workshop-upload - Directly saves uploaded photo or video to public/workshops/
+  app.post('/api/workshop-upload', async (req, res) => {
+    try {
+      const { fileBase64, filename, type, groupId, title, caption, craftTechnique, thumbnailBase64 } = req.body;
+      if (!fileBase64 || typeof fileBase64 !== 'string') {
+        return res.status(400).json({ error: 'Missing fileBase64 payload' });
+      }
+
+      if (!fs.existsSync(workshopsDir)) {
+        fs.mkdirSync(workshopsDir, { recursive: true });
+      }
+
+      // Determine extension and decode base64
+      let ext = 'jpg';
+      let buffer: Buffer;
+
+      const dataUrlMatches = fileBase64.match(/^data:([a-zA-Z0-9_\-\/+]+);base64,(.+)$/);
+      if (dataUrlMatches) {
+        const mime = dataUrlMatches[1].toLowerCase();
+        buffer = Buffer.from(dataUrlMatches[2], 'base64');
+        if (mime.includes('video/mp4')) ext = 'mp4';
+        else if (mime.includes('video/quicktime')) ext = 'mov';
+        else if (mime.includes('video/webm')) ext = 'webm';
+        else if (mime.includes('png')) ext = 'png';
+        else if (mime.includes('webp')) ext = 'webp';
+        else if (mime.includes('gif')) ext = 'gif';
+        else ext = 'jpeg';
+      } else {
+        const cleanBase64 = fileBase64.replace(/^data:[^;]+;base64,/, '');
+        buffer = Buffer.from(cleanBase64, 'base64');
+        if (filename && filename.includes('.')) {
+          ext = filename.split('.').pop()?.toLowerCase() || (type === 'video' ? 'mp4' : 'jpg');
+        } else {
+          ext = type === 'video' ? 'mp4' : 'jpg';
+        }
+      }
+
+      const origName = filename ? filename.replace(/\.[^/.]+$/, '') : `workshop_${Date.now()}`;
+      const cleanBaseName = origName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+      const savedFilename = `${cleanBaseName}.${ext}`;
+      const targetPath = path.join(workshopsDir, savedFilename);
+
+      fs.writeFileSync(targetPath, buffer);
+      console.log(`[Workshop Upload] Saved file directly to: public/workshops/${savedFilename} (${buffer.length} bytes)`);
+
+      const publicUrl = `/workshops/${savedFilename}`;
+      let thumbUrl = publicUrl;
+
+      // Handle thumbnail if video
+      const isVideo = type === 'video' || ['mp4', 'mov', 'webm'].includes(ext);
+      if (isVideo) {
+        const thumbFilename = `${cleanBaseName}_thumb.jpg`;
+        const thumbPath = path.join(workshopsDir, thumbFilename);
+
+        if (thumbnailBase64 && typeof thumbnailBase64 === 'string') {
+          try {
+            const rawThumb = thumbnailBase64.replace(/^data:[^;]+;base64,/, '');
+            fs.writeFileSync(thumbPath, Buffer.from(rawThumb, 'base64'));
+            thumbUrl = `/workshops/${thumbFilename}`;
+          } catch (tErr) {
+            console.warn('Could not save client thumbnail:', tErr);
+          }
+        } else {
+          // Attempt ffmpeg extraction
+          try {
+            const { execSync } = await import('child_process');
+            execSync(`ffmpeg -y -ss 00:00:00.500 -i "${targetPath}" -vframes 1 -q:v 2 "${thumbPath}"`, { stdio: 'ignore' });
+            if (fs.existsSync(thumbPath)) {
+              thumbUrl = `/workshops/${thumbFilename}`;
+            }
+          } catch (ffErr) {
+            console.warn('Notice: ffmpeg thumbnail generation note for workshop video:', ffErr);
+          }
+        }
+      }
+
+      // Generate workshop media item
+      const itemId = `ws_media_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const cleanTitle = title || origName.replace(/[_-]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const newItem = {
+        id: itemId,
+        groupId: groupId || 'macrame',
+        type: isVideo ? 'video' : 'image',
+        title: cleanTitle,
+        workshopTitle: groupId === 'macrame' ? 'Macrame Handcrafting Masterclass' : (groupId === 'wastepipe-sunflower' ? 'Waste Pipe to Sunflower Making Workshop' : (groupId === 'pearl-bag' ? 'Pearl Bag Making Masterclass' : 'Artisan Masterclass')),
+        url: publicUrl,
+        thumbnailUrl: thumbUrl,
+        caption: caption || `${cleanTitle} session recorded at Kathmandu Workshop, Nepal.`,
+        craftTechnique: craftTechnique || 'Handcrafting Technique',
+        location: 'Kathmandu, Nepal',
+        date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        instructor: 'Sahina Shrestha',
+        tags: ['Artisan Masterclass', 'Kathmandu Atelier'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Persist to workshop_media.json
+      let allItems: any[] = [];
+      if (fs.existsSync(workshopMediaJsonPath)) {
+        try {
+          allItems = JSON.parse(fs.readFileSync(workshopMediaJsonPath, 'utf-8'));
+          if (!Array.isArray(allItems)) allItems = [];
+        } catch {
+          allItems = [];
+        }
+      }
+      allItems = [newItem, ...allItems.filter((i) => i.id !== newItem.id)];
+      fs.writeFileSync(workshopMediaJsonPath, JSON.stringify(allItems, null, 2), 'utf-8');
+
+      return res.json({
+        success: true,
+        item: newItem,
+        url: publicUrl,
+        thumbnailUrl: thumbUrl,
+        filename: savedFilename
+      });
+    } catch (err: any) {
+      console.error('Error in /api/workshop-upload:', err);
+      return res.status(500).json({ error: err.message || 'Failed to upload workshop media' });
+    }
+  });
+
+  // GET /api/workshop-media - Retrieve saved custom workshop media items
+  app.get('/api/workshop-media', (_req, res) => {
+    try {
+      if (fs.existsSync(workshopMediaJsonPath)) {
+        const raw = fs.readFileSync(workshopMediaJsonPath, 'utf-8');
+        const items = JSON.parse(raw);
+        if (Array.isArray(items)) {
+          return res.json({ success: true, items });
+        }
+      }
+      return res.json({ success: true, items: [] });
+    } catch (err: any) {
+      console.error('Error reading workshop_media.json:', err);
+      return res.json({ success: true, items: [] });
+    }
+  });
+
+  // POST /api/workshop-media - Save all workshop media items persistently
+  app.post('/api/workshop-media', (req, res) => {
+    try {
+      const items = req.body;
+      if (!Array.isArray(items)) {
+        return res.status(400).json({ error: 'Expected an array of media items' });
+      }
+      fs.writeFileSync(workshopMediaJsonPath, JSON.stringify(items, null, 2), 'utf-8');
+      return res.json({ success: true, items });
+    } catch (err: any) {
+      console.error('Error saving workshop_media.json:', err);
+      return res.status(500).json({ error: err.message || 'Failed to save workshop media' });
+    }
+  });
+
+  // POST /api/workshop-media/delete - Delete a workshop media item from server disk
+  app.post('/api/workshop-media/delete', (req, res) => {
+    try {
+      const { id, deleteFile, filename, url } = req.body;
+      if (!id && !filename && !url) {
+        return res.status(400).json({ error: 'Missing media item identifier' });
+      }
+      let allItems: any[] = [];
+      if (fs.existsSync(workshopMediaJsonPath)) {
+        try {
+          allItems = JSON.parse(fs.readFileSync(workshopMediaJsonPath, 'utf-8'));
+          if (!Array.isArray(allItems)) allItems = [];
+        } catch {
+          allItems = [];
+        }
+      }
+
+      const itemToDelete = allItems.find((i) => i.id === id || (url && i.url === url) || (filename && i.url?.includes(filename)));
+      allItems = allItems.filter((i) => i.id !== id && (!url || i.url !== url));
+      fs.writeFileSync(workshopMediaJsonPath, JSON.stringify(allItems, null, 2), 'utf-8');
+
+      // Optionally delete physical file if requested
+      if (deleteFile) {
+        const targetFilename = filename || (itemToDelete && itemToDelete.url ? path.basename(itemToDelete.url) : (url ? path.basename(url) : (typeof id === 'string' && id.includes('.') ? id : null)));
+        if (targetFilename) {
+          const filePath = path.join(workshopsDir, targetFilename);
+          if (fs.existsSync(filePath)) {
+            try {
+              fs.unlinkSync(filePath);
+              console.log(`Deleted physical workshop file: ${filePath}`);
+            } catch (uErr) {
+              console.warn('Notice: unlink failed', uErr);
+            }
+          }
+        }
+      }
+
+      return res.json({ success: true, id });
+    } catch (err: any) {
+      console.error('Error in /api/workshop-media/delete:', err);
+      return res.status(500).json({ error: err.message || 'Failed to delete media item' });
+    }
+  });
+
+  // GET /api/workshop-groups - Retrieve masterclass groups
+  app.get('/api/workshop-groups', (_req, res) => {
+    try {
+      if (fs.existsSync(workshopGroupsJsonPath)) {
+        const raw = fs.readFileSync(workshopGroupsJsonPath, 'utf-8');
+        const groups = JSON.parse(raw);
+        if (Array.isArray(groups) && groups.length > 0) {
+          return res.json({ success: true, groups });
+        }
+      }
+      return res.json({ success: true, groups: [] });
+    } catch (err: any) {
+      console.error('Error reading workshop_groups.json:', err);
+      return res.json({ success: true, groups: [] });
+    }
+  });
+
+  // POST /api/workshop-groups - Save masterclass groups persistently to server disk
+  app.post('/api/workshop-groups', (req, res) => {
+    try {
+      const groups = req.body;
+      if (!Array.isArray(groups)) {
+        return res.status(400).json({ error: 'Expected an array of groups' });
+      }
+      fs.writeFileSync(workshopGroupsJsonPath, JSON.stringify(groups, null, 2), 'utf-8');
+      return res.json({ success: true, groups });
+    } catch (err: any) {
+      console.error('Error saving workshop_groups.json:', err);
+      return res.status(500).json({ error: err.message || 'Failed to save workshop groups' });
+    }
+  });
+
   const sellerSettingsJsonPath = path.resolve(process.cwd(), 'src/data/seller_settings.json');
 
   // Helper for server-side password hashing
   const hashSellerPasscode = (pass: string, salt: string) => {
-    const crypto = require('crypto');
     return crypto.createHash('sha256').update(`${salt}:${pass.trim()}`).digest('hex');
   };
 
@@ -1047,11 +1326,11 @@ async function startServer() {
       // Exact verified presets ONLY for the 4 known signature posts
       if (shortcode === 'DdjhhazvaRr') {
         headline = 'Tourmaline Gemstone & Baroque Pearl Necklace ✨';
-        caption = 'Me: When my husband says no to the necklace 😭 Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our Chikamugal store, Kathmandu.\n\n✨ Pure Nepal Handcrafted\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap to shop or DM on Instagram #artified_np #smallbusiness #necklace #pearls';
+        caption = 'Me: When my husband says no to the necklace 😭 Individually knotted natural freshwater baroque pearls with genuine tourmaline gemstones. Handcrafted at our workshop in Kathmandu, Nepal.\n\n✨ Pure Nepal Handcrafted\n📍 Store: Kathmandu, Nepal\n🛍️ Tap to shop or DM on Instagram #artified_np #smallbusiness #necklace #pearls';
         thumbnail = thumbnail || '/instagram_videos/DdjhhazvaRr_cover.jpg';
       } else if (shortcode === 'DdMRgKdP4HK') {
         headline = 'Some glimpse of todays Macrame Workshop ✨';
-        caption = "Behind the scenes at today's macrame craft workshop in Kathmandu! Each knot and weave is created by hand with natural cord and ancestral techniques.\n\n✨ 100% Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ Tap or double-click to view on Instagram #artified_np #macrame #workshop #handmade";
+        caption = "Behind the scenes at today's macrame craft workshop in Kathmandu! Each knot and weave is created by hand with natural cord and ancestral techniques.\n\n✨ 100% Handcrafted in Kathmandu, Nepal\n📍 Store: Kathmandu, Nepal\n🛍️ Tap or double-click to view on Instagram #artified_np #macrame #workshop #handmade";
         thumbnail = thumbnail || '/instagram_videos/DdMRgKdP4HK_cover.jpg';
       } else if (shortcode === 'DdIUMC4BqFr') {
         headline = 'Macrame Workshop Happening This Saturday !!! ✨';
@@ -1059,7 +1338,7 @@ async function startServer() {
         thumbnail = thumbnail || '/instagram_videos/DdIUMC4BqFr_cover.jpg';
       } else if (shortcode === 'DY6OqqfPyJu') {
         headline = 'Packing a Special Order for Pyarii Maya 🌸';
-        caption = "Let's pack a very special order for her! 🌸 Packing the handcrafted pearl bag and custom necklace for someone's pyarii Maya ❤️ Individually packed with love at our Chikamugal atelier.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Chikamugal, Kathmandu\n🛍️ DM to purchase this for your pyarii maya! #artified_np #pyariimaya #pearlbag #smallbusiness";
+        caption = "Let's pack a very special order for her! 🌸 Packing the handcrafted pearl bag and custom necklace for someone's pyarii Maya ❤️ Individually packed with love at our Kathmandu workshop.\n\n✨ Handcrafted in Kathmandu, Nepal\n📍 Store: Kathmandu, Nepal\n🛍️ DM to purchase this for your pyarii maya! #artified_np #pyariimaya #pearlbag #smallbusiness";
         thumbnail = thumbnail || '/instagram_videos/DY6OqqfPyJu_cover.jpg';
       }
 
@@ -1153,6 +1432,24 @@ async function startServer() {
     const filename = path.basename(req.params.filename);
     const filePath = path.resolve(process.cwd(), 'public', 'instagram_videos', filename);
     if (filename.endsWith('.mp4')) {
+      return streamVideoFile(req, res, filePath);
+    }
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath, (err) => {
+        if (err && !res.headersSent) {
+          res.status(404).end();
+        }
+      });
+    }
+    return res.status(404).end();
+  });
+
+  // Dedicated route to stream video and image files directly from public/workshops/ with Range support
+  app.get('/workshops/:filename', (req, res) => {
+    const filename = path.basename(req.params.filename);
+    const filePath = path.resolve(process.cwd(), 'public', 'workshops', filename);
+    const lower = filename.toLowerCase();
+    if (lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.webm') || lower.endsWith('.m4v')) {
       return streamVideoFile(req, res, filePath);
     }
     if (fs.existsSync(filePath)) {
@@ -1457,7 +1754,12 @@ async function startServer() {
   let viteInstance: any = null;
   if (!isProd) {
     const vite = await createViteServer({
-      server: { middlewareMode: true, port: Number(port), host: '0.0.0.0' },
+      server: {
+        middlewareMode: true,
+        port: Number(port),
+        host: '0.0.0.0',
+        allowedHosts: true,
+      },
       appType: 'spa',
     });
     viteInstance = vite;

@@ -133,7 +133,7 @@ export const SocialShowcase: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-2 text-[#C5A880] text-xs uppercase tracking-[0.25em] font-semibold mb-2">
               <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>CHIKAMUGAL CRAFT WORKSHOP • KATHMANDU</span>
+              <span>KATHMANDU CRAFT WORKSHOP • NEPAL</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl text-[#1C1B1A] font-semibold tracking-tight">
               Seen in Motion & The Visual Journal

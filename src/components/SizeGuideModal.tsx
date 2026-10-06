@@ -55,13 +55,13 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider border border-[#D4AF37]/30">
               <Ruler className="w-3 h-3" />
-              <span>Artisanal Fit & Sizing Guide</span>
+              <span>Handcrafted Fit & Sizing Guide</span>
             </div>
             <h2 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white">
               Measurements & Fit Guide
             </h2>
             <p className="text-xs text-[#A69E96]">
-              Handcrafted in Chikamugal, Kathmandu • Custom lengths available on order
+              Handcrafted in Kathmandu, Nepal • Custom lengths available on order
             </p>
           </div>
 
@@ -308,7 +308,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({
                 <ShoppingBag className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
                 <div className="text-xs space-y-0.5">
                   <p className="font-bold text-[#1C1B1A]">
-                    Engineered Structural Capacity (Chikamugal Atelier)
+                    Engineered Structural Capacity (Kathmandu Atelier)
                   </p>
                   <p className="text-[#5E5955] leading-relaxed">
                     Woven with 7-strand nylon-coated stainless steel core. Can comfortably support up to 1.5 kg without warping or sagging.
@@ -389,7 +389,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({
         {/* Footer */}
         <div className="p-3.5 bg-white border-t border-[#E8DFD8] flex items-center justify-between text-xs">
           <span className="text-[11px] text-[#736C65]">
-            Artified Nepal • Chikamugal, Kathmandu
+            Artified Nepal • Kathmandu, Nepal
           </span>
           <button
             type="button"

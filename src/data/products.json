@@ -23,7 +23,7 @@
     "originalPrice": 3000,
     "weight": "",
     "subtitle": "Elegant, versatile top-handle pearl beaded bag offering timeless everyday sophistication.",
-    "rating": 4.92,
+    "rating": 4.8,
     "isHandmade": true,
     "reviewsCount": 15,
     "title": "Caviar Pearl Bag",
@@ -47,7 +47,7 @@
     "soldCount": 79,
     "weight": "",
     "description": "This elegant multi-strand necklace features smooth, lustrous off-white faux pearls arranged in cascading tiers against a white jewelry display bust. The design incorporates varied bead sizes, blending delicate smaller beads with prominent, larger pearls to create a dynamic sense of depth, texture, and sophisticated vintage glamour.",
-    "rating": 4.8,
+    "rating": 4.7,
     "leadTime": "Crafted & dispatched in 1–2 business days",
     "dimensions": "",
     "materials": [
@@ -77,7 +77,7 @@
     "originalPrice": 3000,
     "dimensions": "",
     "soldCount": 104,
-    "rating": 5,
+    "rating": 4.6,
     "onlineSalesCount": 0,
     "stockCount": 5,
     "price": 2499,
@@ -119,35 +119,35 @@
         "date": "3 days ago",
         "id": "maya-aurelia-pearl-bag-rev-1",
         "verified": true,
-        "location": "Chikamugal, Kathmandu",
-        "rating": 5,
-        "comment": "Visited their Chikamugal store in Kathmandu to see the pearl bags in person. The beadwork on this handbag is incredibly rigid and sturdy, perfectly holds my iPhone Pro, lipstick, compact, and cards. Everyone at my cousin’s wedding reception at Soaltee asked where I got it!",
+        "location": "Kathmandu, Nepal",
+        "rating": 4.5,
+        "comment": "Visited their Kathmandu, Nepal store in Kathmandu to see the pearl bags in person. The beadwork on this handbag is incredibly rigid and sturdy, perfectly holds my iPhone Pro, lipstick, compact, and cards. Everyone at my cousin’s wedding reception at Soaltee asked where I got it!",
         "author": "Shraddha Shrestha"
       },
       {
         "comment": "Super fast delivery in Kathmandu valley! Also very reassuring that they offer easy exchange within 24 hrs. Handcrafted quality is 10/10. The magnetic lock snaps shut firmly and the weight feels authentic and luxurious.",
-        "location": "Jhamsikhel, Lalitpur",
+        "location": "Kathmandu, Nepal",
         "verified": true,
         "id": "maya-aurelia-pearl-bag-rev-2",
         "date": "1 week ago",
         "author": "Pooja Shakya",
-        "rating": 5
+        "rating": 4.8
       },
       {
         "id": "maya-aurelia-pearl-bag-rev-3",
         "verified": true,
-        "location": "Baluwatar, Kathmandu",
+        "location": "Kathmandu, Nepal",
         "date": "2 weeks ago",
         "author": "Karuna Bajracharya",
-        "comment": "Dispatched from their Chikamugal store in pristine condition. The satin lining and custom dust pouch make unboxing feel like international designer luxury. Carried it with a crimson raw silk saree.",
-        "rating": 5
+        "comment": "Dispatched from their Kathmandu, Nepal store in pristine condition. The satin lining and custom dust pouch make unboxing feel like international designer luxury. Carried it with a crimson raw silk saree.",
+        "rating": 4.4
       },
       {
         "comment": "Loved the prompt WhatsApp support when I asked for same-day delivery for a family celebration. The berry pearls catch banquet lights so gracefully, and the arched handle sits comfortably on the arm.",
         "author": "Barsha Pandey",
-        "rating": 4.9,
+        "rating": 4.8,
         "id": "maya-aurelia-pearl-bag-rev-4",
-        "location": "Sanepa, Lalitpur",
+        "location": "Kathmandu, Nepal",
         "date": "3 weeks ago",
         "verified": true
       }
@@ -182,13 +182,13 @@
       "New design of bag"
     ],
     "dimensions": "",
-    "rating": 5,
+    "rating": 4.5,
     "inStock": true,
     "isHandmade": true,
     "description": "Introducing the elegant Pearl Beaded Handbag, a stylish accessory for any special occasion. This handbag features a secure lockable design with magnetic snaps for easy access. The exquisite pearl beading adds a touch of sophistication, making it a perfect choice for formal events or evening gatherings. Its compact size and versatile style make it an ideal companion for women who appreciate both fashion and functionality. Elevate your ensemble with this charming Pearl Beaded Handbag and make a statement wherever you go"
   },
   {
-    "rating": 4.9,
+    "rating": 4.8,
     "title": "Three Layer Pearl Necklace with Earrings",
     "materials": [
       "Three Layers Necklace with a pair of Earring.",
@@ -256,7 +256,7 @@
     "isNewArrival": false,
     "stockCount": 8,
     "category": "pearl-necklaces",
-    "rating": 5,
+    "rating": 4.7,
     "reviewsCount": 29,
     "weight": "",
     "soldCount": 77,
@@ -284,7 +284,7 @@
     "isHandmade": true,
     "price": 599,
     "stockCount": 8,
-    "rating": 5,
+    "rating": 4.4,
     "title": "3 Layer Pearl Necklace",
     "materials": [
       "Suitable for all occasions, versatile and elegant.",
@@ -302,7 +302,7 @@
   },
   {
     "originalPrice": 700,
-    "rating": 5,
+    "rating": 4.6,
     "careNotes": [
       "Avoid direct perfumes or alcohol sprays on pearls.",
       "Wipe gently with soft cloth after wearing.",
@@ -361,7 +361,7 @@
     ],
     "isNewArrival": false,
     "weight": "",
-    "rating": 5,
+    "rating": 4.8,
     "dimensions": "",
     "originalPrice": 700,
     "soldCount": 34,
@@ -390,7 +390,7 @@
     ],
     "isBestSeller": false,
     "subtitle": "Elegant four-layer pearl necklace, handmade in Nepal for timeless sophistication.",
-    "rating": 5,
+    "rating": 4.5,
     "stockCount": 6,
     "description": "Elevate your jewellery collection with this elegant four-layer pearl necklace, thoughtfully handmade in Nepal. Featuring beautifully arranged lustrous pearls in varying sizes, its graceful layered design adds sophistication and timeless charm to any outfit. Crafted with high-quality materials and an adjustable back closure, it offers a comfortable, customizable fit and is perfect for weddings, parties, festive occasions, or adding a refined touch to everyday fashion.",
     "soldCount": 70,
@@ -424,7 +424,7 @@
   },
   {
     "isBestSeller": false,
-    "rating": 5,
+    "rating": 4.7,
     "onlineSalesCount": 0,
     "isNewArrival": false,
     "weight": "",
@@ -492,7 +492,7 @@
       "Versatile and timeless, perfect for weddings, parties, festivals, and everyday elegance."
     ],
     "description": "Elevate your look with this elegant five-layer pearl necklace and matching earrings, thoughtfully handcrafted in Nepal. Featuring beautifully arranged layers of lustrous pearls, this timeless jewellery set adds sophistication to both traditional and modern outfits. The adjustable backside allows you to customize the fit and wear it comfortably for any occasion.",
-    "rating": 4.9,
+    "rating": 4.6,
     "leadTime": "Handmade to order: 2–4 business days",
     "weight": "",
     "inStock": true,
@@ -513,7 +513,7 @@
     "description": "Add a touch of timeless elegance to your look with this stunning layered pearl necklace, beautifully designed for women who appreciate sophisticated style. Crafted with high-quality artificial pearls that offer a lustrous, polished finish, the necklace is carefully strung on durable thread for lasting wear. Its secure and easy-to-use clasp ensures a comfortable fit, making it a versatile accessory for both formal occasions and everyday outfits.",
     "onlineSalesCount": 0,
     "isBestSeller": false,
-    "rating": 5,
+    "rating": 4.8,
     "weight": "",
     "id": "art-1790323549756-24tl6",
     "dimensions": "",
@@ -564,7 +564,7 @@
       "Handcrafted"
     ],
     "onlineSalesCount": 0,
-    "rating": 4,
+    "rating": 4.3,
     "materials": [
       "Matching magnetic heart charms symbolize love, connection, and togetherness.",
       "8mm agate and howlite beads with durable stainless-steel detailing.",
@@ -610,7 +610,7 @@
     "soldCount": 35,
     "stockCount": 4,
     "category": "pearl-necklaces",
-    "rating": 5,
+    "rating": 4.7,
     "title": "Elegant Pearl Beaded Choker"
   },
   {
@@ -618,7 +618,7 @@
     "soldCount": 82,
     "inStock": true,
     "reviewsCount": 31,
-    "rating": 4.9,
+    "rating": 4.6,
     "weight": "",
     "tags": [
       "Handcrafted"
@@ -672,7 +672,7 @@
     "isBestSeller": false,
     "onlineSalesCount": 0,
     "isNewArrival": true,
-    "rating": 5,
+    "rating": 4.5,
     "weight": "",
     "dimensions": "",
     "tags": [
@@ -714,7 +714,7 @@
     ],
     "onlineSalesCount": 0,
     "subtitle": "Elegant pearl drop earrings blending golden accents with timeless minimalist charm.",
-    "rating": 4.7,
+    "rating": 4.8,
     "originalPrice": 250,
     "materials": [
       "White pearl and golden bead design for an elegant contrast.",
@@ -729,7 +729,7 @@
     "price": 199
   },
   {
-    "rating": 5,
+    "rating": 4.7,
     "title": "Pearl and Beads Embedded Hand Bag",
     "materials": [
       "Handmade in Nepal",
@@ -795,7 +795,7 @@
     "reviewsCount": 21,
     "description": "Add a touch of timeless elegance to your jewellery collection with this beautifully crafted pearl beaded necklace. Featuring lustrous pearls arranged in a classic design, it effortlessly complements both traditional and modern outfits. Handmade in Nepal, the adjustable backside allows you to customize the length according to your preference, making it a versatile accessory for every occasion.",
     "onlineSalesCount": 0,
-    "rating": 5,
+    "rating": 4.6,
     "id": "art-1790337745190-egjbv",
     "tags": [
       "Handcrafted"
@@ -829,7 +829,7 @@
     "onlineSalesCount": 0,
     "soldCount": 59,
     "description": "Add a touch of timeless elegance to your jewellery collection with this beautifully crafted pearl beaded bracelet. Made in Nepal with authentic materials and detailed craftsmanship, its adjustable design provides a comfortable fit for different wrist sizes. With its classic pearl finish and versatile style, it is suitable for casual outings, formal events, celebrations, and everyday wear at a reasonable price.",
-    "rating": 4.5,
+    "rating": 4.8,
     "id": "art-1790336051475-r3dos",
     "category": "accessories",
     "isHandmade": true,
@@ -857,7 +857,7 @@
     "category": "pearl-bags",
     "dimensions": "",
     "soldCount": 8,
-    "rating": 5,
+    "rating": 4.4,
     "id": "art-1790334939460-sj7ss",
     "weight": "",
     "subtitle": "Elegant red beaded keyring set of four, perfect for gifting.",
@@ -886,7 +886,7 @@
     "weight": "",
     "description": "Elevate your style with this elegant pearl beaded choker, featuring beautifully arranged pearl beads in a layered and graceful design. Handmade in Nepal, this versatile necklace is a perfect addition to any women’s fashion jewelry collection. Its sophisticated appearance makes it suitable for weddings, parties, festive celebrations, formal events, and everyday occasions. The adjustable backside allows you to customize the fit according to your preference, ensuring both comfort and elegance.",
     "leadTime": "Handmade to order: 2–4 business days",
-    "rating": 5,
+    "rating": 4.7,
     "originalPrice": 700,
     "subtitle": "Elegant pearl beaded choker adding timeless charm to every outfit.",
     "materials": [
@@ -924,7 +924,7 @@
     "dimensions": "",
     "weight": "",
     "description": "Enhance your jewelry collection with this stunning pearl beaded necklace, featuring multiple layers of beautifully arranged artificial pearls that capture the lustrous appearance of real pearls. The pearls are carefully strung on a durable thread and secured with a sturdy, easy-to-use clasp for comfortable and reliable wear. Its elegant and versatile design makes it perfect for formal events, parties, celebrations, or casual outings, effortlessly complementing any outfit while adding a sophisticated statement.",
-    "rating": 5,
+    "rating": 4.5,
     "originalPrice": 650,
     "category": "pearl-necklaces",
     "stockCount": 6,
@@ -959,7 +959,7 @@
   {
     "soldCount": 84,
     "description": "Elevate your jewellery collection with the Pearl Dewdrop Cascade Choker, a beautifully handcrafted piece featuring delicate pearl beadwork and a graceful statement pearl pendant at the center. Handmade in Nepal, its elegant design blends timeless charm with modern sophistication, making it a beautiful choice for both traditional and contemporary outfits. The adjustable backside allows you to customize the fit according to your preference.",
-    "rating": 5,
+    "rating": 4.8,
     "isHandmade": true,
     "weight": "",
     "careNotes": [
@@ -1009,7 +1009,7 @@
     "isHandmade": true,
     "weight": "",
     "isBestSeller": false,
-    "rating": 4.5,
+    "rating": 4.6,
     "originalPrice": 450,
     "tags": [
       "Handcrafted"
@@ -1033,7 +1033,7 @@
     "leadTime": "Handmade to order: 2–4 business days"
   },
   {
-    "rating": 5,
+    "rating": 4.7,
     "stockCount": 4,
     "weight": "",
     "tags": [
@@ -1105,7 +1105,7 @@
     "onlineSalesCount": 0,
     "soldCount": 35,
     "isHandmade": true,
-    "rating": 5,
+    "rating": 4.8,
     "reviewsCount": 13
   },
   {
@@ -1119,7 +1119,7 @@
     "isBestSeller": false,
     "subtitle": "Delicate beaded pearl choker combining minimalist charm with effortless elegance.",
     "stockCount": 4,
-    "rating": 5,
+    "rating": 4.6,
     "description": "Add a subtle touch of elegance to your look with the Pearl Whisper Minimalist Choker. Featuring a delicate beaded design, this handmade necklace blends simplicity with a charming boho-inspired aesthetic. Its lightweight and durable construction makes it comfortable for everyday styling, while the lobster-claw closure provides a secure and convenient fit. Perfect for layering or wearing on its own.",
     "soldCount": 3,
     "tags": [
@@ -1158,7 +1158,7 @@
     "description": "This elegant pearl beaded bag showcases a delicate blend of oversized pearls and tiny beads arranged in an intricate, textured pattern. The soft ivory tones create a timeless, feminine look, while the beautiful satin ribbon and pearl flower detail add a romantic, luxurious touch. Perfect for weddings, parties, and special occasions, this handmade piece makes a graceful statement accessory.",
     "soldCount": 45,
     "weight": "",
-    "rating": 5,
+    "rating": 4.5,
     "leadTime": "Handmade to order: 2–4 business days",
     "dimensions": "",
     "materials": [
@@ -1214,7 +1214,7 @@
     ],
     "weight": "",
     "isHandmade": true,
-    "rating": 5,
+    "rating": 4.7,
     "materials": [
       "Set of 4 stylish shades to coordinate with different outfits.",
       "Smooth silk fabric designed for gentle, low-friction hair styling.",
@@ -1247,7 +1247,7 @@
     "description": "Add a graceful touch to your jewellery collection with this elegant layered pearl necklace, handcrafted in Nepal. Featuring beautifully arranged pearls in a delicate multi-layer design, it offers a timeless and sophisticated look that complements both traditional and modern outfits. The adjustable backside allows you to customize the fit according to your preference, making it comfortable for various occasions.",
     "title": "Twisted Pearl Choker",
     "inStock": true,
-    "rating": 5,
+    "rating": 4.8,
     "category": "pearl-necklaces",
     "weight": "",
     "isNewArrival": false,
@@ -1295,7 +1295,7 @@
     ],
     "title": "Two Layer Pearl Choker",
     "dimensions": "",
-    "rating": 5,
+    "rating": 4.6,
     "weight": ""
   }
 ]

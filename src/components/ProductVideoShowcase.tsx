@@ -253,7 +253,7 @@ export const ProductVideoShowcase: React.FC = () => {
                 </span>
                 <span className="text-[11px] text-white/85 flex items-center gap-1 font-medium bg-black/40 px-2 py-0.5 rounded-md border border-white/10">
                   <Sparkles className="w-3 h-3 text-[#D4AF37]" />
-                  Handmade in Chikamugal, Kathmandu
+                  Handmade in Kathmandu, Nepal
                 </span>
               </div>
 

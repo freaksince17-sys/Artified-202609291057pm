@@ -14,66 +14,17 @@ export const CareGuideSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Care Instructions Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#E8DFD8] text-[10px] tracking-[0.2em] font-bold uppercase text-[#8C7A6B] mb-3">
             <Sparkles className="w-3 h-3 text-[#C5A880]" />
-            <span>Preserving Your Heirloom</span>
+            <span>Care Guide</span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl text-[#1C1B1A] font-semibold">
-            Pearl & Macrame Care Guide
+            Care Guide
           </h2>
-          <p className="text-xs sm:text-sm text-[#736C65] mt-2">
-            Natural pearls and organic cotton knots require gentle mindfulness to maintain their radiant luster for decades.
-          </p>
-        </div>
-
-        {/* 4 Care Rules Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-          <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-2xs space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-[#E8DFD8] flex items-center justify-center text-[#C5A880]">
-              <Droplets className="w-5 h-5" />
-            </div>
-            <h4 className="text-xs font-bold text-[#1C1B1A] uppercase tracking-wider">
-              Last On, First Off
-            </h4>
-            <p className="text-xs text-[#736C65] leading-relaxed">
-              Always put on pearl jewelry and carry your pearl bag after applying perfumes, deodorants, hairspray, and lotions to prevent organic pearl degradation.
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-2xs space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-[#E8DFD8] flex items-center justify-center text-[#C5A880]">
-              <Wind className="w-5 h-5" />
-            </div>
-            <h4 className="text-xs font-bold text-[#1C1B1A] uppercase tracking-wider">
-              Gentle Wipe Only
-            </h4>
-            <p className="text-xs text-[#736C65] leading-relaxed">
-              After wearing, wipe pearls with a clean dry microfiber cloth. Never submerge structured pearl bags in water or use harsh chemicals.
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-2xs space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-[#E8DFD8] flex items-center justify-center text-[#C5A880]">
-              <Shield className="w-5 h-5" />
-            </div>
-            <h4 className="text-xs font-bold text-[#1C1B1A] uppercase tracking-wider">
-              Cotton Dust Pouch Storage
-            </h4>
-            <p className="text-xs text-[#736C65] leading-relaxed">
-              Store your pearl bags inside the complimentary breathable cotton dust bag provided. Never store in airtight plastic bags that dehydrate pearls.
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-[#E8DFD8] shadow-2xs space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-[#E8DFD8] flex items-center justify-center text-[#C5A880]">
-              <Sun className="w-5 h-5" />
-            </div>
-            <h4 className="text-xs font-bold text-[#1C1B1A] uppercase tracking-wider">
-              Macrame Fringe Care
-            </h4>
-            <p className="text-xs text-[#736C65] leading-relaxed">
-              For cotton macrame fringes, gently stroke with a wide-toothed comb to straighten tassels. Hand-spot wash only with mild soap and dry flat.
+          <div className="mt-4 p-6 bg-white rounded-2xl border border-[#E8DFD8] shadow-2xs max-w-lg mx-auto">
+            <p className="text-base text-[#1C1B1A] font-medium leading-relaxed">
+              Store in cotton or silk pouch
             </p>
           </div>
         </div>

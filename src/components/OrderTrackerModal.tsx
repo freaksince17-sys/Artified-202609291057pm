@@ -195,7 +195,7 @@ export const OrderTrackerModal: React.FC = () => {
                 )}
               </h3>
               <p className="text-[11px] text-[#A69E96]">
-                Chikamugal Workshop, Kathmandu • Handcrafted by Sahina Shrestha
+                Kathmandu Workshop, Kathmandu • Handcrafted by Sahina Shrestha
               </p>
             </div>
           </div>
@@ -423,7 +423,7 @@ export const OrderTrackerModal: React.FC = () => {
                     </p>
                     <p className="text-[11px] text-[#736C65] flex items-center gap-1">
                       <MapPin className="w-3 h-3 text-[#C5A880]" />
-                      <span>Artified Workshop, Chikamugal, Kathmandu</span>
+                      <span>Artified Workshop, Kathmandu, Nepal</span>
                     </p>
                     <p className="text-[11px] text-[#5E5955] italic pt-1 leading-relaxed border-t border-[#E8DFD8]/60 mt-1">
                       &ldquo;{trackedOrder.liveCraftNotes}&rdquo;
@@ -603,7 +603,7 @@ export const OrderTrackerModal: React.FC = () => {
         {/* Modal Footer */}
         <div className="p-3 bg-white border-t border-[#E8DFD8] flex items-center justify-between text-xs">
           <span className="text-[#736C65] text-[11px]">
-            Artified Nepal • Chikamugal, Kathmandu
+            Artified Nepal • Kathmandu, Nepal
           </span>
           <button
             type="button"

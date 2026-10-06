@@ -192,12 +192,69 @@
         "createdAt": { "type": "string" }
       },
       "required": ["id", "productId", "author", "rating", "comment"]
+    },
+    "WorkshopMedia": {
+      "title": "WorkshopMedia",
+      "description": "Artisan training and masterclass photos and videos led by Sahina Shrestha for interested candidates and artisans",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["image", "video"] },
+        "title": { "type": "string", "maxLength": 256 },
+        "workshopTitle": { "type": "string", "maxLength": 256 },
+        "batchName": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 128 },
+        "location": { "type": "string", "maxLength": 256 },
+        "url": { "type": "string", "maxLength": 2048 },
+        "thumbnailUrl": { "type": "string", "maxLength": 2048 },
+        "caption": { "type": "string", "maxLength": 4000 },
+        "craftTechnique": { "type": "string", "maxLength": 256 },
+        "attendeesCount": { "type": "number" },
+        "instructor": { "type": "string", "maxLength": 128 },
+        "featured": { "type": "boolean" },
+        "aspectRatio": { "type": "string", "enum": ["vertical", "square", "horizontal"] },
+        "tags": { "type": "array" },
+        "duration": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "type", "title", "workshopTitle", "url"]
+    },
+    "WorkshopGroupEntity": {
+      "title": "WorkshopGroupEntity",
+      "description": "Masterclass workshop categories and curriculum with auto-generated notes and details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "groupKey": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 256 },
+        "badge": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 128 },
+        "location": { "type": "string", "maxLength": 256 },
+        "instructor": { "type": "string", "maxLength": 128 },
+        "attendeesCount": { "type": "number" },
+        "tagline": { "type": "string", "maxLength": 256 },
+        "description": { "type": "string", "maxLength": 4000 },
+        "keyTechniques": { "type": "array" },
+        "whatsappMessage": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "groupKey", "title", "description"]
     }
   },
   "firestore": {
     "/products/{productId}": {
       "schema": "Product",
       "description": "Live catalog products accessible to all buyers and editable by seller"
+    },
+    "/workshop_groups/{groupId}": {
+      "schema": "WorkshopGroupEntity",
+      "description": "Workshop masterclasses and cohorts created by seller"
+    },
+    "/workshop_gallery/{itemId}": {
+      "schema": "WorkshopMedia",
+      "description": "Training photos and videos from masterclasses and craft workshops"
     },
     "/instagram_journal/{itemId}": {
       "schema": "InstagramJournalItem",

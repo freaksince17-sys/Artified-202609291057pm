@@ -279,7 +279,7 @@ export const NavbarSearch: React.FC<NavbarSearchProps> = ({ isOpen, onClose }) =
                   Reset Search Filter
                 </button>
                 <a
-                  href="https://wa.me/9779767573721?text=Namaste!%20I%20am%20looking%20for%20a%20specific%20handcrafted%20pearl%20piece%20from%20Chikamugal,%20Kathmandu."
+                  href="https://wa.me/9779767573721?text=Namaste!%20I%20am%20looking%20for%20a%20specific%20handcrafted%20pearl%20piece%20from%20Kathmandu,%20Kathmandu."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 bg-[#1C1B1A] text-white rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 hover:bg-[#34312F] transition-colors"

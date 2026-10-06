@@ -113,7 +113,7 @@ export const SellerProductModal: React.FC = () => {
       // Default template for new piece
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
       setTitle(`New Handcrafted Piece #${randomSuffix}`);
-      setSubtitle('Custom hand-beaded pearl couture crafted in Chikamugal, Kathmandu, Nepal');
+      setSubtitle('Custom hand-beaded pearl couture crafted in Kathmandu, Nepal');
       setCategory('pearl-bags');
       setPrice(3950);
       setOriginalPrice(4500);
@@ -121,7 +121,7 @@ export const SellerProductModal: React.FC = () => {
       setStockCount(4);
       setIsBestSeller(false);
       setIsNewArrival(true);
-      setRating(5.0);
+      setRating(4.8);
       setReviewsCount(18);
       setSoldCount(36);
       setLeadTime('Handmade to order: 2–4 business days');

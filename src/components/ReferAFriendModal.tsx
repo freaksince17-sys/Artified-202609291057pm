@@ -129,7 +129,7 @@ export const ReferAFriendModal: React.FC<ReferAFriendModalProps> = ({ isOpen, on
             </h2>
 
             <p className="text-xs sm:text-sm text-[#D8CFCA] leading-relaxed">
-              Invite your friends and bridesmaids to experience handcrafted elegance from Chikamugal, Kathmandu. They receive 10% off their first order, and you unlock Rs. 250 credit!
+              Invite your friends and bridesmaids to experience handcrafted elegance from Kathmandu, Nepal. They receive 10% off their first order, and you unlock Rs. 250 credit!
             </p>
           </div>
         </div>

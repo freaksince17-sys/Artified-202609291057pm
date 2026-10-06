@@ -62,7 +62,7 @@ export const CATEGORY_ARTISANAL_SPOTLIGHTS: Record<string, ArtisanalSpotlightPoi
     {
       id: 'knotting-tension',
       title: 'Fluid Drape & Flexible Knotting',
-      tag: 'Artisan Stringing Tension',
+      tag: 'Hand-Stringing Tension',
       specHighlight: 'Non-Kinking Silk-Nylon Blend',
       description: 'Precisely tensioned so the strands lay completely flat against the collarbone without pinching skin or curling upwards.',
       x: 32,
@@ -92,7 +92,7 @@ export const CATEGORY_ARTISANAL_SPOTLIGHTS: Record<string, ArtisanalSpotlightPoi
     {
       id: 'fringe-finish',
       title: 'Precision-Combed Feather Fringe',
-      tag: 'Artisanal Finishing',
+      tag: 'Handcrafted Finishing',
       specHighlight: 'Boho Tassel Brush Finish',
       description: 'Individually hand-combed and steam-pressed tassels that drape cleanly and resist matting.',
       x: 50,
@@ -151,10 +151,10 @@ export const CATEGORY_ARTISANAL_SPOTLIGHTS: Record<string, ArtisanalSpotlightPoi
     },
     {
       id: 'hand-knotting',
-      title: 'Single-Artisan Chikamugal Weave',
-      tag: 'Chikamugal Atelier Heritage',
+      title: 'Single-Creator Kathmandu Weave',
+      tag: 'Kathmandu Atelier Heritage',
       specHighlight: 'Over 6–10 Craft Hours',
-      description: 'Crafted exclusively from start to finish by one master artisan to guarantee singular consistent knotting tension.',
+      description: 'Crafted exclusively from start to finish by the creator to guarantee singular consistent knotting tension.',
       x: 50,
       y: 75
     }

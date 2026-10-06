@@ -33,7 +33,7 @@ export const LOYALTY_TIERS_CONFIG: Record<
       '1.25x Loyalty points booster on all orders',
       'Complimentary custom necklace & choker sizing',
       'Same-day priority dispatch inside Kathmandu Valley',
-      'Exclusive Silver Patron private WhatsApp channel'
+      'Exclusive Silver Member private WhatsApp channel'
     ]
   },
   'Gold Sovereign': {
@@ -44,7 +44,7 @@ export const LOYALTY_TIERS_CONFIG: Record<
     perks: [
       '1.5x Maximum Loyalty points booster on all orders',
       'Free Luxury Gift Packaging & Wax Seal on ALL orders',
-      'Direct bespoke order concierge with artisan Sahina Shrestha',
+      'Direct bespoke order concierge with founder and creator Sahina Shrestha',
       'Annual anniversary handcrafted surprise keepsake'
     ]
   }
@@ -90,7 +90,7 @@ export const AVAILABLE_LOYALTY_VOUCHERS: LoyaltyRewardVoucher[] = [
 ];
 
 export const DEFAULT_LOYALTY_ACCOUNT: LoyaltyAccount = {
-  customerId: 'art-patron-8821',
+  customerId: 'art-member-8821',
   customerName: 'Samikshya Shrestha',
   phone: '9841234567',
   email: 'samikshya@example.com',
@@ -103,7 +103,7 @@ export const DEFAULT_LOYALTY_ACCOUNT: LoyaltyAccount = {
       id: 'tx-1',
       type: 'welcome',
       points: 100,
-      description: 'Welcome to Artified Patron Circle! 🌸',
+      description: 'Welcome to Artified Member Circle! 🌸',
       date: 'Aug 14, 2026'
     },
     {

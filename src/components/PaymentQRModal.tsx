@@ -74,7 +74,7 @@ export const PaymentQRModal: React.FC<PaymentQRModalProps> = ({
   const currentAccountName = accountName || settings.accountName || 'Sahina Shrestha';
   const currentPhone = phone || settings.phone || '9767573721';
   const currentBankName = bankName || settings.bankName || 'Global IME Bank (Fonepay Network)';
-  const currentBranch = branch || settings.branch || 'Chikamugal, Kathmandu';
+  const currentBranch = branch || settings.branch || 'Kathmandu, Nepal';
   const displayRef = referenceNumber || orderId;
 
   // Active QR image resolution: customQrUrl -> settings uploaded image -> fallback SVG pattern
@@ -139,7 +139,7 @@ export const PaymentQRModal: React.FC<PaymentQRModalProps> = ({
                 </span>
               </div>
               <p className="text-[11px] text-[#A69E96]">
-                Pay directly to artisan <strong>{currentAccountName}</strong>
+                Pay directly to founder and creator <strong>{currentAccountName}</strong>
               </p>
             </div>
           </div>

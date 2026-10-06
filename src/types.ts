@@ -46,7 +46,7 @@ export interface CartItem {
 }
 
 export interface DeliveryZone {
-  id: 'inside_ring_road' | 'outside_ring_road' | 'outside_valley';
+  id: 'ktm_valley' | 'inside_ring_road' | 'outside_ring_road' | 'outside_valley';
   name: string;
   area: string;
   fee: number; // in NPR
@@ -271,6 +271,64 @@ export interface ReferralRewardData {
   rewardDiscountAmount: number;
   friendDiscountPercent: number;
   hasClaimedReward: boolean;
+}
+
+export interface WorkshopMediaItem {
+  id: string;
+  groupId?: 'macrame' | 'wastepipe-sunflower' | 'pearl-bag' | string;
+  type: 'image' | 'video';
+  title: string;
+  workshopTitle: string;
+  batchName?: string;
+  date: string;
+  location: string;
+  url: string;
+  thumbnailUrl: string;
+  caption: string;
+  craftTechnique: string;
+  attendeesCount?: number;
+  instructor: string;
+  featured?: boolean;
+  aspectRatio?: 'vertical' | 'square' | 'horizontal';
+  tags: string[];
+  duration?: string;
+  likes?: string;
+  views?: string;
+  whatsappMessage?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface WorkshopGroup {
+  id: string;
+  groupKey: 'macrame' | 'wastepipe-sunflower' | 'pearl-bag' | string;
+  title: string;
+  badge: string;
+  date: string;
+  location: string;
+  instructor: string;
+  attendeesCount: number;
+  tagline: string;
+  description: string;
+  keyTechniques: string[];
+  items: WorkshopMediaItem[];
+  whatsappMessage?: string;
+}
+
+export interface WorkshopEventSummary {
+  id: string;
+  title: string;
+  batchName: string;
+  date: string;
+  location: string;
+  description: string;
+  technique: string;
+  attendeesCount: number;
+  photosCount: number;
+  videosCount: number;
+  coverImage: string;
+  status: 'completed' | 'upcoming';
+  nextBatchDate?: string;
 }
 
 

@@ -302,7 +302,7 @@ export const SellerReviewsModal: React.FC = () => {
                     required
                     value={formLocation}
                     onChange={(e) => setFormLocation(e.target.value)}
-                    placeholder="e.g. Chikamugal, Kathmandu / Pokhara, Nepal"
+                    placeholder="e.g. Kathmandu, Nepal"
                     className="w-full text-xs p-2.5 bg-[#FAF8F5] border border-[#D5C7BC] rounded-lg focus:outline-none focus:border-[#1C1B1A]"
                   />
                 </div>

@@ -247,14 +247,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isSelected = 
 
           {/* Rating stars & review count row */}
           <div className="flex items-center gap-1 my-0.5">
-            <div className="flex items-center text-teal-600 dark:text-teal-400">
+            <div className="flex items-center text-amber-500 dark:text-amber-400">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  className={`w-2 h-2 sm:w-2.5 sm:h-2.5 ${star <= Math.round(product.rating || 5) ? 'fill-current' : 'text-zinc-300 dark:text-zinc-600'}`}
+                  className={`w-2 h-2 sm:w-2.5 sm:h-2.5 ${star <= Math.round(product.rating || 4.7) ? 'fill-current' : 'text-zinc-300 dark:text-zinc-600'}`}
                 />
               ))}
             </div>
+            <span className="text-[9px] sm:text-[10px] font-bold text-[#1C1B1A] dark:text-[#E8E2D9]">
+              {Number(product.rating || 4.7).toFixed(1)}
+            </span>
             <span className="text-[9px] sm:text-[10px] text-[#736C65] dark:text-[#A8A096]">
               ({dynamicReviewsCount})
             </span>

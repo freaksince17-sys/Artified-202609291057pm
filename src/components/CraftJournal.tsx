@@ -43,7 +43,7 @@ export const CraftJournal: React.FC = () => {
   const [newCoverImage, setNewCoverImage] = useState(CAVIAR_PEARL_BAG_IMAGE);
   const [newContentText, setNewContentText] = useState('');
   const [newTagsText, setNewTagsText] = useState('Pearl Weaving, Kathmandu, Handmade');
-  const [newKeywordsText, setNewKeywordsText] = useState('handmade pearl bags nepal, chikamugal craft');
+  const [newKeywordsText, setNewKeywordsText] = useState('handmade pearl bags nepal, kathmandu craft');
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -99,18 +99,18 @@ export const CraftJournal: React.FC = () => {
       id: `art-${Date.now()}`,
       slug,
       title: newTitle.trim(),
-      subtitle: newSubtitle.trim() || 'Artisanal Insights from Chikamugal Workshop',
+      subtitle: newSubtitle.trim() || 'Craft Insights from Kathmandu Workshop',
       excerpt: newExcerpt.trim() || paragraphs[0]?.slice(0, 160) + '...',
       category: newCategory,
       author: 'Sahina Shrestha',
-      authorRole: 'Founder & Master Artisan',
+      authorRole: 'Founder and Creator',
       publishedDate: 'Just Published',
       readTime: `${Math.max(2, Math.ceil(paragraphs.join(' ').split(' ').length / 180))} min read`,
       coverImage: newCoverImage.trim() || CAVIAR_PEARL_BAG_IMAGE,
       tags: tags.length > 0 ? tags : ['Handmade', 'Nepal'],
       seoKeywords: keywords.length > 0 ? keywords : ['handmade pearl bags nepal'],
       viewsCount: 1,
-      content: paragraphs.length > 0 ? paragraphs : ['New artisanal article content published at Artified Nepal.']
+      content: paragraphs.length > 0 ? paragraphs : ['New handcrafted article content published at Artified Nepal.']
     };
 
     saveCraftArticle(created);
@@ -133,13 +133,13 @@ export const CraftJournal: React.FC = () => {
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1C1B1A] text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
               <Feather className="w-3.5 h-3.5" />
-              <span>Artisanal Craft Journal</span>
+              <span>Handcrafted Craft Journal</span>
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#1C1B1A] font-semibold tracking-tight">
               Stories of Pearl Mastery & Nepali Heritage
             </h2>
             <p className="text-xs sm:text-sm text-[#736C65] leading-relaxed">
-              Explore the historical Newari bead stringing traditions, our signature 7-strand steel wire weaving techniques, and bridal pearl styling straight from our Chikamugal workshop in Kathmandu.
+              Explore the historical Newari bead stringing traditions, our signature 7-strand steel wire weaving techniques, and bridal pearl styling straight from our workshop in Kathmandu, Nepal.
             </p>
           </div>
 
@@ -396,7 +396,7 @@ export const CraftJournal: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-3 text-[11px]">
-                    <span>📍 Chikamugal, Kathmandu</span>
+                    <span>📍 Kathmandu, Nepal</span>
                     <span>•</span>
                     <span>{activeArticle.publishedDate}</span>
                   </div>
@@ -416,7 +416,7 @@ export const CraftJournal: React.FC = () => {
               <div className="p-4 rounded-xl bg-white border border-[#E8DFD8] space-y-2">
                 <span className="text-[10px] uppercase font-bold text-[#8C7A6B] tracking-wider flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-[#C5A880]" />
-                  <span>Artisanal Heritage Tags & SEO Indexing:</span>
+                  <span>Craft Heritage Tags & SEO Indexing:</span>
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {activeArticle.tags.map((tag, idx) => (
@@ -436,7 +436,7 @@ export const CraftJournal: React.FC = () => {
               <div className="p-5 rounded-2xl bg-gradient-to-r from-[#1C1B1A] via-[#2A2622] to-[#1C1B1A] text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
                 <div className="space-y-1 text-center sm:text-left">
                   <h4 className="font-serif text-base font-bold text-[#D4AF37]">
-                    Experience Our Chikamugal Pearl Creations
+                    Experience Our Kathmandu Pearl Creations
                   </h4>
                   <p className="text-xs text-[#A69E96]">
                     Every bag and choker is handcrafted by Sahina Shrestha with a 24-hr exchange guarantee across Nepal.
@@ -564,7 +564,7 @@ export const CraftJournal: React.FC = () => {
                   required
                   value={newContentText}
                   onChange={(e) => setNewContentText(e.target.value)}
-                  placeholder="Describe the artisan techniques, history, or care guide in detail..."
+                  placeholder="Describe the craft techniques, history, or care guide in detail..."
                   className="w-full p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl text-xs focus:outline-none focus:border-[#C5A880]"
                 />
               </div>
@@ -587,7 +587,7 @@ export const CraftJournal: React.FC = () => {
                     type="text"
                     value={newKeywordsText}
                     onChange={(e) => setNewKeywordsText(e.target.value)}
-                    placeholder="handmade pearl bags nepal, chikamugal craft"
+                    placeholder="handmade pearl bags nepal, kathmandu craft"
                     className="w-full p-2 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl text-xs focus:outline-none focus:border-[#C5A880]"
                   />
                 </div>

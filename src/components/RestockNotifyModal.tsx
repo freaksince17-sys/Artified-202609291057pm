@@ -85,7 +85,7 @@ export const RestockNotifyModal: React.FC<RestockNotifyModalProps> = ({
                 Back in Stock Alert
               </h3>
               <p className="text-[11px] text-[#A69E96]">
-                Artified Nepal • Chikamugal Atelier
+                Artified Nepal • Kathmandu Workshop
               </p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export const RestockNotifyModal: React.FC<RestockNotifyModalProps> = ({
                 You're on the VIP Waitlist!
               </h4>
               <p className="text-xs text-emerald-800 leading-relaxed">
-                As soon as Sahina crafts the next batch at our Chikamugal workshop, you will be the very first to receive an email alert.
+                As soon as Sahina crafts the next batch at our Kathmandu workshop, you will be the very first to receive an email alert.
               </p>
             </div>
           ) : (

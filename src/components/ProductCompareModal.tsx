@@ -259,7 +259,7 @@ export const ProductCompareModal: React.FC = () => {
         {/* Footer */}
         <div className="p-4 bg-white border-t border-[#E8DFD8] flex items-center justify-between text-xs">
           <span className="text-[#736C65] text-[11px]">
-            Chikamugal Atelier • Handcrafted in Kathmandu, Nepal
+            Kathmandu Workshop • Handcrafted in Kathmandu, Nepal
           </span>
           <button
             type="button"

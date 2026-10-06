@@ -176,7 +176,7 @@ export const SellerPaymentSettingsModal: React.FC<SellerPaymentSettingsModalProp
                   type="text"
                   value={settings.branch}
                   onChange={(e) => setSettings({ ...settings, branch: e.target.value })}
-                  placeholder="Chikamugal, Kathmandu"
+                  placeholder="Kathmandu, Nepal"
                   className="w-full px-2.5 py-1.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-lg text-xs text-[#1C1B1A] focus:outline-none focus:border-[#C5A880]"
                 />
               </div>

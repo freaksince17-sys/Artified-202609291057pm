@@ -23,17 +23,18 @@ export interface ArtisanProfileData {
   avatarPosition?: string;
   avatarUpdatedAt?: string;
   avatarMetadata?: ArtisanImageMetadata;
-  stat1Value: string;
-  stat1Label: string;
-  stat2Value: string;
-  stat2Label: string;
+  stat1Value?: string;
+  stat1Label?: string;
+  stat2Value?: string;
+  stat2Label?: string;
   headline: string;
   subheadline: string;
   quote: string;
-  pillar1: ArtisanPillar;
-  pillar2: ArtisanPillar;
-  pillar3: ArtisanPillar;
-  pillar4: ArtisanPillar;
+  whyArtified?: string;
+  pillar1?: ArtisanPillar;
+  pillar2?: ArtisanPillar;
+  pillar3?: ArtisanPillar;
+  pillar4?: ArtisanPillar;
   whatsappPhone: string;
   whatsappGreetingEn: string;
   whatsappGreetingNe: string;
@@ -46,48 +47,33 @@ const authenticAvatar = (savedProfile.avatarUrl && savedProfile.avatarUrl.length
 
 export const DEFAULT_ARTISAN_PROFILE: ArtisanProfileData = {
   artisanName: savedProfile.artisanName || 'Sahina Shrestha',
-  artisanRole: savedProfile.artisanRole || 'Founder & Master Artisan',
-  atelierLocation: savedProfile.atelierLocation || 'Chikamugal Atelier • Kathmandu, Nepal',
-  establishedText: savedProfile.establishedText || 'Est. 2021 • 100% Handcrafted in Nepal',
+  artisanRole: 'Founder & Creator',
+  atelierLocation: 'Kathmandu, Nepal',
+  establishedText: savedProfile.establishedText || 'Est. 2024 • 100% Handcrafted in Nepal',
   avatarUrl: authenticAvatar,
   avatarPosition: savedProfile.avatarPosition || 'center 20%',
-  avatarUpdatedAt: savedProfile.avatarUpdatedAt || '2026-10-02T00:00:00.000Z',
+  avatarUpdatedAt: savedProfile.avatarUpdatedAt || '2026-10-06T00:00:00.000Z',
   avatarMetadata: savedProfile.avatarMetadata || {
-    uploadedAt: '2026-10-02T00:00:00.000Z',
-    versionId: 'ver_sahina_authentic',
-    source: 'Atelier Portrait'
+    uploadedAt: '2026-10-06T00:00:00.000Z',
+    versionId: 'ver_founder_creator_v7',
+    source: 'Kathmandu Workshop'
   },
-  stat1Value: savedProfile.stat1Value || '9–14 Hours',
-  stat1Label: savedProfile.stat1Label || 'Devoted Per Bag',
-  stat2Value: savedProfile.stat2Value || '3x Living Wage',
-  stat2Label: savedProfile.stat2Label || 'Local Women Makers',
-  headline: savedProfile.headline || 'Meet the Artisan: Sahina Shrestha',
-  subheadline: savedProfile.subheadline || 'Slow Craft & Living Beadwork from Chikamugal, Kathmandu',
-  quote: savedProfile.quote || '“In a world crowded with disposable fast fashion and factory plastics, I envisioned accessories carrying genuine human warmth, patience, and ancestral devotion. Every pearl strand and cotton cord is knotted with intention right here in historic Kathmandu.”',
-  pillar1: savedProfile.pillar1 || {
-    title: '1. Rooted in Chikamugal',
-    desc: 'Drawing from centuries of Newari beadwork in Indrachowk, reimagining ancient tactile techniques into modern haute couture.'
-  },
-  pillar2: savedProfile.pillar2 || {
-    title: '2. 9–14 Hours Hand-Knotting',
-    desc: 'Reinforced 7-strand nylon-coated stainless cores with 3-pass anchor knotting ensures heirloom durability.'
-  },
-  pillar3: savedProfile.pillar3 || {
-    title: '3. Empowering Local Women',
-    desc: 'Providing dignified livelihoods and fair living wages (3x standard piece rates) to skilled home-based women makers.'
-  },
-  pillar4: savedProfile.pillar4 || {
-    title: '4. Bespoke Bridal Tailoring',
-    desc: 'Personalized bespoke collaborations for brides: customized drops, strand counts, and matching pearl clutches.'
-  },
+  stat1Value: '',
+  stat1Label: '',
+  stat2Value: '',
+  stat2Label: '',
+  headline: 'Meet the Founder & Creator: Sahina Shrestha',
+  subheadline: 'From Childhood Passion to Creative Journey',
+  quote: savedProfile.quote || 'My love for art and crafts began in childhood, inspired by watching my mother create beautiful handicrafts. I have always been drawn to unique and different designs, especially those inspired by cultures around the world.\n\nWhen I couldn’t find the pieces I loved in the local market, I started creating them myself. What began as a personal passion soon received appreciation from others, encouraging me to share my creations and turn my creativity into a small business.',
+  whyArtified: savedProfile.whyArtified || 'Artified comes from the combination of “Art” and “Modified.” It reflects my belief that creativity can transform ordinary ideas into something unique and meaningful.\n\nEvery creation is an opportunity to experiment, add a personal touch, and make something truly different. What began as childhood curiosity has grown into a journey of creativity, learning, and entrepreneurship—with the goal of creating pieces that make people think, “I haven’t seen this before.”',
   whatsappPhone: savedProfile.whatsappPhone || '9779767573721',
-  whatsappGreetingEn: savedProfile.whatsappGreetingEn || 'Namaste Sahina! 🌸 I just read your artisan story on Artified Nepal and would love to consult with you regarding your handcrafted pearl creations.',
+  whatsappGreetingEn: savedProfile.whatsappGreetingEn || 'Namaste Sahina! 🌸 I just read your story on Artified Nepal and would love to consult with you regarding your handcrafted creations.',
   whatsappGreetingNe: savedProfile.whatsappGreetingNe || 'नमस्ते सहिना दिदी! 🌸 मैले Artified वेबसाइटमा तपाईंको कथा पढें र हस्तनिर्मित मोती/म्याक्रामे सिर्जनाबारे कुरा गर्न चाहन्छु।',
   guaranteeText: savedProfile.guaranteeText || '24-Hour Easy Exchange Guarantee across Nepal',
   instagramHandle: savedProfile.instagramHandle || '@artified_np'
 };
 
-const ARTISAN_STORAGE_KEY = 'artified_artisan_profile';
+const ARTISAN_STORAGE_KEY = 'artified_founder_creator_profile_v7';
 
 // Global isSaving flag to prevent any re-render fallback to defaults during active saves/uploads
 let isProfileSavingInFlight = false;
@@ -98,11 +84,22 @@ export function getIsProfileSaving(): boolean {
 
 export function getArtisanProfile(): ArtisanProfileData {
   try {
+    // Purge obsolete legacy storage keys if present
+    try {
+      localStorage.removeItem('artified_artisan_profile');
+      localStorage.removeItem('artified_founder_creator_profile_v4');
+      localStorage.removeItem('artified_founder_creator_profile_v5');
+      localStorage.removeItem('artified_founder_creator_profile_v6');
+    } catch {}
+
     const raw = localStorage.getItem(ARTISAN_STORAGE_KEY);
     if (raw) {
+      if (/chikamugal/i.test(raw)) {
+        localStorage.removeItem(ARTISAN_STORAGE_KEY);
+        return DEFAULT_ARTISAN_PROFILE;
+      }
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        // Sanitize out old unwanted corporate or unsplash photo fallback if present
         let avatarUrl = parsed.avatarUrl;
         if (!avatarUrl || avatarUrl.includes('photo-') || avatarUrl.includes('unsplash.com') || (!avatarUrl.startsWith('/artisan_avatar') && !avatarUrl.startsWith('data:image/'))) {
           avatarUrl = '/artisan_avatar.png';
@@ -111,16 +108,18 @@ export function getArtisanProfile(): ArtisanProfileData {
         return {
           ...DEFAULT_ARTISAN_PROFILE,
           ...parsed,
+          artisanRole: 'Founder & Creator',
+          atelierLocation: 'Kathmandu, Nepal',
+          headline: 'Meet the Founder & Creator: Sahina Shrestha',
+          subheadline: 'From Childhood Passion to Creative Journey',
+          quote: DEFAULT_ARTISAN_PROFILE.quote,
+          whyArtified: DEFAULT_ARTISAN_PROFILE.whyArtified,
           avatarUrl,
-          pillar1: { ...DEFAULT_ARTISAN_PROFILE.pillar1, ...(parsed.pillar1 || {}) },
-          pillar2: { ...DEFAULT_ARTISAN_PROFILE.pillar2, ...(parsed.pillar2 || {}) },
-          pillar3: { ...DEFAULT_ARTISAN_PROFILE.pillar3, ...(parsed.pillar3 || {}) },
-          pillar4: { ...DEFAULT_ARTISAN_PROFILE.pillar4, ...(parsed.pillar4 || {}) },
         };
       }
     }
   } catch (e) {
-    console.warn('Notice: Error loading artisan profile from localStorage:', e);
+    console.warn('Notice: Error loading founder & creator profile from localStorage:', e);
   }
   return DEFAULT_ARTISAN_PROFILE;
 }
@@ -242,28 +241,42 @@ export async function fetchArtisanProfileFromServer(): Promise<ArtisanProfileDat
 
       let merged: ArtisanProfileData;
       if (remoteUpdated > localUpdated || (localIsDefault && remoteUpdated > defaultTs)) {
-        // Remote is newer or local is uninitialized default: adopt remote permanently
+        // Remote is newer or local is uninitialized default: adopt remote permanently with strict sanitization
         merged = {
           ...DEFAULT_ARTISAN_PROFILE,
           ...authoritative,
           avatarUrl: authoritative.avatarUrl || currentLocal.avatarUrl || DEFAULT_ARTISAN_PROFILE.avatarUrl,
-          pillar1: { ...DEFAULT_ARTISAN_PROFILE.pillar1, ...(authoritative?.pillar1 || {}) },
-          pillar2: { ...DEFAULT_ARTISAN_PROFILE.pillar2, ...(authoritative?.pillar2 || {}) },
-          pillar3: { ...DEFAULT_ARTISAN_PROFILE.pillar3, ...(authoritative?.pillar3 || {}) },
-          pillar4: { ...DEFAULT_ARTISAN_PROFILE.pillar4, ...(authoritative?.pillar4 || {}) },
+          headline: 'Meet the Founder & Creator: Sahina Shrestha',
+          subheadline: 'From Childhood Passion to Creative Journey',
+          atelierLocation: 'Kathmandu, Nepal',
+          artisanRole: 'Founder & Creator',
+          stat1Value: '',
+          stat1Label: '',
+          stat2Value: '',
+          stat2Label: '',
+          quote: DEFAULT_ARTISAN_PROFILE.quote,
+          whyArtified: DEFAULT_ARTISAN_PROFILE.whyArtified
         };
         try {
           localStorage.setItem(ARTISAN_STORAGE_KEY, JSON.stringify(merged));
         } catch {}
         window.dispatchEvent(new CustomEvent('artified_artisan_updated', { detail: merged }));
+
+        // Sync sanitized back to Firestore & server
+        try {
+          setDoc(doc(db, 'activeProfile', 'sahina_shrestha'), merged, { merge: true }).catch(() => {});
+          setDoc(doc(db, 'store_settings', 'artisan_profile'), merged, { merge: true }).catch(() => {});
+        } catch {}
       } else if (localUpdated > remoteUpdated && localUpdated > defaultTs) {
-        // Local is newer: sync local to server disk API
+        // Local is newer: sync local to server disk API and Firestore
         try {
           fetch('/api/artisan-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentLocal)
           }).catch(() => {});
+          setDoc(doc(db, 'activeProfile', 'sahina_shrestha'), currentLocal, { merge: true }).catch(() => {});
+          setDoc(doc(db, 'store_settings', 'artisan_profile'), currentLocal, { merge: true }).catch(() => {});
         } catch {}
       }
     } catch (e) {}

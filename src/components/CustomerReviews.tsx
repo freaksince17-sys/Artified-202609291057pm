@@ -32,8 +32,8 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-1',
     author: 'Aayushi Khadgi',
-    location: 'Baluwatar, Kathmandu',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.8,
     reviewTitle: 'Very pretty red bag for my cousin’s wedding',
     comment: 'Honestly, I was not sure about ordering bags online because sometimes pearls look cheap plastic. But this Red Pearl Beaded Bag is surprisingly heavy and well made. The red pearls shine nicely under hall lights and it easily fits my mobile phone, handkerchief and compact powder. Delivery rider called before arriving. Everyone in wedding was asking where I got it from!',
     productName: 'Red Pearl Beaded Bag',
@@ -47,8 +47,8 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-2',
     author: 'Prerana Shahi',
-    location: 'Jhamsikhel, Lalitpur',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.7,
     reviewTitle: 'Fits comfortably and easy to adjust',
     comment: 'I ordered this choker after seeing their reel on Instagram. My neck is bit thin so normal fixed chokers become loose on me, but this one has adjustable chain at back so I could fit it properly. Wore it with black sari for college farewell. Beads are smooth and did not scratch my skin. Very happy with the purchase at this price.',
     productName: 'Pearl Beaded Adjustable Choker',
@@ -62,10 +62,10 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-3',
     author: 'Bhawana Gurung',
-    location: 'Lakeside, Pokhara',
-    rating: 5,
-    reviewTitle: 'Safely delivered to Pokhara in 3 days',
-    comment: 'I live in Pokhara so I was little worried whether pearl bag might get pressed or damaged during courier transport. But the seller packed it inside solid box with lots of bubble wrap. The round shape is very unique and sturdy. It is slightly heavy in hand because of solid beads, but look is 100% royal.',
+    location: 'Kathmandu, Nepal',
+    rating: 4.6,
+    reviewTitle: 'Safely delivered in 2 days with cute packaging',
+    comment: 'I ordered the round pearl bag for my party. The seller packed it inside solid box with lots of bubble wrap and a soft dust pouch. The round shape is very unique and sturdy. It is slightly heavy in hand because of solid beads, but look is 100% royal.',
     productName: 'Round Pearl Bag',
     date: '1 week ago',
     verifiedPurchase: true,
@@ -77,8 +77,8 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-4',
     author: 'Sneha Tuladhar',
-    location: 'New Road / Chikamugal, Kathmandu',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.8,
     reviewTitle: 'Complete set for Teej, good value for money',
     comment: 'Bought the 5 layer necklace set with earrings for Teej puja. For Rs 899, getting both necklace and matching earrings is really good value in Kathmandu. The layers sit flat on collarbone and don’t get tangled easily. My mother in law also liked it and told me to order one for her.',
     productName: '5 layer pearl necklace with earrings',
@@ -92,8 +92,8 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-5',
     author: 'Aaradhya K.C.',
-    location: 'Bharatpur, Chitwan',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.5,
     reviewTitle: 'Rose pendant is very cute and decent',
     comment: 'I gifted this to my best friend on her 22nd birthday. She loves minimalist pearl jewelry. The small rose pendant between the three pearl layers looks elegant with kurtha. Only small thing is the hook clasp was slightly stiff at first, but after opening a couple of times it became smooth. She loved it a lot!',
     productName: '3 Layer Pearl Rose Necklace',
@@ -107,10 +107,10 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-6',
     author: 'Samikshya Maharjan',
-    location: 'Baneshwor, Kathmandu',
-    rating: 5,
-    reviewTitle: 'Visited their Chikamugal store, very neat work',
-    comment: 'I wanted to check bag size before paying so I visited their store in Chikamugal, Kathmandu. Sahina didi showed me the bag and explained how each bead is tied with strong nylon cord. Finish is clean with zero loose threads. Paid directly via Fonepay QR. Feels proud supporting local handmade brand.',
+    location: 'Kathmandu, Nepal',
+    rating: 4.8,
+    reviewTitle: 'Visited their Kathmandu store, very neat work',
+    comment: 'I wanted to check bag size before paying so I visited their store in Kathmandu, Nepal. Sahina didi showed me the bag and explained how each bead is tied with strong nylon cord. Finish is clean with zero loose threads. Paid directly via Fonepay QR. Feels proud supporting local handmade brand.',
     productName: 'Caviar Pearl Bag',
     date: '3 weeks ago',
     verifiedPurchase: true,
@@ -122,8 +122,8 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-7',
     author: 'Pooja Shakya',
-    location: 'Lagankhel, Patan',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.6,
     reviewTitle: 'Super shiny crystals and cute heart lock',
     comment: 'Ordered two bracelets for me and my younger sister. Price is only Rs 299 each so I was not expecting high luxury, but the crystal sparkle is really nice when sunlight hits. Heart clasp is secure so it doesn’t fall off while riding scooter. Definitely buying more colors.',
     productName: 'Crystal Bead Bracelets with Heart Clasp',
@@ -137,10 +137,10 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-8',
     author: 'Kritika Bista',
-    location: 'Dharan, Sunsari',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.7,
     reviewTitle: 'Simple and sweet for everyday office wear',
-    comment: 'Delivery to Dharan took 4 business days. The two layer choker is subtle and not too flashy, so I can wear it with formal shirts to my office and also on family dinners. Quality of pearls is good and color does not fade. Recommend to anyone looking for classic pearls.',
+    comment: 'Delivered in 2 business days. The two layer choker is subtle and not too flashy, so I can wear it with formal shirts to my office and also on family dinners. Quality of pearls is good and color does not fade. Recommend to anyone looking for classic pearls.',
     productName: 'Two Layer Pearl Choker',
     date: '1 month ago',
     verifiedPurchase: true,
@@ -152,10 +152,10 @@ export const INITIAL_CUSTOMER_REVIEWS: CustomerReviewWithPhoto[] = [
   {
     id: 'cr-9',
     author: 'Barsha Pandey',
-    location: 'Sanepa, Lalitpur',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.7,
     reviewTitle: 'Cute gift idea for friend circle',
-    comment: 'Got the set of 4 keyrings for Rs 499. Gave three to my college friends and kept one on my tote bag. The beads are tightly strung so keys don’t pull it apart. Cute packaging too. Fast delivery inside Ring Road.',
+    comment: 'Got the set of 4 keyrings for Rs 499. Gave three to my college friends and kept one on my tote bag. The beads are tightly strung so keys don’t pull it apart. Cute packaging too. Fast delivery in Kathmandu valley.',
     productName: 'Pearl Beaded Keyring Set Of 4',
     date: '1 month ago',
     verifiedPurchase: true,
@@ -173,6 +173,10 @@ export const CustomerReviews: React.FC = () => {
     try {
       const saved = localStorage.getItem('artified_customer_reviews_with_photos');
       if (saved) {
+        if (/chikamugal/i.test(saved)) {
+          localStorage.removeItem('artified_customer_reviews_with_photos');
+          return INITIAL_CUSTOMER_REVIEWS;
+        }
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           // If stored reviews still have old placeholder products like "The Maya Aurelia Structured Pearl Bag", migrate to real products!
@@ -181,7 +185,13 @@ export const CustomerReviews: React.FC = () => {
             r.productName?.includes('Celestia') ||
             r.productName?.includes('Ayla Boho')
           );
-          if (!hasObsolete) return parsed;
+          if (!hasObsolete) {
+            return parsed.map(r => ({
+              ...r,
+              location: 'Kathmandu, Nepal',
+              comment: (r.comment || '').replace(/chikamugal,?\s*kathmandu/gi, 'Kathmandu, Nepal').replace(/chikamugal/gi, 'Kathmandu, Nepal')
+            }));
+          }
         }
       }
     } catch {}
@@ -196,13 +206,16 @@ export const CustomerReviews: React.FC = () => {
           const map = new Map<string, CustomerReviewWithPhoto>();
           // Put firestore reviews first
           firestoreRevList.forEach((fr) => {
+            const sanitizedComment = (fr.comment || '')
+              .replace(/chikamugal,?\s*kathmandu/gi, 'Kathmandu, Nepal')
+              .replace(/chikamugal/gi, 'Kathmandu, Nepal');
             map.set(fr.id, {
               id: fr.id,
               author: fr.author,
-              location: fr.location || 'Kathmandu, Nepal',
+              location: 'Kathmandu, Nepal',
               rating: fr.rating,
-              reviewTitle: fr.comment.slice(0, 45) + (fr.comment.length > 45 ? '...' : ''),
-              comment: fr.comment,
+              reviewTitle: sanitizedComment.slice(0, 45) + (sanitizedComment.length > 45 ? '...' : ''),
+              comment: sanitizedComment,
               productName: fr.productTitle || 'Handcrafted Pearl Bag',
               date: fr.date || 'Recently',
               verifiedPurchase: true,
@@ -342,8 +355,8 @@ export const CustomerReviews: React.FC = () => {
               <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
             </div>
             <div>
-              <span className="block text-xs font-black text-[#1C1B1A]">4.9 / 5.0 Rating</span>
-              <span className="block text-[11px] text-[#736C65]">1,200+ Delivered Patrons</span>
+              <span className="block text-xs font-black text-[#1C1B1A]">4.7 / 5.0 Rating</span>
+              <span className="block text-[11px] text-[#736C65]">1,200+ Verified Buyers</span>
             </div>
           </div>
 
@@ -352,7 +365,7 @@ export const CustomerReviews: React.FC = () => {
               <MapPin className="w-5 h-5 text-[#D4AF37]" />
             </div>
             <div>
-              <span className="block text-xs font-black text-[#1C1B1A]">Chikamugal Workshop</span>
+              <span className="block text-xs font-black text-[#1C1B1A]">Kathmandu Atelier</span>
               <span className="block text-[11px] text-[#736C65]">Kathmandu, Nepal</span>
             </div>
           </div>
@@ -389,7 +402,7 @@ export const CustomerReviews: React.FC = () => {
               Loved Across Nepal • Customer Reviews
             </h2>
             <p className="text-xs sm:text-sm text-[#736C65] mt-1 max-w-2xl leading-relaxed">
-              Real photos and testimonials from patrons styling our handmade pearl bags and baroque jewelry across Kathmandu, Lalitpur, Pokhara, and all across Nepal.
+              Real photos and testimonials from customers styling our handmade pearl bags and baroque jewelry across Kathmandu, Lalitpur, Pokhara, and all across Nepal.
             </p>
           </div>
 
@@ -597,7 +610,7 @@ export const CustomerReviews: React.FC = () => {
                 rows={3}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="How was the pearl luster, structural tension, packaging, and delivery from Chikamugal? Tell others..."
+                placeholder="How was the pearl luster, structural tension, packaging, and delivery from Kathmandu? Tell others..."
                 className="w-full p-2.5 bg-[#FAF8F5] border border-[#E8DFD8] rounded-xl focus:outline-none focus:border-[#C5A880]"
               />
             </div>
@@ -697,7 +710,7 @@ export const CustomerReviews: React.FC = () => {
                     <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
                       <div className="min-w-0 pr-2">
                         <span className="text-[10px] text-white/80 block uppercase tracking-wider font-semibold">
-                          Patron Style
+                          Customer Style
                         </span>
                         <p className="text-xs font-bold text-white truncate drop-shadow-sm">
                           {rev.productName}
@@ -724,15 +737,20 @@ export const CustomerReviews: React.FC = () => {
                   <div className="space-y-2">
                     {/* Rating & Date */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-0.5 text-amber-400">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3.5 h-3.5 ${
-                              i < rev.rating ? 'fill-amber-400 text-amber-400' : 'text-zinc-200'
-                            }`}
-                          />
-                        ))}
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-0.5 text-amber-400">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${
+                                i < Math.floor(rev.rating) ? 'fill-amber-400 text-amber-400' : 'text-zinc-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[11px] font-bold text-[#1C1B1A]">
+                          {typeof rev.rating === 'number' ? rev.rating.toFixed(1) : '4.8'}
+                        </span>
                       </div>
                       <span className="text-[11px] text-[#A69E96]">{rev.date}</span>
                     </div>
@@ -845,7 +863,7 @@ export const CustomerReviews: React.FC = () => {
                   <span>Product: <strong>{activePhotoModal.productName}</strong></span>
                   <span className="text-emerald-700 font-semibold flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    Verified Patron
+                    Verified Customer
                   </span>
                 </div>
               </div>

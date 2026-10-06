@@ -14,13 +14,13 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Brand & General
     brandName: 'Artified_np',
     brandTagline: '-Art made with love',
-    atelierLocation: 'Chikamugal Atelier • Kathmandu, Nepal',
+    atelierLocation: 'Kathmandu, Nepal',
     pricingInNpr: 'Pricing in NPR (Rs.)',
     currencyNpr: 'NPR',
 
     // Announcement Bar
-    announcementStore: 'Store: Chikamugal, Kathmandu',
-    announcementText: 'Handcrafted in Chikamugal, Kathmandu • Easy exchange within 24 hrs • Code TIKTOK10 for 10% off',
+    announcementStore: 'Store: Kathmandu, Nepal',
+    announcementText: 'Handcrafted in Kathmandu, Nepal • Easy exchange within 24 hrs • Code TIKTOK10 for 10% off',
     referFriendGet: 'Refer a Friend • Get Rs. 250',
 
     // Navigation Tabs
@@ -32,7 +32,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     navTikTok: 'Follow on TikTok',
     navJournal: 'Follow on Instagram',
     navTrackOrder: 'Track Order',
-    navMeetArtisan: 'Meet the Artisan',
+    navMeetArtisan: 'Meet the Founder & Creator',
     navBestSellers: 'Best Sellers',
     navNewArrivals: 'New Arrivals',
     navAllPieces: 'All Creations',
@@ -64,7 +64,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Product Spotlight
     guidedTourLauncher: '✨ Launch Guided Spotlight Tour (Clasp, Pearls & Knotting)',
     spotlightActive: 'Spotlight Active • Click to Exit',
-    spotlightTitle: 'Artisanal Spotlight Tour',
+    spotlightTitle: 'Craftsmanship Spotlight Tour',
     exitTour: 'Exit Tour',
 
     // Modals & Action
@@ -79,7 +79,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Footer
     joinCommunity: 'Join Our Growing Atelier Community',
     followInstagram: 'Follow @artified_np for Daily Drops & Behind-The-Scenes',
-    communityDesc: 'Connect with 15,000+ patrons across Nepal. Watch our Chikamugal artisans weave pearl bags in real time, catch limited batch releases, and get custom sizing via direct message.',
+    communityDesc: 'Connect with 15,000+ customers across Nepal. Watch our Kathmandu creators weave pearl bags in real time, catch limited batch releases, and get custom sizing via direct message.',
     followOnInstagramBtn: 'Follow on Instagram',
     followOnTikTokBtn: 'Follow on TikTok',
     clientCare: 'Client Care',
@@ -94,7 +94,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     acceptedInNepal: 'Accepted In Nepal:',
     cod: 'Cash on Delivery (COD)',
     backToTop: 'Back to Top',
-    meetTheArtisanBtn: '✨ Meet the Artisan: Sahina Shrestha',
+    meetTheArtisanBtn: '✨ Meet the Founder & Creator: Sahina Shrestha',
     meetTheArtisanDesc: 'The story, vision, and devotion behind Artified_np',
     rightsReserved: 'All rights reserved. Intricately Handcrafted in Nepal.'
   },
@@ -102,13 +102,13 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Brand & General
     brandName: 'Artified_np',
     brandTagline: '-मायाले हस्तनिर्मित कला',
-    atelierLocation: 'चिकमुगल कार्यशाला • काठमाडौं, नेपाल',
+    atelierLocation: 'काठमाडौं, नेपाल',
     pricingInNpr: 'मूल्य नेपाली रूपैयाँ (रु.) मा',
     currencyNpr: 'रु.',
 
     // Announcement Bar
-    announcementStore: 'पसल: चिकमुगल, काठमाडौं',
-    announcementText: 'चिकमुगल, काठमाडौंबाट हस्तनिर्मित • २४ घण्टाभित्र सजिलो साटफेर • कोड TIKTOK10 प्रयोग गरी १०% छुट!',
+    announcementStore: 'पसल: काठमाडौं, नेपाल',
+    announcementText: 'काठमाडौं, नेपालबाट हस्तनिर्मित • २४ घण्टाभित्र सजिलो साटफेर • कोड TIKTOK10 प्रयोग गरी १०% छुट!',
     referFriendGet: 'साथीलाई सिफारिस गर्नुहोस् • रु. २५० पाउनुहोस्',
 
     // Navigation Tabs
@@ -120,7 +120,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     navTikTok: 'टिकटक ट्रेन्डिङ',
     navJournal: 'इन्स्टाग्राम जर्नल',
     navTrackOrder: 'अर्डर ट्र्याक',
-    navMeetArtisan: 'कालिगढलाई भेट्नुहोस्',
+    navMeetArtisan: 'संस्थापक र सिर्जनाकर्तालाई भेट्नुहोस्',
     navBestSellers: 'धेरै रुचाइएका',
     navNewArrivals: 'नयाँ आगमन',
     navAllPieces: 'सबै सिर्जनाहरू',
@@ -167,7 +167,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Footer
     joinCommunity: 'हाम्रो बढ्दो कलात्मक समुदायमा जोडिनुहोस्',
     followInstagram: 'दैनिक नयाँ सिर्जनाहरूका लागि @artified_np फलो गर्नुहोस्',
-    communityDesc: 'नेपालभरिका १५,०००+ ग्राहकहरूसँग जोडिनुहोस्। हाम्रा चिकमुगलका महिला कालिगढहरूले मोतीका झोला बुनेको प्रत्यक्ष हेर्नुहोस् र आफ्नो रोजाइअनुसारको साइज अर्डर गर्नुहोस्।',
+    communityDesc: 'नेपालभरिका १५,०००+ ग्राहकहरूसँग जोडिनुहोस्। हाम्रा काठमाडौंका महिला सिर्जनाकर्ताहरूले मोतीका झोला बुनेको प्रत्यक्ष हेर्नुहोस् र आफ्नो रोजाइअनुसारको साइज अर्डर गर्नुहोस्।',
     followOnInstagramBtn: 'इन्स्टाग्राममा फलो गर्नुहोस्',
     followOnTikTokBtn: 'टिकटकमा फलो गर्नुहोस्',
     clientCare: 'ग्राहक सेवा र नीतिहरू',
@@ -182,7 +182,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     acceptedInNepal: 'नेपालमा स्वीकार्य भुक्तानीहरू:',
     cod: 'डेलिभरीमा नगद भुक्तानी (COD)',
     backToTop: 'माथि जानुहोस्',
-    meetTheArtisanBtn: '✨ कालिगढलाई भेट्नुहोस्: सहिना श्रेष्ठ',
+    meetTheArtisanBtn: '✨ संस्थापक र सिर्जनाकर्ता: सहिना श्रेष्ठ',
     meetTheArtisanDesc: 'Artified_np पछाडिको कथा, दृष्टिकोण र समर्पण',
     rightsReserved: 'सर्वाधिकार सुरक्षित। नेपालमा श्रद्धापूर्वक हस्तनिर्मित।'
   }

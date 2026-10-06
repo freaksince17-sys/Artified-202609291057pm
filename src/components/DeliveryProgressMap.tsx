@@ -39,7 +39,7 @@ const NEPAL_LOCATIONS: Record<string, LocationEstimate> = {
     area: 'Baluwatar, Jhamsikhel, Thamel, New Road, Lazimpat, Baneshwor, Kupondole',
     eta: '1–2 business days (Same-day dispatch available)',
     courierType: 'Doorstep Bike Express Rider',
-    distance: '2.5 – 6.0 km from Chikamugal',
+    distance: '2.5 – 6.0 km from Kathmandu Workshop',
     statusText: 'Direct city bike courier assigned',
     coordinates: { x: 50, y: 55 }
   },
@@ -49,7 +49,7 @@ const NEPAL_LOCATIONS: Record<string, LocationEstimate> = {
     area: 'Bhaktapur Durbar, Kapan, Budhanilkantha, Imadol, Kirtipur, Thimi, Dhapakhel',
     eta: '2–3 business days',
     courierType: 'Valley Express Parcel Van / Bike',
-    distance: '8.0 – 16.5 km from Chikamugal',
+    distance: '8.0 – 16.5 km from Kathmandu Workshop',
     statusText: 'Transiting via Ring Road Hub',
     coordinates: { x: 68, y: 48 }
   },
@@ -132,7 +132,7 @@ export const DeliveryProgressMap: React.FC<DeliveryProgressMapProps> = ({ order 
             </h4>
           </div>
           <p className="text-[11px] text-[#A69E96]">
-            Real-time transit tracker from our Chikamugal workshop to your doorstep
+            Real-time transit tracker from our Kathmandu workshop to your doorstep
           </p>
         </div>
 
@@ -215,7 +215,7 @@ export const DeliveryProgressMap: React.FC<DeliveryProgressMapProps> = ({ order 
               filter="url(#glow)"
             />
 
-            {/* Origin Node: Artified Workshop (Chikamugal) */}
+            {/* Origin Node: Artified Workshop (Kathmandu) */}
             <circle cx={originX} cy={originY} r="3" fill="#1C1B1A" stroke="#D4AF37" strokeWidth="1" />
             <circle cx={originX} cy={originY} r="5" fill="#D4AF37" fillOpacity="0.25" className="animate-ping" />
 
@@ -234,7 +234,7 @@ export const DeliveryProgressMap: React.FC<DeliveryProgressMapProps> = ({ order 
           >
             <div className="bg-[#1C1B1A] text-white px-2 py-1 rounded-md text-[9px] font-bold shadow-md border border-[#D4AF37]/50 flex items-center gap-1 whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-              <span>Chikamugal Workshop (Origin)</span>
+              <span>Kathmandu Workshop (Origin)</span>
             </div>
           </div>
 

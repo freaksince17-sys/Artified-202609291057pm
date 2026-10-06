@@ -30,7 +30,7 @@ const FAQ_ITEMS: FAQItem[] = [
     id: 'ship-1',
     category: 'shipping',
     question: 'How long does delivery take inside Kathmandu Valley and across Nepal?',
-    answer: 'Inside Kathmandu & Lalitpur (Ring Road): 1–2 business days (often same-day if ordered before 12 PM). Outer Valley (Bhaktapur, Budhanilkantha, Kirtipur): 2–3 days. Nationwide Delivery across all 77 districts of Nepal (Pokhara, Biratnagar, Chitwan, Butwal, Dharan, etc.): 3–5 business days via Pathao Express and Nepal Post.',
+    answer: 'Kathmandu Valley: Rs. 120 (1 to 2 days doorstep delivery). Outside Valley: Rs. 250 to 300 (can increase depending on location/weight, 3 to 7 days delivery via express courier).',
     badge: 'Fast Dispatch'
   },
   {
@@ -63,7 +63,7 @@ const FAQ_ITEMS: FAQItem[] = [
     id: 'dur-3',
     category: 'durability',
     question: 'What if my piece needs restringing or tension adjustment later?',
-    answer: 'We stand behind our handmade craft! All Artified creations include complimentary lifetime tension checkups and restringing warranty at our Chikamugal workshop in Kathmandu.',
+    answer: 'We stand behind our handmade craft! All Artified creations include complimentary lifetime tension checkups and restringing warranty at our workshop in Kathmandu, Nepal.',
     badge: 'Lifetime Workshop Warranty'
   },
   {
@@ -100,7 +100,7 @@ interface OrderFAQsModalProps {
 }
 
 export const OrderFAQsModal: React.FC<OrderFAQsModalProps> = ({ isOpen, onClose }) => {
-  const { setIsTrackerOpen, openSizeGuideModal } = useCart();
+  const { setIsTrackerOpen } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<'all' | 'shipping' | 'durability' | 'returns' | 'packaging'>('all');
   const [expandedIds, setExpandedIds] = useState<string[]>(['ship-1', 'dur-1', 'ret-1']);
@@ -150,7 +150,7 @@ export const OrderFAQsModal: React.FC<OrderFAQsModalProps> = ({ isOpen, onClose 
               Order FAQs & Policies
             </h2>
             <p className="text-xs text-[#A69E96]">
-              Handcrafted in Chikamugal, Kathmandu • Fast shipping, durability & exchanges
+              Handcrafted in Kathmandu, Nepal • Fast shipping, durability & exchanges
             </p>
           </div>
 
@@ -278,21 +278,6 @@ export const OrderFAQsModal: React.FC<OrderFAQsModalProps> = ({ isOpen, onClose 
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-[#C5A880]" />
                 <span className="font-semibold text-[#1C1B1A]">Track an Existing Order</span>
-              </div>
-              <span className="text-[10px] text-[#8C7A6B] font-bold">&rarr;</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                openSizeGuideModal('necklaces');
-              }}
-              className="p-3 rounded-2xl bg-white border border-[#E8DFD8] hover:border-[#C5A880] text-left flex items-center justify-between text-xs transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Ruler className="w-4 h-4 text-[#C5A880]" />
-                <span className="font-semibold text-[#1C1B1A]">View Size & Fit Guide</span>
               </div>
               <span className="text-[10px] text-[#8C7A6B] font-bold">&rarr;</span>
             </button>

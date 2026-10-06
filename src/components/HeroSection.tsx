@@ -216,7 +216,7 @@ export const HeroSection: React.FC = () => {
                 }`}
               >
                 <Sparkles className="w-3 h-3 text-[#C5A880]" />
-                <span>Chikamugal, KTM Store</span>
+                <span>Kathmandu, Nepal</span>
               </button>
             </div>
 
@@ -227,7 +227,7 @@ export const HeroSection: React.FC = () => {
                   <HeartHandshake className="w-3.5 h-3.5" />
                 </div>
                 <div className="truncate">
-                  <h4 className="text-[11px] font-semibold text-[#1C1B1A] leading-tight truncate">Chikamugal Store</h4>
+                  <h4 className="text-[11px] font-semibold text-[#1C1B1A] leading-tight truncate">Kathmandu Store</h4>
                   <p className="text-[9px] text-[#736C65] truncate hidden sm:block">Kathmandu, Nepal</p>
                 </div>
               </div>

@@ -25,7 +25,7 @@ export const TestimonialsSection: React.FC = () => {
         </div>
 
         <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-[#8C7A6B] block mb-2">
-          Voices of Artified Patrons
+          Voices of Artified Customers
         </span>
         <h2 className="font-serif text-3xl sm:text-4xl text-[#1C1B1A] font-semibold mb-8">
           Loved Across Nepal

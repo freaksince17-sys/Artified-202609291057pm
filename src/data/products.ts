@@ -1,5 +1,5 @@
 import { Product, DeliveryZone, Testimonial, TikTokReel, CraftStoryData, InstagramJournalItem } from '../types';
-import { PRODUCT_REVIEWS_MAP } from '../utils/productStats';
+import { PRODUCT_REVIEWS_MAP, sanitizeReviewItem } from '../utils/productStats';
 import SAVED_PRODUCTS from './products.json';
 import SAVED_TIKTOK_REELS from './tiktok_reels.json';
 import SAVED_INSTAGRAM_ITEMS from './instagram_journal.json';
@@ -14,28 +14,20 @@ export const DEFAULT_CRAFT_STORY: CraftStoryData = (SAVED_CRAFT_STORY as unknown
 
 export const DELIVERY_ZONES: DeliveryZone[] = [
   {
-    id: 'inside_ring_road',
-    name: 'Inside Ring Road (Kathmandu / Lalitpur)',
-    area: 'Kathmandu Central, Thamel, Jhamsikhel, Baluwatar, New Road, Lazimpat, Baneshwor',
-    fee: 100,
-    estimatedDays: '1–2 business days',
-    description: 'Fast doorstep bike courier within Kathmandu Valley Ring Road'
-  },
-  {
-    id: 'outside_ring_road',
-    name: 'Outside Ring Road (Lalitpur / Bhaktapur / Kapan / Budhanilkantha)',
-    area: 'Bhaktapur Durbar area, Kapan, Budhanilkantha, Dhapakhel, Imadol, Kirtipur, Thimi',
-    fee: 150,
-    estimatedDays: '2–3 business days',
-    description: 'Extended valley doorstep delivery via express parcel service'
+    id: 'ktm_valley',
+    name: 'Kathmandu Valley',
+    area: 'Kathmandu, Lalitpur, Bhaktapur (Doorstep delivery)',
+    fee: 120,
+    estimatedDays: '1 to 2 days',
+    description: 'Fast doorstep courier inside Kathmandu Valley (1 to 2 days)'
   },
   {
     id: 'outside_valley',
-    name: 'Outside Kathmandu Valley (Major Cities in Nepal)',
-    area: 'Pokhara, Chitwan, Butwal, Biratnagar, Dharan, Nepalgunj, Itahari, Birtamode, Hetauda',
-    fee: 220,
-    estimatedDays: '3–5 business days',
-    description: 'Reliable nationwide courier delivery with SMS tracking updates'
+    name: 'Outside Valley',
+    area: 'Pokhara, Chitwan, Butwal, Biratnagar, Dharan & all other districts across Nepal',
+    fee: 250,
+    estimatedDays: '3 to 7 days',
+    description: 'Rs. 250 to 300 (may increase depending on weight/location), 3 to 7 days'
   }
 ];
 
@@ -48,8 +40,8 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     id: 't1',
     author: 'Aayushi Khadgi',
-    location: 'Baluwatar, Kathmandu',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.8,
     comment: 'Honestly, I was not sure about ordering bags online because sometimes pearls look cheap plastic. But this Red Pearl Beaded Bag is surprisingly heavy and well made. The red pearls shine nicely under hall lights and it easily fits my mobile phone, handkerchief and compact powder. Delivery rider called before arriving. Everyone in wedding was asking where I got it from!',
     productName: 'Red Pearl Beaded Bag',
     date: '2 weeks ago',
@@ -58,8 +50,8 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     id: 't2',
     author: 'Prerana Shahi',
-    location: 'Jhamsikhel, Lalitpur',
-    rating: 5,
+    location: 'Kathmandu, Nepal',
+    rating: 4.7,
     comment: 'I ordered this choker after seeing their reel on Instagram. My neck is bit thin so normal fixed chokers become loose on me, but this one has adjustable chain at back so I could fit it properly. Wore it with black sari for college farewell. Beads are smooth and did not scratch my skin. Very happy with the purchase at this price.',
     productName: 'Pearl Beaded Adjustable Choker',
     date: '1 month ago',
@@ -68,9 +60,9 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     id: 't3',
     author: 'Bhawana Gurung',
-    location: 'Lakeside, Pokhara',
-    rating: 5,
-    comment: 'I live in Pokhara so I was little worried whether pearl bag might get pressed or damaged during courier transport. But the seller packed it inside solid box with lots of bubble wrap. The round shape is very unique and sturdy. It is slightly heavy in hand because of solid beads, but look is 100% royal.',
+    location: 'Kathmandu, Nepal',
+    rating: 4.6,
+    comment: 'I ordered the round pearl bag for my celebration. The seller packed it inside solid box with lots of bubble wrap and a soft pouch. The round shape is very unique and sturdy. It is slightly heavy in hand because of solid beads, but look is 100% royal.',
     productName: 'Round Pearl Bag',
     date: '3 weeks ago',
     verifiedPurchase: true
@@ -82,7 +74,7 @@ export const TIKTOK_REELS: TikTokReel[] = (SAVED_TIKTOK_REELS as unknown as TikT
 export const FAQS = [
   {
     q: 'How long does delivery take inside and outside Kathmandu Valley?',
-    a: 'Inside Ring Road (Kathmandu/Lalitpur): 1–2 business days. Outside Ring Road: 2–3 business days. Major cities across Nepal (Pokhara, Chitwan, Butwal, Biratnagar, etc.): 3–5 business days via trusted courier.'
+    a: 'Kathmandu Valley: Rs. 120 (1 to 2 days doorstep delivery). Outside Valley: Rs. 250 to 300 (can increase depending on location/weight, 3 to 7 days delivery via courier).'
   },
   {
     q: 'How do I pay with eSewa, Khalti, or Cash on Delivery (COD)?',
@@ -90,7 +82,7 @@ export const FAQS = [
   },
   {
     q: 'Where is your store located and can I pick up in person?',
-    a: 'Our physical store is located in Chikamugal, Kathmandu, Nepal. You can visit us in Chikamugal to pick up your handcrafted pieces or order online for fast home delivery with Cash on Delivery (COD).'
+    a: 'Our store is located in Kathmandu, Nepal. You can visit us in Kathmandu to pick up your handcrafted pieces or order online for fast home delivery across Nepal with Cash on Delivery (COD).'
   },
   {
     q: 'How durable are the pearl bags? Will the beads break?',
@@ -98,6 +90,6 @@ export const FAQS = [
   },
   {
     q: 'What is your exchange and inspection policy?',
-    a: 'We offer easy exchange within 24 hrs of delivery if there is any issue or if you need an adjustment. Simply contact our Chikamugal, Kathmandu store on WhatsApp with your Order ID for immediate support.'
+    a: 'We offer easy exchange within 24 hrs of delivery if there is any issue or if you need an adjustment. Simply contact our Kathmandu, Nepal team on WhatsApp with your Order ID for immediate support.'
   }
 ];

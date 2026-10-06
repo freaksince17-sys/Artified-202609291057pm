@@ -99,7 +99,7 @@ export const FloatingWhatsAppButton: React.FC = () => {
                 </div>
                 <p className="text-[9px] text-emerald-400 flex items-center gap-1">
                   <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Online • Chikamugal Atelier</span>
+                  <span>Online • Kathmandu Workshop</span>
                 </p>
               </div>
             </div>

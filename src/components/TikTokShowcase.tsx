@@ -430,7 +430,7 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
               Follow on TikTok
             </h2>
             <p className="text-xs sm:text-sm text-neutral-300 mt-1 max-w-lg">
-              Watch real customer unboxings, slow-motion pearl bag shine tests, and wedding styling guides straight from our store in Chikamugal, Kathmandu.
+              Watch real customer unboxings, slow-motion pearl bag shine tests, and wedding styling guides straight from our store in Kathmandu, Nepal.
             </p>
           </div>
 
@@ -541,7 +541,7 @@ export const TikTokShowcase: React.FC<TikTokShowcaseProps> = ({ embedded = false
           </h3>
 
           <p className="text-xs sm:text-sm text-neutral-300 max-w-md mx-auto leading-relaxed">
-            Stay updated with daily store clips, fresh product drops, customer reviews, and handcrafted pearl creations directly from Chikamugal, Kathmandu.
+            Stay updated with daily store clips, fresh product drops, customer reviews, and handcrafted pearl creations directly from Kathmandu, Nepal.
           </p>
 
           <div className="pt-2 flex items-center justify-center gap-3 flex-wrap">

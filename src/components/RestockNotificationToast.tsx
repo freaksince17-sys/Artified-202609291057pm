@@ -66,7 +66,7 @@ export const RestockNotificationToast: React.FC = () => {
                   🎉 Back In Stock!
                 </span>
                 <span className="text-[10px] text-[#8C7A6B]">
-                  Chikamugal Atelier
+                  Kathmandu Workshop
                 </span>
               </div>
               <h4 className="font-serif font-bold text-xs sm:text-sm text-[#1C1B1A] truncate">

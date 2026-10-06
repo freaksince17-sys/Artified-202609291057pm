@@ -383,7 +383,7 @@ export const AboutCraftSection: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-serif text-xl font-semibold text-[#1C1B1A]">
-                      Handmade Chikamugal Workshop
+                      Handmade Kathmandu Workshop
                     </h3>
                     <p className="text-xs text-[#736C65] mt-1.5 max-w-xs mx-auto">
                       Slow fashion handcrafted with pride by Sahina Shrestha and local women handcrafters in Kathmandu.

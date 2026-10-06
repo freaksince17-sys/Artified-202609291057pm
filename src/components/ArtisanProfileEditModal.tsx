@@ -42,7 +42,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
 }) => {
   const { artisanProfile, updateArtisanProfile, updateInstagramSettings } = useCart();
   const [profile, setProfile] = useState<ArtisanProfileData>(() => artisanProfile);
-  const [activeTab, setActiveTab] = useState<'general' | 'story' | 'pillars' | 'contact'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'story' | 'contact'>('general');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -114,10 +114,10 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
             </div>
             <div>
               <h3 className="font-serif text-lg sm:text-xl font-bold text-[#1C1B1A] dark:text-[#FAF8F5]">
-                Edit "Meet the Artisan"
+                Edit "Meet the Founder & Creator"
               </h3>
               <p className="text-[11px] text-[#736C65] dark:text-[#A69E96] font-medium">
-                Live Artisan Editor • Instant Preview & Profile Updates
+                Live Profile Editor • Instant Preview & Profile Updates
               </p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                 : 'border-transparent text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-white'
             }`}
           >
-            1. Artisan Identity & Photo
+            1. Identity & Photo
           </button>
           <button
             type="button"
@@ -153,18 +153,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                 : 'border-transparent text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-white'
             }`}
           >
-            2. Headline, Quote & Philosophy
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('pillars')}
-            className={`py-2.5 px-3 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'pillars'
-                ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5]'
-                : 'border-transparent text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-white'
-            }`}
-          >
-            3. The 4 Craft Pillars
+            2. Headline, Story & Philosophy
           </button>
           <button
             type="button"
@@ -175,7 +164,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                 : 'border-transparent text-[#736C65] dark:text-[#A69E96] hover:text-[#1C1B1A] dark:hover:text-white'
             }`}
           >
-            4. WhatsApp & Guarantees
+            3. WhatsApp & Guarantees
           </button>
         </div>
 
@@ -184,7 +173,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
           {saveSuccess && (
             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Artisan profile saved successfully! The page has updated live.</span>
+              <span>Founder & Creator profile saved successfully! The page has updated live.</span>
             </div>
           )}
 
@@ -194,7 +183,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#1C1B1A] dark:text-[#F5F2EB] mb-1">
-                    Artisan Name
+                    Founder & Creator Name
                   </label>
                   <input
                     type="text"
@@ -208,7 +197,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
 
                 <div>
                   <label className="block text-xs font-bold text-[#1C1B1A] dark:text-[#F5F2EB] mb-1">
-                    Artisan Role / Title
+                    Role / Title
                   </label>
                   <input
                     type="text"
@@ -216,7 +205,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                     onChange={(e) => setProfile({ ...profile, artisanRole: e.target.value })}
                     required
                     className="w-full px-3 py-2 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] focus:border-[#C5A880] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none"
-                    placeholder="e.g. Founder & Master Artisan"
+                    placeholder="e.g. Founder and Creator"
                   />
                 </div>
               </div>
@@ -232,7 +221,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                     onChange={(e) => setProfile({ ...profile, atelierLocation: e.target.value })}
                     required
                     className="w-full px-3 py-2 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] focus:border-[#C5A880] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none"
-                    placeholder="e.g. Chikamugal Atelier • Kathmandu, Nepal"
+                    placeholder="e.g. Kathmandu, Nepal"
                   />
                 </div>
 
@@ -348,51 +337,6 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                   </div>
                 </div>
               </div>
-
-              {/* Stats Below Photo */}
-              <div className="pt-2 border-t border-[#E8DFD8] dark:border-[#2D2B28] grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3 bg-white dark:bg-[#1E1D1B] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                    <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>Stat Card 1 (Time devoted)</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={profile.stat1Value}
-                    onChange={(e) => setProfile({ ...profile, stat1Value: e.target.value })}
-                    className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5]"
-                    placeholder="e.g. 9–14 Hours"
-                  />
-                  <input
-                    type="text"
-                    value={profile.stat1Label}
-                    onChange={(e) => setProfile({ ...profile, stat1Label: e.target.value })}
-                    className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs text-[#5E5955] dark:text-[#A69E96]"
-                    placeholder="e.g. Devoted Per Bag"
-                  />
-                </div>
-
-                <div className="p-3 bg-white dark:bg-[#1E1D1B] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                    <Heart className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>Stat Card 2 (Fair living wage)</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={profile.stat2Value}
-                    onChange={(e) => setProfile({ ...profile, stat2Value: e.target.value })}
-                    className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5]"
-                    placeholder="e.g. 3x Living Wage"
-                  />
-                  <input
-                    type="text"
-                    value={profile.stat2Label}
-                    onChange={(e) => setProfile({ ...profile, stat2Label: e.target.value })}
-                    className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs text-[#5E5955] dark:text-[#A69E96]"
-                    placeholder="e.g. Local Women Makers"
-                  />
-                </div>
-              </div>
             </div>
           )}
 
@@ -409,7 +353,7 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                   onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
                   required
                   className="w-full px-3 py-2 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] focus:border-[#C5A880] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none"
-                  placeholder="e.g. Meet the Artisan: Sahina Shrestha"
+                  placeholder="e.g. Meet the Founder & Creator: Sahina Shrestha"
                 />
               </div>
 
@@ -423,138 +367,34 @@ export const ArtisanProfileEditModal: React.FC<ArtisanProfileEditModalProps> = (
                   onChange={(e) => setProfile({ ...profile, subheadline: e.target.value })}
                   required
                   className="w-full px-3 py-2 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] focus:border-[#C5A880] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none"
-                  placeholder="e.g. Slow Craft & Living Beadwork from Chikamugal, Kathmandu"
+                  placeholder="e.g. From Childhood Passion to Creative Journey"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-[#1C1B1A] dark:text-[#F5F2EB] mb-1">
-                  Artisan Philosophy Quote
+                  Founder & Creator Story
                 </label>
                 <textarea
-                  rows={4}
+                  rows={5}
                   value={profile.quote}
                   onChange={(e) => setProfile({ ...profile, quote: e.target.value })}
                   required
                   className="w-full px-3 py-2 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] focus:border-[#C5A880] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none leading-relaxed"
-                  placeholder="Artisan quote about devotion, hand-knotting, and handmade slow luxury..."
-                />
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: 4 Craft Pillars */}
-          {activeTab === 'pillars' && (
-            <div className="space-y-4">
-              <p className="text-xs text-[#736C65] dark:text-[#A69E96]">
-                Customize the 4 core pillars of Artified's craft heritage displayed in the 2x2 grid:
-              </p>
-
-              {/* Pillar 1 */}
-              <div className="p-3.5 bg-white dark:bg-[#1E1D1B] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
-                <label className="block text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                  Pillar 1 (Heritage)
-                </label>
-                <input
-                  type="text"
-                  value={profile.pillar1.title}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar1: { ...profile.pillar1, title: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5]"
-                  placeholder="e.g. 1. Rooted in Chikamugal"
-                />
-                <textarea
-                  rows={2}
-                  value={profile.pillar1.desc}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar1: { ...profile.pillar1, desc: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs text-[#5E5955] dark:text-[#A69E96]"
-                  placeholder="Pillar description..."
+                  placeholder="Founder story about childhood passion, watching mother create handicrafts..."
                 />
               </div>
 
-              {/* Pillar 2 */}
-              <div className="p-3.5 bg-white dark:bg-[#1E1D1B] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
-                <label className="block text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                  Pillar 2 (Technique & Time)
+              <div>
+                <label className="block text-xs font-bold text-[#1C1B1A] dark:text-[#F5F2EB] mb-1">
+                  Why “Artified”? Philosophy
                 </label>
-                <input
-                  type="text"
-                  value={profile.pillar2.title}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar2: { ...profile.pillar2, title: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5]"
-                  placeholder="e.g. 2. 9–14 Hours Hand-Knotting"
-                />
                 <textarea
-                  rows={2}
-                  value={profile.pillar2.desc}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar2: { ...profile.pillar2, desc: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs text-[#5E5955] dark:text-[#A69E96]"
-                  placeholder="Pillar description..."
-                />
-              </div>
-
-              {/* Pillar 3 */}
-              <div className="p-3.5 bg-white dark:bg-[#1E1D1B] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
-                <label className="block text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                  Pillar 3 (Social Impact & Living Wage)
-                </label>
-                <input
-                  type="text"
-                  value={profile.pillar3.title}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar3: { ...profile.pillar3, title: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5]"
-                  placeholder="e.g. 3. Empowering Local Women"
-                />
-                <textarea
-                  rows={2}
-                  value={profile.pillar3.desc}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar3: { ...profile.pillar3, desc: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs text-[#5E5955] dark:text-[#A69E96]"
-                  placeholder="Pillar description..."
-                />
-              </div>
-
-              {/* Pillar 4 */}
-              <div className="p-3.5 bg-white dark:bg-[#1E1D1B] rounded-xl border border-[#E8DFD8] dark:border-[#2D2B28] space-y-2">
-                <label className="block text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                  Pillar 4 (Bespoke Bridal Tailoring)
-                </label>
-                <input
-                  type="text"
-                  value={profile.pillar4.title}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar4: { ...profile.pillar4, title: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs font-bold text-[#1C1B1A] dark:text-[#FAF8F5]"
-                  placeholder="e.g. 4. Bespoke Bridal Tailoring"
-                />
-                <textarea
-                  rows={2}
-                  value={profile.pillar4.desc}
-                  onChange={(e) => setProfile({
-                    ...profile,
-                    pillar4: { ...profile.pillar4, desc: e.target.value }
-                  })}
-                  className="w-full px-2.5 py-1.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded-lg text-xs text-[#5E5955] dark:text-[#A69E96]"
-                  placeholder="Pillar description..."
+                  rows={5}
+                  value={profile.whyArtified || ''}
+                  onChange={(e) => setProfile({ ...profile, whyArtified: e.target.value })}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] focus:border-[#C5A880] rounded-xl text-xs text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none leading-relaxed"
+                  placeholder="Artified comes from the combination of Art and Modified..."
                 />
               </div>
             </div>

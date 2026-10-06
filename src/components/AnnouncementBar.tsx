@@ -27,11 +27,11 @@ export const AnnouncementBar: React.FC = () => {
           <p className="tracking-wide text-[10px] sm:text-[11px]">
             {isNe ? (
               <>
-                चिकमुगल, काठमाडौंबाट हस्तनिर्मित • <span className="font-semibold text-[#D4AF37]">२४ घण्टाभित्र सजिलो साटफेर</span> • कोड <span className="font-semibold text-[#D4AF37] tracking-widest underline decoration-dotted">TIKTOK10</span> प्रयोग गरी १०% छुट!
+                काठमाडौं, नेपालबाट हस्तनिर्मित • <span className="font-semibold text-[#D4AF37]">२४ घण्टाभित्र सजिलो साटफेर</span> • कोड <span className="font-semibold text-[#D4AF37] tracking-widest underline decoration-dotted">TIKTOK10</span> प्रयोग गरी १०% छुट!
               </>
             ) : (
               <>
-                Handcrafted in Chikamugal, Kathmandu • <span className="font-semibold text-[#D4AF37]">Easy exchange within 24 hrs</span> • Code <span className="font-semibold text-[#D4AF37] tracking-widest underline decoration-dotted">TIKTOK10</span> for 10% off
+                Handcrafted in Kathmandu, Nepal • <span className="font-semibold text-[#D4AF37]">Easy exchange within 24 hrs</span> • Code <span className="font-semibold text-[#D4AF37] tracking-widest underline decoration-dotted">TIKTOK10</span> for 10% off
               </>
             )}
           </p>

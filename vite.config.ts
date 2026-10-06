@@ -20,7 +20,7 @@ export default defineConfig(() => {
           id: '/',
           name: 'Artified Nepal',
           short_name: 'ArtifiedNP',
-          description: 'Authentic Nepali Artisan Pearl Jewelry & Macrame Handcrafted in Kathmandu',
+          description: 'Authentic Nepali Founder and Creator Pearl Jewelry & Macrame Handcrafted in Kathmandu',
           theme_color: '#1C1B1A',
           background_color: '#FAF8F5',
           display: 'standalone',
@@ -42,8 +42,8 @@ export default defineConfig(() => {
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,mp4}'],
-          maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // Allow precaching assets up to 15MB (e.g. built JS and video loop files)
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}'],
+          maximumFileSizeToCacheInBytes: 30 * 1024 * 1024, // 30MB safety margin for large bundles
           runtimeCaching: [
             {
               // Cache Unsplash product images with CacheFirst (Offline First)
@@ -145,6 +145,9 @@ export default defineConfig(() => {
       },
     },
     server: {
+      host: '0.0.0.0',
+      port: 3000,
+      allowedHosts: true as const,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

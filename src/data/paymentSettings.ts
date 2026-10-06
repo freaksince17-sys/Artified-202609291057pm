@@ -12,7 +12,7 @@ export const DEFAULT_PAYMENT_SETTINGS: SellerPaymentSettings = {
   accountName: 'Sahina Shrestha',
   phone: '9767573721',
   bankName: 'Global IME Bank (Fonepay Network)',
-  branch: 'Chikamugal, Kathmandu',
+  branch: 'Kathmandu, Nepal',
   fonepayQrImage: '',
   esewaQrImage: '',
   khaltiQrImage: ''

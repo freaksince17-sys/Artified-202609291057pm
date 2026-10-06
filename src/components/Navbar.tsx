@@ -21,7 +21,8 @@ import {
   Sun,
   Moon,
   ExternalLink,
-  Lock
+  Lock,
+  Award
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -154,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                 type="button"
                 onClick={openWhatsApp}
                 title="Chat with Artified on WhatsApp"
-                aria-label="Chat directly with artisan on WhatsApp"
+                aria-label="Chat directly with founder and creator on WhatsApp"
                 className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#1C1B1A] dark:text-[#F5F2EB] hover:text-[#075E54] dark:hover:text-[#25D366] py-1.5 px-3 rounded-full border border-[#E8DFD8] dark:border-[#2E2C29] bg-white dark:bg-[#1A1918] hover:border-[#25D366] transition-all cursor-pointer shadow-2xs shrink-0"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
@@ -240,23 +241,42 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
               {t('navCreations')}
             </button>
 
-            {/* Meet the Artisan (Sahina Shrestha) */}
+            {/* Meet the Founder and Creator (Sahina Shrestha) */}
             <button
               type="button"
               onClick={() => {
                 setActiveNavTab('artisan');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              aria-label="Meet master artisan Sahina Shrestha and read her story"
+              aria-label="Meet founder and creator Sahina Shrestha and read her story"
               className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
                 activeNavTab === 'artisan'
                   ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
                   : 'border-transparent text-[#8C5D36] dark:text-[#C5A880] hover:border-[#D4AF37]'
               }`}
-              title="Meet founder & artisan Sahina Shrestha"
+              title="Meet founder and creator Sahina Shrestha"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>{t('navMeetArtisan')}</span>
+            </button>
+
+            {/* Workshops & Training Gallery */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveNavTab('workshops');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              aria-label="View workshops, training photos and videos"
+              className={`hover:text-[#1C1B1A] dark:hover:text-[#FAF8F5] transition-colors flex items-center gap-1.5 pb-1 border-b-2 cursor-pointer ${
+                activeNavTab === 'workshops'
+                  ? 'border-[#C5A880] text-[#1C1B1A] dark:text-[#FAF8F5] font-semibold'
+                  : 'border-transparent text-[#5E5955] dark:text-[#A69E96]'
+              }`}
+              title="Workshops & Masterclasses by Sahina Shrestha"
+            >
+              <Award className="w-3.5 h-3.5 text-[#C5A880]" />
+              <span>{language === 'ne' ? 'कार्यशाला र तालिम' : 'Workshops'}</span>
             </button>
 
             {/* Tab 1: As Seen On TikTok */}
@@ -435,14 +455,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
 
-                {/* Meet the Artisan (Sahina Shrestha) */}
+                {/* Meet the Founder and Creator (Sahina Shrestha) */}
                 <button
                   onClick={() => {
                     setActiveNavTab('artisan');
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  aria-label="Meet master artisan Sahina Shrestha"
+                  aria-label="Meet founder and creator Sahina Shrestha"
                   className={`flex items-center justify-between py-2.5 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
                     activeNavTab === 'artisan' ? 'text-[#C5A880] font-bold' : 'text-[#8C5D36] dark:text-[#E6CA9E]'
                   }`}
@@ -450,6 +470,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                   <span className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#D4AF37]" />
                     <span>{t('navMeetArtisan')} (Sahina Shrestha)</span>
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-[#8C847E]" />
+                </button>
+
+                {/* Workshops & Training Gallery */}
+                <button
+                  onClick={() => {
+                    setActiveNavTab('workshops');
+                    setMobileMenuOpen(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  aria-label="Workshops & Training"
+                  className={`flex items-center justify-between py-2.5 text-xs font-semibold tracking-wider uppercase border-b border-[#F0EBE5] dark:border-[#262422] ${
+                    activeNavTab === 'workshops' ? 'text-[#C5A880] font-bold' : 'text-[#4A4541] dark:text-[#A69E96]'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-[#C5A880]" />
+                    <span>{language === 'ne' ? 'कार्यशाला र तालिम' : 'Workshops & Training Gallery'}</span>
                   </span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
@@ -559,10 +598,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigateSection }) => {
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }, 350);
                   }}
-                  aria-label="Read pearl and macrame care guide"
+                  aria-label="Read care guide"
                   className="flex items-center justify-between py-2.5 text-xs font-medium tracking-wider uppercase text-[#736C65] dark:text-[#A69E96] border-b border-[#F0EBE5] dark:border-[#262422]"
                 >
-                  <span>Pearl & Macrame Care Guide</span>
+                  <span>Care Guide</span>
                   <ChevronRight className="w-4 h-4 text-[#8C847E]" />
                 </button>
               </div>

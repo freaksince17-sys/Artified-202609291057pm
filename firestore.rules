@@ -7,6 +7,18 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // Workshop training gallery photos & videos
+    match /workshop_gallery/{itemId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Workshop masterclasses & groups created by seller
+    match /workshop_groups/{groupId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
     // TikTok & Instagram showcase
     match /tiktok_reels/{reelId} {
       allow read: if true;

@@ -4,7 +4,7 @@
     "customerName": "Lamar Anzelov",
     "phone": "9703726980",
     "deliveryAddress": "175/25, Kathmandu Valley",
-    "deliveryZoneName": "Inside Ring Road (Kathmandu / Lalitpur)",
+    "deliveryZoneName": "Kathmandu Valley",
     "paymentMethodText": "Direct Order / Cash on Delivery",
     "paymentStatus": "Paid & Verified",
     "items": [
@@ -22,9 +22,9 @@
     "currentPhase": "out_for_delivery",
     "progressPercentage": 85,
     "artisanName": "Sahina Shrestha",
-    "artisanRole": "Founder & Master Handcrafter",
-    "studioLocation": "Artified Workshop, Chikamugal, Kathmandu",
-    "liveCraftNotes": "Your Caviar Pearl Bag was meticulously hand-woven and inspected at our Chikamugal workshop. It has been handed over to our express courier for delivery to your doorstep.",
+    "artisanRole": "Founder and Creator",
+    "studioLocation": "Artified Workshop, Kathmandu, Nepal",
+    "liveCraftNotes": "Your Caviar Pearl Bag was meticulously hand-woven and inspected at our Kathmandu workshop. It has been handed over to our express courier for delivery to your doorstep.",
     "courierPartner": "Kathmandu Valley Express Courier",
     "consignmentCode": "KTM-EXP-5526",
     "updatedAt": "2026-10-03T08:15:00.000Z"

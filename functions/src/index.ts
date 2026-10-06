@@ -93,7 +93,7 @@ function buildRestockEmailHtml(
                 ARTIFIED<span style="color: #D4AF37; font-size: 14px;">_np</span>
               </h1>
               <p style="margin: 6px 0 0; color: #C5A880; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">
-                Handmade Luxury • Chikamugal, Kathmandu
+                Handmade Luxury • Kathmandu, Nepal
               </p>
             </td>
           </tr>
@@ -151,7 +151,7 @@ function buildRestockEmailHtml(
                       🌿 Why Artified Pieces Are Unique:
                     </p>
                     <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #736C65; line-height: 1.6;">
-                      <li>Handwoven pearl beads and macramé cords crafted in Chikamugal</li>
+                      <li>Handwoven pearl beads and macramé cords crafted in Kathmandu, Nepal</li>
                       <li>Fast delivery across Kathmandu Valley & 77 Nepal districts</li>
                       <li>Cash on Delivery (COD), eSewa, and Khalti accepted</li>
                     </ul>
@@ -168,7 +168,7 @@ function buildRestockEmailHtml(
                 Need custom sizing or have questions about this piece?
               </p>
               <a href="https://wa.me/9779767573721?text=Hi%20Artified!%20I%20received%20the%20restock%20email%20for%20${encodeURIComponent(productTitle)}" style="display: inline-flex; align-items: center; gap: 8px; color: #075E54; font-size: 13px; font-weight: 600; text-decoration: none;">
-                💬 Chat with our Artisan on WhatsApp (+977 9767573721)
+                💬 Chat with our Founder & Creator on WhatsApp (+977 9767573721)
               </a>
             </td>
           </tr>
@@ -177,7 +177,7 @@ function buildRestockEmailHtml(
           <tr>
             <td style="background-color: #FAF8F5; padding: 24px; text-align: center; border-top: 1px solid #E8DFD8; font-size: 11px; color: #8C847E; line-height: 1.5;">
               <p style="margin: 0 0 6px;">
-                © ${new Date().getFullYear()} Artified_np • Chikamugal, Kathmandu, Nepal
+                © ${new Date().getFullYear()} Artified_np • Kathmandu, Nepal
               </p>
               <p style="margin: 0;">
                 You received this notification because you subscribed to the waitlist with <strong>${subscriberEmail}</strong>.

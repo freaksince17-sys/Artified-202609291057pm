@@ -36,7 +36,8 @@ export const CartDrawer: React.FC = () => {
     discount,
     setIsCheckoutOpen,
     openAccountModal,
-    openReferralModal
+    openReferralModal,
+    isReferralVisible
   } = useCart();
 
   const [promoInput, setPromoInput] = React.useState('');
@@ -272,20 +273,22 @@ export const CartDrawer: React.FC = () => {
               </div>
 
               {/* Refer a Friend prompt */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCartOpen(false);
-                  openReferralModal();
-                }}
-                className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-50/80 to-[#FAF8F5] dark:from-amber-950/30 dark:to-[#181716] border border-[#D4AF37]/40 text-left text-xs text-[#1C1B1A] dark:text-[#F5F2EB] flex items-center justify-between hover:border-[#D4AF37] transition-all cursor-pointer shadow-2xs"
-              >
-                <div className="flex items-center gap-2">
-                  <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span className="font-semibold text-[11px]">Invite friends & earn Rs. 250 credit</span>
-                </div>
-                <span className="text-[10px] text-[#C5A880] font-bold">Refer & Earn &rarr;</span>
-              </button>
+              {isReferralVisible && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCartOpen(false);
+                    openReferralModal();
+                  }}
+                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-50/80 to-[#FAF8F5] dark:from-amber-950/30 dark:to-[#181716] border border-[#D4AF37]/40 text-left text-xs text-[#1C1B1A] dark:text-[#F5F2EB] flex items-center justify-between hover:border-[#D4AF37] transition-all cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span className="font-semibold text-[11px]">Invite friends & earn Rs. 250 credit</span>
+                  </div>
+                  <span className="text-[10px] text-[#C5A880] font-bold">Refer & Earn &rarr;</span>
+                </button>
+              )}
 
               {/* Security reassurance */}
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#736C65] dark:text-[#A69E96] pt-1">
@@ -320,7 +323,7 @@ export const CartDrawer: React.FC = () => {
               )}
               <div className="flex justify-between text-[#736C65] dark:text-[#8C847E] text-[11px]">
                 <span>Estimated Delivery</span>
-                <span>Calculated at checkout (Rs. 100–220)</span>
+                <span>KTM Valley: Rs. 120 (1–2 days) • Outside: Rs. 250 (3–7 days)</span>
               </div>
             </div>
 

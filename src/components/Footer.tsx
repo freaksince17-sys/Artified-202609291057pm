@@ -31,10 +31,9 @@ export const Footer: React.FC = () => {
     setIsSellerAuthModalOpen, 
     setActiveNavTab,
     openOrderFAQsModal,
-    openSizeGuideModal,
     openAccountModal,
     openReferralModal,
-    loyaltyPointsBalance,
+    isReferralVisible,
     instagramHandle,
     instagramProfileUrl
   } = useCart();
@@ -75,7 +74,7 @@ export const Footer: React.FC = () => {
             <div>
               <ArtifiedLogo variant="light" size="lg" />
               <p className="text-[10px] tracking-widest uppercase text-[#C5A880] mt-1 font-medium">
-                Chikamugal Atelier • Kathmandu
+                Kathmandu Atelier, Nepal
               </p>
             </div>
             <p className="text-xs text-[#A69E96] leading-relaxed">
@@ -117,7 +116,7 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Column 2: Artisanal Categories */}
+          {/* Column 2: Handcrafted Categories */}
           <div>
             <h5 className="text-xs font-bold uppercase tracking-[0.18em] text-[#C5A880] mb-4">
               {t('navCreations')}
@@ -222,36 +221,18 @@ export const Footer: React.FC = () => {
                   <span>Order FAQs & Policies (Shipping, Durability, Returns)</span>
                 </button>
               </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => openSizeGuideModal('necklaces')}
-                  className="hover:text-white transition-colors block text-left cursor-pointer"
-                >
-                  📐 Size & Fit Guide (Necklaces & Rings)
-                </button>
-              </li>
-              {/* Patron Perks & Community Rewards */}
-              <li className="pt-1.5 border-t border-[#3E3A36]">
-                <button
-                  type="button"
-                  onClick={() => openAccountModal('rewards')}
-                  className="hover:text-[#D4AF37] text-amber-200/90 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
-                >
-                  <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Patron Rewards ({loyaltyPointsBalance} pts)</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={openReferralModal}
-                  className="hover:text-[#D4AF37] text-[#D4AF37] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
-                >
-                  <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Refer a Friend (Get 10% Off)</span>
-                </button>
-              </li>
+              {isReferralVisible && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={openReferralModal}
+                    className="hover:text-[#D4AF37] text-[#D4AF37] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                  >
+                    <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <span>Refer a Friend (Get 10% Off)</span>
+                  </button>
+                </li>
+              )}
               <li>
                 <a
                   href="https://wa.me/9779767573721"
@@ -286,7 +267,7 @@ export const Footer: React.FC = () => {
             </h5>
             <div className="flex items-start gap-2.5 text-xs text-[#A69E96]">
               <MapPin className="w-4 h-4 text-[#C5A880] shrink-0 mt-0.5" />
-              <span>Chikamugal, Kathmandu, Nepal</span>
+              <span>Kathmandu, Nepal</span>
             </div>
             <div className="flex items-center gap-2.5 text-xs text-[#A69E96]">
               <Phone className="w-4 h-4 text-[#C5A880] shrink-0" />

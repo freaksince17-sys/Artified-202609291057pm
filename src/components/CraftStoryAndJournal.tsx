@@ -87,7 +87,7 @@ export const CraftStoryAndJournal: React.FC = () => {
   const [newCoverImage, setNewCoverImage] = useState(CAVIAR_PEARL_BAG_IMAGE);
   const [newContentText, setNewContentText] = useState('');
   const [newTagsText, setNewTagsText] = useState('Pearl Weaving, Kathmandu, Handmade');
-  const [newKeywordsText, setNewKeywordsText] = useState('handmade pearl bags nepal, chikamugal craft');
+  const [newKeywordsText, setNewKeywordsText] = useState('handmade pearl bags nepal, kathmandu craft');
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -205,7 +205,7 @@ export const CraftStoryAndJournal: React.FC = () => {
       excerpt: newExcerpt.trim() || newContentText.slice(0, 160) + '...',
       content: newContentText.trim().split('\n\n'),
       author: 'Sahina Shrestha',
-      authorRole: 'Master Artisan & Founder',
+      authorRole: 'Founder and Creator',
       category: newCategory,
       publishedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       readTime: `${Math.max(2, Math.ceil(newContentText.split(' ').length / 180))} min read`,
@@ -245,7 +245,7 @@ export const CraftStoryAndJournal: React.FC = () => {
             <div className="space-y-0.5">
               <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#FAF8F5] dark:bg-[#201F1D] border border-[#E8DFD8] dark:border-[#33302C] text-[#8C5D36] dark:text-[#E6CA9E] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
                 <MapPin className="w-3 h-3 text-[#D4AF37]" />
-                <span>Chikamugal Atelier • Kathmandu, Nepal</span>
+                <span>Kathmandu, Nepal</span>
               </div>
               <h1 className="font-serif text-lg sm:text-2xl lg:text-3xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold tracking-tight">
                 {isNe ? 'हाम्रो कथा र जीवित शिल्पकारी' : 'Our Story & Living Craft'}
@@ -329,7 +329,7 @@ export const CraftStoryAndJournal: React.FC = () => {
               <div className="absolute top-2 left-2 right-2 flex items-center justify-between text-white text-xs z-10">
                 <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[9px] font-bold uppercase tracking-wider border border-white/20 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                  <span>Chikamugal Workshop</span>
+                  <span>Kathmandu Workshop</span>
                 </span>
 
                 <button
@@ -367,7 +367,7 @@ export const CraftStoryAndJournal: React.FC = () => {
                   </h3>
                 </div>
                 <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug">
-                  No factory molding. Every piece requires 9 to 14 hours of continuous hand-knotting on high-tensile core threads.
+                  No factory molding. Every piece is crafted with meticulous continuous hand-knotting on high-tensile core threads.
                 </p>
               </div>
 
@@ -380,7 +380,7 @@ export const CraftStoryAndJournal: React.FC = () => {
                   </h3>
                 </div>
                 <p className="text-[11px] text-[#5E5955] dark:text-[#A69E96] leading-snug">
-                  Artified pays fair living wages (3x standard piece rates) to skilled home-based women artisans across Kathmandu.
+                  Artified supports and empowers skilled home-based women creators across Kathmandu with ethical compensation.
                 </p>
               </div>
 
@@ -409,7 +409,7 @@ export const CraftStoryAndJournal: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-1.5 text-[#C5A880] text-[10px] font-bold uppercase tracking-wider mb-0.5">
                 <Feather className="w-3 h-3" />
-                <span>Artisanal Essays & Heritage Guides</span>
+                <span>Craft Essays & Heritage Guides</span>
               </div>
               <h2 className="font-serif text-lg sm:text-xl text-[#1C1B1A] dark:text-[#F5F2EB] font-semibold">
                 Craft Journal & Styling Library
@@ -638,7 +638,7 @@ export const CraftStoryAndJournal: React.FC = () => {
                 className="text-xs font-bold text-[#8C5D36] dark:text-[#E6CA9E] hover:underline transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>Meet the Artisan</span>
+                <span>Meet the Founder & Creator</span>
               </button>
 
               <button

@@ -124,7 +124,7 @@ export const OrderProgressManagerSection: React.FC = () => {
 
     const currentStatus = phaseNames[order.currentPhase];
     const message = encodeURIComponent(
-      `Namaste ${order.customerName}! 🌸\n\nYour Artified order *${order.orderId}* is currently: *${currentStatus}*.\n\n✨ Item: ${order.items[0]?.title || 'Handcrafted Pearl Piece'}\n📍 Workshop: Chikamugal, Kathmandu by Sahina Shrestha\n🚚 Estimated Arrival: ${order.estimatedDeliveryDate || '1-2 business days'}\n\nTrack live progress on our website anytime using your Order ID:\n${window.location.origin}/#track?id=${encodeURIComponent(order.orderId)}\n\nThank you for choosing Artified Nepal!`
+      `Namaste ${order.customerName}! 🌸\n\nYour Artified order *${order.orderId}* is currently: *${currentStatus}*.\n\n✨ Item: ${order.items[0]?.title || 'Handcrafted Pearl Piece'}\n📍 Workshop: Kathmandu, Nepal by Sahina Shrestha\n🚚 Estimated Arrival: ${order.estimatedDeliveryDate || '1-2 business days'}\n\nTrack live progress on our website anytime using your Order ID:\n${window.location.origin}/#track?id=${encodeURIComponent(order.orderId)}\n\nThank you for choosing Artified Nepal!`
     );
 
     const waUrl = cleanPhone.length >= 10 
@@ -168,9 +168,9 @@ export const OrderProgressManagerSection: React.FC = () => {
       currentPhase: newPhase,
       progressPercentage: getProgressPercentage(newPhase),
       artisanName: 'Sahina Shrestha',
-      artisanRole: 'Founder & Master Handcrafter',
-      studioLocation: 'Artified Workshop, Chikamugal, Kathmandu',
-      liveCraftNotes: 'Handcrafting scheduled at Chikamugal workshop by Sahina Shrestha.',
+      artisanRole: 'Founder and Creator',
+      studioLocation: 'Artified Workshop, Kathmandu, Nepal',
+      liveCraftNotes: 'Handcrafting scheduled at Kathmandu workshop by Sahina Shrestha.',
       milestones: buildMilestonesForPhase(newPhase, 'Just Now', newDeliveryDate.trim() || '1-2 business days', newAddress || 'Kathmandu')
     };
 

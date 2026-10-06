@@ -278,10 +278,10 @@ export async function updateOrderStatusInFirestore(
 
   const baseOrder: TrackedOrderData = existing || {
     orderId: orderId.startsWith('#') ? orderId : `#${orderId}`,
-    customerName: 'Valued Artified Patron',
+    customerName: 'Valued Artified Customer',
     phone: '98XXXXXXXX',
     deliveryAddress: 'Kathmandu Valley, Nepal',
-    deliveryZoneName: 'Inside Ring Road (Kathmandu / Lalitpur)',
+    deliveryZoneName: 'Kathmandu Valley',
     paymentMethodText: 'Verified Order Booking',
     paymentStatus: 'Paid & Verified',
     items: [
@@ -295,14 +295,14 @@ export async function updateOrderStatusInFirestore(
     ],
     total: 2499,
     orderPlacedDate: 'Recent Order',
-    estimatedDeliveryDate: updates?.estimatedDeliveryDate || '1–2 business days',
+    estimatedDeliveryDate: updates?.estimatedDeliveryDate || '1 to 2 days',
     currentPhase: newPhase,
     progressPercentage: getProgressPercentage(newPhase),
     artisanName: 'Sahina Shrestha',
     artisanRole: 'Founder & Master Handcrafter',
-    studioLocation: 'Artified Workshop, Chikamugal, Kathmandu',
-    liveCraftNotes: updates?.liveCraftNotes || 'Handcrafting progress updated at Chikamugal atelier.',
-    milestones: buildMilestonesForPhase(newPhase, 'Recent Order', '1–2 business days', 'Kathmandu Valley')
+    studioLocation: 'Artified Workshop, Kathmandu, Nepal',
+    liveCraftNotes: updates?.liveCraftNotes || 'Handcrafting progress updated at Kathmandu atelier.',
+    milestones: buildMilestonesForPhase(newPhase, 'Recent Order', '1 to 2 days', 'Kathmandu Valley')
   };
 
   const updated: TrackedOrderData = {

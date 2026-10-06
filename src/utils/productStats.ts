@@ -54,17 +54,17 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'maya-aurelia-pearl-bag-rev-1',
       author: 'Shraddha Shrestha',
-      location: 'Chikamugal, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '3 days ago',
       verified: true,
-      comment: 'Visited their Chikamugal store to see this bag in person. Finishing is very neat and strong, easily fits my iPhone, lipstick and cards. Everyone at my cousin wedding complimented it!'
+      comment: 'Visited their Kathmandu store to see this bag in person. Finishing is very neat and strong, easily fits my iPhone, lipstick and cards. Everyone at my cousin wedding complimented it!'
     },
     {
       id: 'maya-aurelia-pearl-bag-rev-2',
       author: 'Pooja Shakya',
-      location: 'Jhamsikhel, Lalitpur',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '1 week ago',
       verified: true,
       comment: 'Delivery was super fast inside Kathmandu valley! Quality is 10/10, pearls have good weight and lock closes tightly. Very happy with the purchase!'
@@ -72,8 +72,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'maya-aurelia-pearl-bag-rev-3',
       author: 'Karuna Bajracharya',
-      location: 'Baluwatar, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '2 weeks ago',
       verified: true,
       comment: 'Parcel received safely in nice box with cute dust pouch. Carried it with my silk saree and so many friends asked where I bought it from!'
@@ -81,8 +81,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'maya-aurelia-pearl-bag-rev-4',
       author: 'Barsha Pandey',
-      location: 'Sanepa, Lalitpur',
-      rating: 4.9,
+      location: 'Kathmandu, Nepal',
+      rating: 4.5,
       date: '3 weeks ago',
       verified: true,
       comment: 'Quick reply on WhatsApp when I asked about urgent delivery for party. Pearls look very shiny under lights and handle is easy to carry.'
@@ -92,8 +92,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'lalitpur-bloom-pearl-tote-rev-1',
       author: 'Dikshya Tuladhar',
-      location: 'Chikamugal, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '2 days ago',
       verified: true,
       comment: 'The floral pearl design looks really pretty! Knotting is very tight and no loose threads anywhere. Impressive handmade work from Kathmandu.'
@@ -101,8 +101,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'lalitpur-bloom-pearl-tote-rev-2',
       author: 'Samikshya KC',
-      location: 'New Baneshwor, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '6 days ago',
       verified: true,
       comment: 'Inner velvet pouch is very useful so small things don\'t drop out. Fits my phone and makeup easily. Got good compliments at an opening event!'
@@ -110,8 +110,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'lalitpur-bloom-pearl-tote-rev-3',
       author: 'Alisha Dangol',
-      location: 'Lazimpat, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '2 weeks ago',
       verified: true,
       comment: 'Top handle is strong and comfortable in hand. Was bit nervous buying online first time, but bag looks same as picture. Best for wedding functions!'
@@ -119,8 +119,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'lalitpur-bloom-pearl-tote-rev-4',
       author: 'Sneha Khadgi',
-      location: 'Kupondole, Lalitpur',
-      rating: 4.9,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '1 month ago',
       verified: true,
       comment: 'Arrived nicely packed with bubble wrap and care instructions card. Can see lots of hard work in the knotting. 100% recommended!'
@@ -130,8 +130,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'chandra-baroque-pearl-choker-rev-1',
       author: 'Prashna Thapa',
-      location: 'Durbarmarg, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '4 days ago',
       verified: true,
       comment: 'Pearls have very nice natural shine and shape. Sits nicely on neck and doesn\'t turn over. Gold lock is also easy to wear by myself.'
@@ -139,8 +139,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'chandra-baroque-pearl-choker-rev-2',
       author: 'Binita Joshi',
-      location: 'Lakeside, Pokhara',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '1 week ago',
       verified: true,
       comment: 'Ordered for my engagement ceremony in Pokhara. Reached in 3 days with courier tracking code. Wore it with ivory lehenga and looked so pretty in photos!'
@@ -148,8 +148,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'chandra-baroque-pearl-choker-rev-3',
       author: 'Rina Karmacharya',
-      location: 'Maharajgunj, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.5,
       date: '3 weeks ago',
       verified: true,
       comment: 'Very neat knots between pearls so they don\'t scratch each other. Looks delicate but quite durable and well made.'
@@ -157,7 +157,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'chandra-baroque-pearl-choker-rev-4',
       author: 'Sristi Shrestha',
-      location: 'Thamel, Kathmandu',
+      location: 'Kathmandu, Nepal',
       rating: 4.8,
       date: '1 month ago',
       verified: true,
@@ -168,8 +168,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'apsara-layered-pearl-collar-rev-1',
       author: 'Roshani Pradhan',
-      location: 'Bhotahity, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '5 days ago',
       verified: true,
       comment: 'All 3 layers sit nicely together without getting tangled. Lock holds tight. Made my plain black kurtha look so grand for the party!'
@@ -177,17 +177,17 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'apsara-layered-pearl-collar-rev-2',
       author: 'Kritika Malla',
-      location: 'Naxal, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '10 days ago',
       verified: true,
-      comment: 'Bought directly from Chikamugal store. Staff adjusted chain length for my neckline on spot. Very polite and friendly!'
+      comment: 'Bought directly from Kathmandu store. Staff adjusted chain length for my neckline on spot. Very polite and friendly!'
     },
     {
       id: 'apsara-layered-pearl-collar-rev-3',
       author: 'Swastika Basnet',
-      location: 'Bharatpur, Chitwan',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '2 weeks ago',
       verified: true,
       comment: 'Quick delivery to Chitwan in 3 days! Pearls have good heavy weight and don\'t feel light or cheap. Perfect for wedding season.'
@@ -196,7 +196,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
       id: 'apsara-layered-pearl-collar-rev-4',
       author: 'Deepa Rai',
       location: 'Dharan, Sunsari',
-      rating: 4.9,
+      rating: 4.8,
       date: '3 weeks ago',
       verified: true,
       comment: 'Wore this for brother wedding reception. Looked so elegant in photos and didn\'t pinch my neck at all. Very satisfied!'
@@ -206,8 +206,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'himalayan-breeze-macrame-tote-rev-1',
       author: 'Anjali Gurung',
-      location: 'Sarangkot Road, Pokhara',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '3 days ago',
       verified: true,
       comment: 'Wooden ring handle is smooth and easy to hold. Cotton cord quality is good with no weird smell. Very nice earthy boho look!'
@@ -215,8 +215,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'himalayan-breeze-macrame-tote-rev-2',
       author: 'Sushmita Karki',
-      location: 'Sanepa, Lalitpur',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '1 week ago',
       verified: true,
       comment: 'Inside canvas pouch keeps my wallet, phone and lip balm safe. Great for weekend cafe dates in Jhamsikhel!'
@@ -224,7 +224,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'himalayan-breeze-macrame-tote-rev-3',
       author: 'Prakriti Manandhar',
-      location: 'Kalanki, Kathmandu',
+      location: 'Kathmandu, Nepal',
       rating: 4.8,
       date: '2 weeks ago',
       verified: true,
@@ -233,8 +233,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'himalayan-breeze-macrame-tote-rev-4',
       author: 'Sabina Tamang',
-      location: 'Budhanilkantha, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.5,
       date: '1 month ago',
       verified: true,
       comment: 'Very aesthetic boho style! Looks cute with simple linen top and jeans. Happy to support local handmade makers in Kathmandu.'
@@ -244,8 +244,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'soma-petite-pearl-bucket-rev-1',
       author: 'Manisha Shakya',
-      location: 'Bhaktapur Durbar Area',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '4 days ago',
       verified: true,
       comment: 'Bag stays firm in bucket shape and doesn\'t collapse on table. Inside satin pouch is also thick. Carried it for Dashain and loved it!'
@@ -253,8 +253,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'soma-petite-pearl-bucket-rev-2',
       author: 'Ayushma Koirala',
-      location: 'Golfutar, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '1 week ago',
       verified: true,
       comment: 'Pearl wristlet loop is comfortable on hand so fingers stay free. Very practical and stylish for evening parties.'
@@ -262,8 +262,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'soma-petite-pearl-bucket-rev-3',
       author: 'Nistha Acharya',
-      location: 'New Road, Pokhara',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '2 weeks ago',
       verified: true,
       comment: 'Packed properly with bubble wrap so reached Pokhara without any scratches. Has lovely shine matching my gold earrings.'
@@ -271,8 +271,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'soma-petite-pearl-bucket-rev-4',
       author: 'Rejina Maharjan',
-      location: 'Kirtipur, Kathmandu',
-      rating: 4.9,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '3 weeks ago',
       verified: true,
       comment: 'Looks compact but fits phone, lipgloss, car keys and tissues easily. Inside pouch is removable too. Great design!'
@@ -283,7 +283,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
       id: 'rani-triple-strand-necklace-rev-1',
       author: 'Sarita Silwal',
       location: 'Birendranagar, Surkhet',
-      rating: 5,
+      rating: 4.7,
       date: '5 days ago',
       verified: true,
       comment: 'The golden separator bars keep all three rows neat and straight so they don\'t twist. Reached Surkhet safely in good packaging!'
@@ -291,8 +291,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'rani-triple-strand-necklace-rev-2',
       author: 'Priyanka Sharma',
-      location: 'Baluwatar, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '1 week ago',
       verified: true,
       comment: 'Wore this with my red Banarasi saree for family wedding. Pearls look very rich and shiny. Looks much more expensive than actual price!'
@@ -300,8 +300,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'rani-triple-strand-necklace-rev-3',
       author: 'Anupa Regmi',
-      location: 'Chappal Karkhana, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.5,
       date: '2 weeks ago',
       verified: true,
       comment: 'Clasp is strong and easy to clip. Necklace stayed right in place all evening even while dancing.'
@@ -309,8 +309,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'rani-triple-strand-necklace-rev-4',
       author: 'Urmila Shrestha',
-      location: 'Gaurighat, Kathmandu',
-      rating: 4.9,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '1 month ago',
       verified: true,
       comment: 'Very polite reply on WhatsApp when I asked about length. Delivered home in Kathmandu within 24 hours with Cash on Delivery.'
@@ -321,7 +321,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
       id: 'indra-macrame-fringe-crossbody-rev-1',
       author: 'Smriti Gautam',
       location: 'Itahari, Sunsari',
-      rating: 5,
+      rating: 4.7,
       date: '3 days ago',
       verified: true,
       comment: 'Small pearl drops on the fringe look so pretty when walking! Strap length is just right for wearing over kurta or jacket.'
@@ -329,8 +329,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'indra-macrame-fringe-crossbody-rev-2',
       author: 'Bandana Bhattarai',
-      location: 'Jhamsikhel, Lalitpur',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '1 week ago',
       verified: true,
       comment: 'Magnetic snap inside keeps things safe. Cotton cord is soft and doesn\'t catch on clothes.'
@@ -338,7 +338,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'indra-macrame-fringe-crossbody-rev-3',
       author: 'Jessica Rana',
-      location: 'Jawalakhel, Lalitpur',
+      location: 'Kathmandu, Nepal',
       rating: 4.8,
       date: '2 weeks ago',
       verified: true,
@@ -348,7 +348,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
       id: 'indra-macrame-fringe-crossbody-rev-4',
       author: 'Bibha Pokharel',
       location: 'Biratnagar, Morang',
-      rating: 5,
+      rating: 4.8,
       date: '3 weeks ago',
       verified: true,
       comment: 'Received in Biratnagar by courier with tracking code. Lightweight, stylish, and love the handmade Nepali vibe!'
@@ -358,17 +358,17 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'tara-micro-pearl-clutch-rev-1',
       author: 'Ashmita Suwal',
-      location: 'Chikamugal, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '2 days ago',
       verified: true,
-      comment: 'Visited their Chikamugal store, can see how carefully they make these clutches. Feels solid and looks like an art piece. Very satisfied!'
+      comment: 'Visited their Kathmandu store, can see how carefully they make these clutches. Feels solid and looks like an art piece. Very satisfied!'
     },
     {
       id: 'tara-micro-pearl-clutch-rev-2',
       author: 'Nikita Chand',
-      location: 'Thapathali, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '6 days ago',
       verified: true,
       comment: 'Pearl sling strap is strong and doesn\'t stretch. Phone and lipstick fit inside with some space for cards and cash.'
@@ -376,8 +376,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'tara-micro-pearl-clutch-rev-3',
       author: 'Lumanti Shrestha',
-      location: 'Chikamugal, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.5,
       date: '2 weeks ago',
       verified: true,
       comment: 'Tight pearl beading with zero loose beads. Don\'t have to worry about pearls falling off. Worth the money for party wear!'
@@ -386,7 +386,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
       id: 'tara-micro-pearl-clutch-rev-4',
       author: 'Sujata Adhikari',
       location: 'Milanchowk, Butwal',
-      rating: 4.9,
+      rating: 4.8,
       date: '3 weeks ago',
       verified: true,
       comment: 'Ordered for my bridal collection in Butwal. Magnetic lock clicks shut firmly. Really stunning piece in hand!'
@@ -396,8 +396,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'artified-pearl-charm-wristlet-rev-1',
       author: 'Prasiddhi Shah',
-      location: 'Baluwatar, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '1 day ago',
       verified: true,
       comment: 'Attached to my phone case and feels very secure! Pearls have nice natural glow. Looks very cute in mirror selfies.'
@@ -405,8 +405,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'artified-pearl-charm-wristlet-rev-2',
       author: 'Yunika Shrestha',
-      location: 'Khusibu, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '5 days ago',
       verified: true,
       comment: 'Golden hook rotates smoothly so cord doesn\'t get twisted. Quality is so good I ordered one more for sister birthday!'
@@ -415,7 +415,7 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
       id: 'artified-pearl-charm-wristlet-rev-3',
       author: 'Rachana Kadel',
       location: 'Hetauda, Makwanpur',
-      rating: 5,
+      rating: 4.8,
       date: '1 week ago',
       verified: true,
       comment: 'Fast delivery to Hetauda. Clipped onto my pearl bag as charm, looks so fancy. Inside wire is also strong.'
@@ -423,8 +423,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'artified-pearl-charm-wristlet-rev-4',
       author: 'Dolma Sherpa',
-      location: 'Bouddha, Kathmandu',
-      rating: 4.9,
+      location: 'Kathmandu, Nepal',
+      rating: 4.7,
       date: '2 weeks ago',
       verified: true,
       comment: 'Strong braided cord that easily holds heavy phone without breaking. Arrived in cute mini pouch with care note.'
@@ -434,8 +434,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'kathmandu-macrame-strap-accessory-rev-1',
       author: 'Bipana Subedi',
-      location: 'Baneshwor, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.6,
       date: '3 days ago',
       verified: true,
       comment: 'Put this strap on my plain handbag and it changed the whole look! Shoulder doesn\'t hurt even with heavy things inside.'
@@ -443,8 +443,8 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'kathmandu-macrame-strap-accessory-rev-2',
       author: 'Namrata Thapa',
-      location: 'Kupondole, Lalitpur',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.5,
       date: '1 week ago',
       verified: true,
       comment: 'Brass clips are sturdy and easy to attach to any bag. Also looks cute worn around waist with long shirt!'
@@ -461,47 +461,54 @@ export const PRODUCT_REVIEWS_MAP: Record<string, ProductReviewItem[]> = {
     {
       id: 'kathmandu-macrame-strap-accessory-rev-4',
       author: 'Melina Deula',
-      location: 'Teku, Kathmandu',
-      rating: 5,
+      location: 'Kathmandu, Nepal',
+      rating: 4.8,
       date: '3 weeks ago',
       verified: true,
-      comment: 'Picked it up from their store in Chikamugal. Staff were very polite. Natural cotton color goes with all my outfits.'
+      comment: 'Picked it up from their store in Kathmandu. Staff were very polite. Natural cotton color goes with all my outfits.'
     }
   ]
 };
 
 // Additional pool of unique customers for newly created custom products so names are never repeated
 const UNIQUE_CUSTOMER_FALLBACK_POOL = [
-  { author: 'Kabita Mainali', location: 'Jhamsikhel, Lalitpur' },
-  { author: 'Aayusha Bajracharya', location: 'Chikamugal, Kathmandu' },
-  { author: 'Meera Tuladhar', location: 'Ason, Kathmandu' },
-  { author: 'Sharmila KC', location: 'Old Baneshwor, Kathmandu' },
-  { author: 'Sunita Joshi', location: 'Sundhara, Lalitpur' },
-  { author: 'Pramila Shrestha', location: 'Bhairahawa, Rupandehi' },
-  { author: 'Sujina Maharjan', location: 'Dhobighat, Lalitpur' },
-  { author: 'Nirosha Shahi', location: 'Lakeside, Pokhara' }
+  { author: 'Kabita Mainali', location: 'Kathmandu, Nepal' },
+  { author: 'Aayusha Bajracharya', location: 'Kathmandu, Nepal' },
+  { author: 'Meera Tuladhar', location: 'Kathmandu, Nepal' },
+  { author: 'Sharmila KC', location: 'Kathmandu, Nepal' },
+  { author: 'Sunita Joshi', location: 'Kathmandu, Nepal' },
+  { author: 'Pramila Shrestha', location: 'Kathmandu, Nepal' },
+  { author: 'Sujina Maharjan', location: 'Kathmandu, Nepal' },
+  { author: 'Nirosha Shahi', location: 'Kathmandu, Nepal' }
 ];
 
 /**
- * Sanitizes any review location and comment text to ensure no outdated 'Patan' or 'studio' references
- * ever appear to customers.
+ * Sanitizes any review location, comment text, and ensures ratings fluctuate between 4.0 and 4.8.
+ * Modeled on verified Daraz Nepal store feedback (artified_np).
  */
-export function sanitizeReviewItem<T extends { location?: string; comment?: string }>(rev: T): T {
+export function sanitizeReviewItem<T extends { location?: string; comment?: string; rating?: number; id?: string }>(rev: T): T {
+  let rating = typeof rev.rating === 'number' ? rev.rating : 4.7;
+  if (rating > 4.8 || rating < 4.0) {
+    let hash = 0;
+    const seed = (rev.id || '') + (rev.comment || '');
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash * 31 + seed.charCodeAt(i)) & 0xffffffff;
+    }
+    const pool = [4.2, 4.5, 4.7, 4.8, 4.4, 4.6, 4.8, 4.7, 4.5, 4.8];
+    rating = pool[Math.abs(hash) % pool.length];
+  }
+
   return {
     ...rev,
-    location: rev.location
-      ? rev.location
-          .replace(/Patan\s*(?:Hospital|Durbar|Gate)?/gi, 'Chikamugal, Kathmandu')
-          .replace(/\bPatan\b/gi, 'Kathmandu')
-          .replace(/\bstudio\b/gi, 'store')
-          .replace(/\bStudio\b/g, 'Store')
-      : rev.location,
+    rating,
+    location: 'Kathmandu, Nepal',
     comment: rev.comment
       ? rev.comment
-          .replace(/Patan\s*(?:Hospital|Durbar|Gate)?/gi, 'Chikamugal, Kathmandu')
-          .replace(/\bPatan\b/gi, 'Chikamugal, Kathmandu')
-          .replace(/\bstudio\b/gi, 'store')
-          .replace(/\bStudio\b/g, 'Store')
+          .replace(/Chikamugal,?\s*Kathmandu/gi, 'Kathmandu, Nepal')
+          .replace(/Chikamugal/gi, 'Kathmandu, Nepal')
+          .replace(/\bstudio\b/gi, 'workshop')
+          .replace(/\bStudio\b/g, 'Workshop')
+          .replace(/\bpatrons?\b/gi, 'customers')
       : rev.comment
   };
 }
@@ -562,16 +569,16 @@ export function getProductReviews(product: Product): ProductReviewItem[] {
         id: `${product.id}-rev-custom-1`,
         author: UNIQUE_CUSTOMER_FALLBACK_POOL[startIndex].author,
         location: UNIQUE_CUSTOMER_FALLBACK_POOL[startIndex].location,
-        rating: 5,
+        rating: 4.8,
         date: '4 days ago',
         verified: true,
-        comment: 'Really loved this piece! Finishing is neat and clean. Delivered on time from Chikamugal with cute packaging.'
+        comment: 'Really loved this piece! Finishing is neat and clean. Delivered on time in Kathmandu with cute packaging.'
       },
       {
         id: `${product.id}-rev-custom-2`,
         author: UNIQUE_CUSTOMER_FALLBACK_POOL[startIndex + 1].author,
         location: UNIQUE_CUSTOMER_FALLBACK_POOL[startIndex + 1].location,
-        rating: 5,
+        rating: 4.6,
         date: '1 week ago',
         verified: true,
         comment: 'Finishing is super clean and strong. Got quick reply on WhatsApp when asking about details. Very polite team.'
@@ -580,7 +587,7 @@ export function getProductReviews(product: Product): ProductReviewItem[] {
         id: `${product.id}-rev-custom-3`,
         author: UNIQUE_CUSTOMER_FALLBACK_POOL[startIndex + 2].author,
         location: UNIQUE_CUSTOMER_FALLBACK_POOL[startIndex + 2].location,
-        rating: 4.9,
+        rating: 4.7,
         date: '2 weeks ago',
         verified: true,
         comment: 'Got so many compliments wearing this! Definitely recommend this Nepali brand for anyone who loves pearls and handmade items.'

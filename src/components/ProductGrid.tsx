@@ -275,7 +275,7 @@ export const ProductGrid: React.FC = () => {
             No handcrafted pieces matched
           </h3>
           <p className="text-xs text-[#736C65] mb-6">
-            We couldn't find any products matching your selection. Feel free to message our store in Chikamugal, Kathmandu on WhatsApp or explore our full collection.
+            We couldn't find any products matching your selection. Feel free to message our store in Kathmandu, Nepal on WhatsApp or explore our full collection.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
@@ -288,13 +288,13 @@ export const ProductGrid: React.FC = () => {
               Reset Filters
             </button>
             <a
-              href="https://wa.me/9779767573721?text=Namaste!%20I%20am%20looking%20for%20a%20handcrafted%20piece%20from%20Chikamugal,%20Kathmandu."
+              href="https://wa.me/9779767573721?text=Namaste!%20I%20am%20looking%20for%20a%20handcrafted%20piece%20from%20Kathmandu,%20Kathmandu."
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 bg-[#1C1B1A] text-white text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#34312F] inline-flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
-              <span>Ask Chikamugal Store</span>
+              <span>Ask Kathmandu Store</span>
             </a>
           </div>
         </div>

@@ -212,7 +212,7 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
           {saveSuccess && (
             <div className="p-2 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Artisan biography and photo updated successfully!</span>
+              <span>Founder & Creator biography and photo updated successfully!</span>
             </div>
           )}
 
@@ -320,91 +320,15 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
               {/* Biography & Quote */}
               <div>
                 <label className="block text-[10px] font-bold text-[#1C1B1A] dark:text-[#F5F2EB] mb-0.5">
-                  Sahina Shrestha's Biography & Story Quote
+                  Sahina Shrestha's Biography & Story
                 </label>
                 <textarea
-                  rows={2}
+                  rows={4}
                   value={editForm.quote}
                   onChange={(e) => setEditForm({ ...editForm, quote: e.target.value })}
                   required
                   className="w-full px-2 py-1.5 bg-white dark:bg-[#1E1D1B] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[11px] text-[#1C1B1A] dark:text-[#F5F2EB] focus:outline-none leading-relaxed"
                 />
-              </div>
-
-              {/* 4 Pillars Compact Fields */}
-              <div className="space-y-1.5 pt-1 border-t border-[#E8DFD8] dark:border-[#2D2B28]">
-                <label className="block text-[10px] font-bold text-[#8C5D36] dark:text-[#E6CA9E]">
-                  The 4 Craft Pillars
-                </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div className="p-1.5 bg-white dark:bg-[#1E1D1B] rounded border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1">
-                    <input
-                      type="text"
-                      value={editForm.pillar1?.title || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar1: { ...editForm.pillar1, title: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px] font-bold"
-                      placeholder="Pillar 1 Title"
-                    />
-                    <input
-                      type="text"
-                      value={editForm.pillar1?.desc || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar1: { ...editForm.pillar1, desc: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px]"
-                      placeholder="Pillar 1 Desc"
-                    />
-                  </div>
-
-                  <div className="p-1.5 bg-white dark:bg-[#1E1D1B] rounded border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1">
-                    <input
-                      type="text"
-                      value={editForm.pillar2?.title || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar2: { ...editForm.pillar2, title: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px] font-bold"
-                      placeholder="Pillar 2 Title"
-                    />
-                    <input
-                      type="text"
-                      value={editForm.pillar2?.desc || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar2: { ...editForm.pillar2, desc: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px]"
-                      placeholder="Pillar 2 Desc"
-                    />
-                  </div>
-
-                  <div className="p-1.5 bg-white dark:bg-[#1E1D1B] rounded border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1">
-                    <input
-                      type="text"
-                      value={editForm.pillar3?.title || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar3: { ...editForm.pillar3, title: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px] font-bold"
-                      placeholder="Pillar 3 Title"
-                    />
-                    <input
-                      type="text"
-                      value={editForm.pillar3?.desc || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar3: { ...editForm.pillar3, desc: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px]"
-                      placeholder="Pillar 3 Desc"
-                    />
-                  </div>
-
-                  <div className="p-1.5 bg-white dark:bg-[#1E1D1B] rounded border border-[#E8DFD8] dark:border-[#2D2B28] space-y-1">
-                    <input
-                      type="text"
-                      value={editForm.pillar4?.title || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar4: { ...editForm.pillar4, title: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px] font-bold"
-                      placeholder="Pillar 4 Title"
-                    />
-                    <input
-                      type="text"
-                      value={editForm.pillar4?.desc || ''}
-                      onChange={(e) => setEditForm({ ...editForm, pillar4: { ...editForm.pillar4, desc: e.target.value } })}
-                      className="w-full px-1 py-0.5 bg-[#FAF8F5] dark:bg-[#141312] border border-[#E8DFD8] dark:border-[#2D2B28] rounded text-[9px]"
-                      placeholder="Pillar 4 Desc"
-                    />
-                  </div>
-                </div>
               </div>
 
               {/* Action Buttons */}
@@ -463,7 +387,7 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
                       className="px-2.5 py-0.5 rounded-lg bg-[#D4AF37] hover:bg-[#c29f2e] text-[#1C1B1A] text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer shadow-xs"
                     >
                       <Edit3 className="w-2.5 h-2.5" />
-                      <span>Edit Bio & Pillars</span>
+                      <span>Edit Bio & Story</span>
                     </button>
                   </div>
                 </div>
@@ -509,10 +433,10 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
                 </div>
 
                 {/* Biography & Philosophy Quote - Tight Typography */}
-                <div className="flex-1 space-y-1 min-w-0">
+                <div className="flex-1 space-y-1.5 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="px-1.5 py-0.2 rounded-full bg-[#FAF8F5] dark:bg-[#22211F] text-[#8C5D36] dark:text-[#E6CA9E] text-[8px] font-bold uppercase tracking-wider">
-                      {isNe ? 'कालिगढको भनाइ' : 'Artisan Philosophy'}
+                      {isNe ? 'संस्थापक र सिर्जनाकर्ताको यात्रा' : 'Founder & Creator Journey'}
                     </span>
                     <button
                       type="button"
@@ -523,78 +447,20 @@ export const MeetArtisanModal: React.FC<MeetArtisanModalProps> = ({
                       <span>Edit</span>
                     </button>
                   </div>
-                  <p className="font-serif italic text-xs text-[#2C2926] dark:text-[#F5F2EB] leading-snug line-clamp-4">
-                    {profile.quote}
-                  </p>
-                  <div className="flex items-center gap-2 pt-0.5 text-[9px] text-[#736C65] dark:text-[#A69E96]">
-                    <span className="flex items-center gap-0.5">
-                      <Clock className="w-2.5 h-2.5 text-[#D4AF37]" />
-                      <span>{profile.stat1Value}</span>
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-0.5">
-                      <Heart className="w-2.5 h-2.5 text-[#D4AF37]" />
-                      <span>{profile.stat2Value}</span>
-                    </span>
+                  <div className="text-[11px] sm:text-xs text-[#2C2926] dark:text-[#F5F2EB] leading-relaxed space-y-1.5">
+                    {profile.quote.split('\n\n').map((paragraph, idx) => (
+                      <p key={idx}>{paragraph}</p>
+                    ))}
                   </div>
+                  {profile.whyArtified && (
+                    <div className="pt-1.5 border-t border-[#E8DFD8] dark:border-[#2D2B28] text-[10px] text-[#5E5955] dark:text-[#A69E96] leading-relaxed space-y-1">
+                      <span className="font-bold text-[#1C1B1A] dark:text-[#FAF8F5] block">Why “Artified”?</span>
+                      {profile.whyArtified.split('\n\n').map((paragraph, idx) => (
+                        <p key={idx}>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {/* Dynamic 2x2 Craft Pillars - Zero Wasted Space */}
-              <div className="grid grid-cols-2 gap-1.5">
-                
-                {/* Pillar 1 */}
-                <div className="p-1.5 sm:p-2 rounded-lg bg-white dark:bg-[#181716] border border-[#E8DFD8] dark:border-[#2D2B28]">
-                  <div className="flex items-center gap-1 text-[#D4AF37] mb-0.5">
-                    <MapPin className="w-2.5 h-2.5 shrink-0" />
-                    <h4 className="font-serif font-bold text-[10px] sm:text-[11px] text-[#1C1B1A] dark:text-[#F5F2EB] truncate">
-                      {profile.pillar1?.title || '1. Rooted in Chikamugal'}
-                    </h4>
-                  </div>
-                  <p className="text-[9px] text-[#6E6761] dark:text-[#A69E96] leading-tight line-clamp-2">
-                    {profile.pillar1?.desc}
-                  </p>
-                </div>
-
-                {/* Pillar 2 */}
-                <div className="p-1.5 sm:p-2 rounded-lg bg-white dark:bg-[#181716] border border-[#E8DFD8] dark:border-[#2D2B28]">
-                  <div className="flex items-center gap-1 text-[#D4AF37] mb-0.5">
-                    <Sparkles className="w-2.5 h-2.5 shrink-0" />
-                    <h4 className="font-serif font-bold text-[10px] sm:text-[11px] text-[#1C1B1A] dark:text-[#F5F2EB] truncate">
-                      {profile.pillar2?.title || '2. 9–14h Hand-Knotting'}
-                    </h4>
-                  </div>
-                  <p className="text-[9px] text-[#6E6761] dark:text-[#A69E96] leading-tight line-clamp-2">
-                    {profile.pillar2?.desc}
-                  </p>
-                </div>
-
-                {/* Pillar 3 */}
-                <div className="p-1.5 sm:p-2 rounded-lg bg-white dark:bg-[#181716] border border-[#E8DFD8] dark:border-[#2D2B28]">
-                  <div className="flex items-center gap-1 text-[#D4AF37] mb-0.5">
-                    <Users className="w-2.5 h-2.5 shrink-0" />
-                    <h4 className="font-serif font-bold text-[10px] sm:text-[11px] text-[#1C1B1A] dark:text-[#F5F2EB] truncate">
-                      {profile.pillar3?.title || '3. Empowering Women'}
-                    </h4>
-                  </div>
-                  <p className="text-[9px] text-[#6E6761] dark:text-[#A69E96] leading-tight line-clamp-2">
-                    {profile.pillar3?.desc}
-                  </p>
-                </div>
-
-                {/* Pillar 4 */}
-                <div className="p-1.5 sm:p-2 rounded-lg bg-white dark:bg-[#181716] border border-[#E8DFD8] dark:border-[#2D2B28]">
-                  <div className="flex items-center gap-1 text-[#D4AF37] mb-0.5">
-                    <Heart className="w-2.5 h-2.5 shrink-0" />
-                    <h4 className="font-serif font-bold text-[10px] sm:text-[11px] text-[#1C1B1A] dark:text-[#F5F2EB] truncate">
-                      {profile.pillar4?.title || '4. Bespoke Tailoring'}
-                    </h4>
-                  </div>
-                  <p className="text-[9px] text-[#6E6761] dark:text-[#A69E96] leading-tight line-clamp-2">
-                    {profile.pillar4?.desc}
-                  </p>
-                </div>
-
               </div>
 
               {/* Compact Guarantee & Instagram Strip */}

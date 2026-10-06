@@ -218,7 +218,7 @@ export const CheckoutModal: React.FC = () => {
     }
 
     text += `\n💰 *Total Payable: Rs. ${order.total.toLocaleString()}*\n\n`;
-    text += `Thank you Sahina di! Looking forward to receiving this handcrafted piece from Chikamugal! 🌸`;
+    text += `Thank you Sahina di! Looking forward to receiving this handcrafted piece from Kathmandu! 🌸`;
 
     const encoded = encodeURIComponent(text);
     window.open(`https://wa.me/${phoneNumber}?text=${encoded}`, '_blank');
@@ -256,7 +256,7 @@ export const CheckoutModal: React.FC = () => {
                 {step === 'details' && 'Fast courier transit across Kathmandu Valley & all Nepal cities'}
                 {step === 'payment' && 'Free Cash on Delivery or 0% fee direct QR transfer'}
                 {step === 'instructions' && 'Take a payment screenshot after scanning to verify in minutes'}
-                {step === 'confirmation' && 'We are preparing your piece at Chikamugal workshop'}
+                {step === 'confirmation' && 'We are preparing your piece at our Kathmandu workshop'}
               </p>
             </div>
           </div>
@@ -404,7 +404,7 @@ export const CheckoutModal: React.FC = () => {
                     type="text"
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
-                    placeholder="e.g. Near New Road Gate, Chikamugal, Kathmandu"
+                    placeholder="e.g. Near New Road Gate, Basantapur, Kathmandu"
                     className="w-full p-2.5 bg-white border border-[#E8DFD8] rounded-xl text-xs text-[#1C1B1A] focus:outline-none focus:border-[#C5A880]"
                   />
                 </div>
@@ -491,7 +491,7 @@ export const CheckoutModal: React.FC = () => {
                         maxLength={220}
                         value={giftMessage}
                         onChange={(e) => setGiftMessage(e.target.value)}
-                        placeholder="Write your heartfelt note here. Our artisan in Chikamugal will hand-write it onto botanical parchment paper..."
+                        placeholder="Write your heartfelt note here. Our founder and creator in Kathmandu will hand-write it onto botanical parchment paper..."
                         className="w-full p-2.5 bg-white border border-[#E8DFD8] rounded-xl text-xs text-[#1C1B1A] focus:outline-none focus:border-[#C5A880] leading-relaxed"
                       />
                     </div>
@@ -567,7 +567,7 @@ export const CheckoutModal: React.FC = () => {
                           <span>🌿 Hand-penned on 280gsm botanical cotton cardstock</span>
                         </span>
                         <span className="text-[#C5A880] font-bold">
-                          Chikamugal Atelier
+                          Kathmandu, Nepal
                         </span>
                       </div>
                     </div>
@@ -608,7 +608,7 @@ export const CheckoutModal: React.FC = () => {
                     <Crown className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]/20" />
                     <div>
                       <span className="text-[11px] font-bold text-[#1C1B1A] block">
-                        +{Math.max(10, Math.floor(grandTotal / 10))} Patron Loyalty Points
+                        +{Math.max(10, Math.floor(grandTotal / 10))} Loyalty Reward Points
                       </span>
                       <span className="text-[10px] text-[#736C65]">
                         Earned upon order completion (1 pt / Rs. 10)
@@ -740,7 +740,7 @@ export const CheckoutModal: React.FC = () => {
 
                   <div className="p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>0% gateway commission. 100% of payment goes directly to artisan Sahina Shrestha.</span>
+                    <span>0% gateway commission. 100% of payment goes directly to founder and creator Sahina Shrestha.</span>
                   </div>
                 </div>
               )}
@@ -1069,7 +1069,7 @@ export const CheckoutModal: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-widest block">
-                        Patron Rewards Earned
+                        Loyalty Rewards Earned
                       </span>
                       <h4 className="font-serif text-sm sm:text-base font-bold text-white">
                         +{confirmedOrder.earnedLoyaltyPoints || Math.max(10, Math.floor(confirmedOrder.total / 10))} Loyalty Points Credited!

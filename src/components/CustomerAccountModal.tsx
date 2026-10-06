@@ -159,7 +159,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
     const text = `Join Artified Nepal with my referral link to get 100 welcome loyalty points + free gift wrap on your first handmade pearl piece from Kathmandu! https://artified.com.np?ref=${account.customerId}`;
     if (navigator.share) {
       navigator.share({
-        title: 'Artified Patron Circle Referral',
+        title: 'Artified Member Referral',
         text
       }).catch(() => {});
     } else {
@@ -192,7 +192,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                 </span>
               </div>
               <p className="text-[11px] text-[#A69E96] truncate">
-                Member ID: <span className="font-mono text-[#D4AF37]">{account.customerId}</span> • Chikamugal Patron Circle
+                Member ID: <span className="font-mono text-[#D4AF37]">{account.customerId}</span> • Kathmandu Atelier
               </p>
             </div>
           </div>
@@ -264,7 +264,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
           ) : (
             <div className="mt-3 flex items-center gap-1.5 text-xs text-amber-800 font-bold bg-amber-50 p-2 rounded-xl border border-amber-200">
               <Crown className="w-4 h-4 text-amber-600 fill-amber-500" />
-              <span>You have attained maximum VIP status: Gold Sovereign Patron!</span>
+              <span>You have attained maximum VIP status: Gold Sovereign Member!</span>
             </div>
           )}
 
@@ -468,7 +468,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
               {/* Extra Ways to Earn Box */}
               <div className="bg-[#FAF8F5] p-3.5 rounded-2xl border border-[#E8DFD8] space-y-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1B1A] block">
-                  🌟 How to Earn More Patron Points:
+                  🌟 How to Earn More Reward Points:
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-[#5E5955]">
                   <div className="p-2 bg-white rounded-xl border border-[#E8DFD8]">
@@ -542,7 +542,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
             <div className="space-y-3.5">
               <div>
                 <h4 className="font-serif text-sm font-bold text-[#1C1B1A]">
-                  Artified Patron Circle Membership Tiers
+                  Artified Member Circle Membership Tiers
                 </h4>
                 <p className="text-[11px] text-[#736C65]">
                   Unlock permanent boosters and personal concierge perks as you collect handmade jewelry pieces.
@@ -601,7 +601,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
             <div className="space-y-4">
               <div>
                 <h4 className="font-serif text-sm font-bold text-[#1C1B1A]">
-                  Patron Profile & Cloud Account
+                  Member Profile & Cloud Account
                 </h4>
                 <p className="text-[11px] text-[#736C65]">
                   Sign in with Google to preserve your wishlist, loyalty tier, and delivery details across all your devices.
@@ -639,7 +639,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                       )}
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-[#1C1B1A] truncate">
-                          {currentUser.displayName || 'Google Patron'}
+                          {currentUser.displayName || 'Valued Member'}
                         </p>
                         <p className="text-[10px] text-[#736C65] truncate">
                           {currentUser.email}
@@ -783,7 +783,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
         <div className="p-3 bg-white border-t border-[#E8DFD8] flex items-center justify-between text-xs text-[#736C65] shrink-0">
           <span className="flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Artified Patron Circle • Chikamugal, Kathmandu</span>
+            <span>Artified Member Circle • Kathmandu, Nepal</span>
           </span>
 
           <button
